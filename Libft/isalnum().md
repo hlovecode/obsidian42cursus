@@ -16,7 +16,7 @@ a-z
 - 如果是字母或数字，则返回非0
 - 如果不是，则返回0
 
-**isalnum 和 isalpha, isdigit 的关系**：
+**`isalnum` 和 `isalpha`, `isdigit` 的关系**：
 ```txt
 isalnum 判断是不是字母或数字
    │
