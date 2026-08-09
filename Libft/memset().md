@@ -25,3 +25,19 @@ void	*memset(void *s, int c, size_t n);
 #### 2. 理解函数参数
 
 1. 第1个参数 `void *s`
+表示要操作的内存区域的起始地址，`void *` 是因为 memset 不关系你传进去的到底是什么类型，它操作的是字节(byte), 而不是char, int, double 等C类型.
+例如：
+```c
+char str[10];
+int tab[10];
+double values[10];
+```
+都可以：
+```c
+memset(str, ...);
+memset(tab, ...);
+memset(values, ...);
+```
+
+2. 第2个参数 `int c`
+把 n 个字节设置成 c 转换后的 unsigned char 
