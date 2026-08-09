@@ -22,7 +22,10 @@ void	*memset(void *s, int c, size_t n);
 ```
 返回被修改的内存区域的起始地址 s，类型是`void *`，一个通用的内存地址. 
 
-`memset` 
+`memset` 从某个地址开始，修改 n 个字节，当n == 0时，表示修改 0 个字节，不会修改任何东西，可以理解为什么都不做. 
+注意 n 是 byte 数量，不是元素数量. 
+
+`memset(s, c, n)`：从地址 `s` 开始，把连续的 `n` 个字节都写成 `c` 的低 8 位，并返回 `s`
 
 #### 2. 理解函数参数
 
@@ -69,3 +72,62 @@ memset(str, 'A', 3);
 一共是3 bytes
 
 PS: 通常一个 int 是 4 bytes 
+
+#### 3. memset 最常见的用途
+
+1. 把数组清零
+```c
+int tab[100];
+
+memset(tab, 0, sizeof(tab));
+```
+
+2. 初始化结构体
+```c
+struct person
+{
+	char	name[50];
+	int		age;
+};
+
+memset(&p, 0, sizeof(p)); // 把整个结构体占用的字节设置为0
+```
+
+3. 清空字符数组
+```c
+char buffer[1024];
+
+memset(buffer, 0, sizeof(buffer));
+```
+结果：
+```c
+buffer[0] = '\0'
+buffer[1] = '\0'
+buffer[2] = '\0'
+...
+```
+
+4. 设置一块内存为特定字节
+```c
+char buffer[10];
+
+memset(buffer, 'X', 10);
+```
+得到：
+```txt
+X X X X X X X X X X
+```
+
+```txt
+① s 是起始地址
+        ↓
+② 转成 unsigned char *
+        ↓
+③ i 从 0 开始
+        ↓
+④ 每次修改 1 byte
+        ↓
+⑤ 修改 n 次
+        ↓
+⑥ 返回原来的 s
+```
