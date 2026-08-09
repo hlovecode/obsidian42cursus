@@ -20,7 +20,7 @@ void	*memset(void *s, int c, size_t n);
    起始地址    要设置的   设置多少
                字节值     个字节
 ```
-返回 `void *`, 即返回被修改的内存区域的起始地址 s
+返回被修改的内存区域的起始地址 s，类型是`void *`，一个通用的内存地址. 
 
 #### 2. 理解函数参数
 
@@ -40,4 +40,4 @@ memset(values, ...);
 ```
 
 2. 第2个参数 `int c`
-把 n 个字节设置成 c 转换后的 unsigned char 
+把 n 个字节设置成 c 转换后的 unsigned char 值. 
