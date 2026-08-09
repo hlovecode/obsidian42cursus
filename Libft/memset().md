@@ -22,6 +22,8 @@ void	*memset(void *s, int c, size_t n);
 ```
 返回被修改的内存区域的起始地址 s，类型是`void *`，一个通用的内存地址. 
 
+`memset` 
+
 #### 2. 理解函数参数
 
 1. 第1个参数 `void *s`
@@ -41,3 +43,29 @@ memset(values, ...);
 
 2. 第2个参数 `int c`
 把 n 个字节设置成 c 转换后的 unsigned char 值. 
+例如：
+```c
+char str[5];
+
+memset(str, 'A', 5);
+```
+'A' 的 ASCII 值：'A' = 65 = 0x41
+所以 65 转成16进制0x41，每个字节都会变成41 41 41 41 41, 也就是A A A A A
+
+3. 第3个参数 `size_t n`
+表示要修改多少个字节
+例如：
+```c
+char str[10];
+
+memset(str, 'A', 3);
+```
+表示：
+```txt
+第 0 个字节 → A
+第 1 个字节 → A
+第 2 个字节 → A
+```
+一共是3 bytes
+
+PS: 通常一个 int 是 4 bytes 
