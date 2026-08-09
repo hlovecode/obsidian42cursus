@@ -41,3 +41,7 @@ else if (strlen(str) == 0)
 	...
 }
 ```
+
+#### 3. 类型 size_t
+
+它是一个无符号整数类型`unsigned int` 或 `unsigned long`, 是用作
