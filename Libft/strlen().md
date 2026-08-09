@@ -24,7 +24,20 @@ strlen(NULL)非法，是undefined behavior, 因为strlen会尝试访问一个根
 char *str = NULL;
 strlen(str);
 ```
-也不要使用strlen来判断是否是NULL，不要写：
+也不要使用strlen来判断str是否是NULL，不要写：
 ```c
-
+if (strlen(str) == 0) 来判断 str == NULL
+```
+正确的是：
+```c
+if (str == NULL)
+{
+	/* NULL */
+	...
+}
+else if (strlen(str) == 0)
+{
+	/* empty string */
+	...
+}
 ```
