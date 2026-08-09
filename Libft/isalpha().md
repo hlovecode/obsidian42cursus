@@ -1,5 +1,5 @@
 `isalpha()` 是 **C 标准库（<ctype.h>）** 中最常用的字符分类函数之一，用于**判断一个字符是否是英文字母(a ~ z / A ~ Z).**
-字母是根据ASCII表来判断的, 因此就是 `65 ~ 90` 以及 `97 ~ 122`. 
+字母是根据ASCII表来判断的, 因此就是 65 ~ 90 以及 97 ~ 122. 
 
 1. **Prototype**
 ```c
@@ -18,7 +18,7 @@ isalpha('3');   // false
 isalpha('$');   // false
 ```
 
-<font color="red"> isalpha() 就是检查 65~90 或者 97~122. </font>
+<font color="red"> isalpha() 就是检查 65 ~ 90 或者 97 ~ 122. </font>
 
 2. **为什么函数参数是int ? 因为：**
 - char 会自动提升
