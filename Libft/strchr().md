@@ -18,7 +18,7 @@ char *strchr(const char *s, int c);
         ↓
 比较当前字符和 c
         ↓
-相同？
+	   相同？
  ┌──────┴──────┐
 是             否
 ↓              ↓
@@ -30,3 +30,4 @@ char *strchr(const char *s, int c);
 1. 找到目标字符
 2. 遇到 `'\0'`
 ```
+
