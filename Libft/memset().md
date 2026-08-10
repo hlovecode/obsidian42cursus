@@ -8,7 +8,10 @@
 void	*memset(void *s, int c, size_t n);
 ```
 它的作用可以简单理解成从 s 开始，把连续的 n 个字节全部设置成 c 的低8位. 
-它的3个参数：
+低8位就是一个整数的二进制表示中，最右边的8个bit, memset 之所以取这8位，是因为它最终要写入的是一个byte, 而 1 byte = 8 bits. 
+(ps: 1个bit只有2种状态：0 和 1)
+
+函数的3个参数：
 ```txt
              memset
                 │
@@ -136,4 +139,33 @@ X X X X X X X X X X
 memset(tab, 1, sizeof(tab));
 
 不是把tab中的每个元素设为1，而是把tab占用的每一个byte都设为0x01
+```
+
+#### 4. 理解函数的操作
+
+```txt
+                 memset
+                    │
+                    ↓
+             操作 memory
+                    │
+                    ↓
+               按 byte 操作
+                    │
+                    ↓
+             1 byte = 8 bits
+                    │
+                    ↓
+        一个 byte 只有 8 个 bit
+                    │
+                    ↓
+         c 转换成 unsigned char
+                    │
+                    ↓
+            得到一个 byte
+                    │
+                    ↓
+              低 8 位
+            
+    低8位并不是memset随便选择的，而是因为它最终一次xie
 ```
