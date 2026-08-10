@@ -50,3 +50,33 @@ if (ret >= sizeof(dst))
 ```
 这里 ret = 14, sizeof(dst) = 10, 说明 dst 的容量不足， src 没有完整追加
 
+#### 4. strlcat 的 size = 0 的情况
+
+例如：
+```c
+strlcat(dst, src, 0);
+```
+意味着目标缓冲区可用容量为0，所以不能写任何东西. 但是函数仍然需要计算返回值，如果 dst 是正常字符串：
+```c
+return strlen(dst) + strlen(src);
+```
+
+#### 5. size <= dst 当前长度
+
+例如：
+```c
+char dst[20] = "Hello";
+char src[] = "World";
+
+strlcat(dst, src, 4);
+```
+这里`size = 4, strlen(dst) = 5, size < strlen(dst)`, 意味着 size 所表示的范围甚至无法容纳完整的 dst 字符串，这种情况下，strlcat 不应该继续访问超过 size 的范围寻找 '\0', 返回的特殊情况是 `size + strlen(src)`, 即 4 + 5 = 9. 这是strlcat 实现里非常重要的一条规则.
+
+#### 6. strlcat 和 strlcpy 的区别
+
+|函数|作用|
+|---|---|
+|`strlcpy`|复制字符串|
+|`strlcat`|追加字符串|
+|`strlcpy(dst, src, size)`|`dst ← src`|
+|`strlcat(dst, src, size)`|`dst ← dst + src`|
