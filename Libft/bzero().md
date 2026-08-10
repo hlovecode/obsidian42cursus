@@ -2,6 +2,8 @@
 
 #### 1. Prototype
 ```c
+#include <strings.h>
+ 
 void	bzero(void *s, size_t n);
 ```
 作用是从 `s` 指向的内存地址开始，把连续的 `n` 个字节全部设置为 `0`.
