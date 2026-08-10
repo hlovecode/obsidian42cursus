@@ -6,3 +6,5 @@
 
 int tolower(int c);
 ```
+
+[[toupper()]]
