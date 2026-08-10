@@ -41,7 +41,51 @@ bzero(str, 3);
 
 #### 2. 理解函数的参数
 
-1. `void`
+1. `void *` 表示任意类型对象的地址
 
 2. `size_t n` 表示要清零多少个byte
 注意不是多少个元素，而是多少个byte
+
+**函数本质意思就是 `bzero(起始地址，字节数量)`**
+
+#### 3. 特别注意：bzero 是按照byte工作的
+举例：
+```c
+int tab[5];
+
+bzero(tab, 5);
+```
+不是:
+```c
+tab[0] = 0
+tab[1] = 0
+tab[2] = 0
+tab[3] = 0
+tab[4] = 0
+```
+而是只清零前 5 个 byte. 假设int = 4 bytes, 那么：
+```c
+tab:
+
+byte 0 ──┐
+byte 1   │ tab[0]
+byte 2   │
+byte 3 ──┘
+
+byte 4 ──┐
+byte 5   │ tab[1]
+byte 6   │
+byte 7 ──┘
+...
+```
+执行bzero(tab, 5); 只会是：
+```c
+00 00 00 00 00
+^^^^^^^^^^^^^^
+  5 bytes
+```
+也就是只完整清除了 `tab[0]`，然后又清除了 `tab[1]` 的第一个 byte, 这不是预期效果.
+因此正确的写法是：
+```c
+bzero(tab, sizeof(tab));
+```
