@@ -29,6 +29,7 @@ size_t strlcpy(char *dst, const char *src, size_t size);
 |`dst`|`char *`|目标字符串|
 |`src`|`const char *`|源字符串|
 |`size`|`size_t`|`dst` 能容纳的最大字节数|
+
 注意当size == 0 时是一个很特殊的情况，这时 `size - 1`就没有意义了，因此什么都不能写入dst，包括'\0', 不会修改dst，但仍然返回strlen(src), 即返回源字符串的长度.
 
 ```
