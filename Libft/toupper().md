@@ -13,5 +13,7 @@ int toupper(int c);
 
 `ctype.h` 中的字符函数通常要求参数能够表示：
 1. 一个 `unsigned char` 的值
-2. 或者特殊值 `EOF`
+2. 或者特殊值 `EOF`, `EOF` 一般定义为一个负的 `int` 值
 因此使用 int 来传递字符
+
+[[tolower()]]
