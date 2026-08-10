@@ -33,3 +33,6 @@ isalnum 判断是不是字母或数字
 isalnum('_') // 不是字母和数字，返回0
 isalnum(-100); // 错误
 ```
+
+[[isalpha()]]
+[[isdigit()]]
