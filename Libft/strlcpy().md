@@ -3,6 +3,8 @@
 #### 1. Prototype
 
 ```c
+#include <string.h>
+
 size_t strlcpy(char *dst, const char *src, size_t size);
 ```
 函数的作用是把 `src` 指向的字符串复制到 `dst`，最多写入 `size - 1` 个字符，并保证目标字符串以 `'\0'` 结尾.
