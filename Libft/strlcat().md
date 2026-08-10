@@ -19,7 +19,10 @@ strlcat 可以理解为 string length-limited concatenate (有长度限制的字
 size_t strlcat(char *dst, const char *src, size_t size);
 ```
 作用是把 `src` 字符串追加到 `dst` 字符串的末尾，同时最多只使用 `dst` 所提供的 `size` 个字节.
+
 返回试图创建的完整字符串长度，如果dst 和 src 都是正常的，以 '\0' 结尾的字符串，那么返回 `strlen(dst) + strlen(src)`, 注意是追加之前 dst 的长度.
+
+**注意函数参数 size 是第1个参数 dst 的总容量，而不是追加长度**
 
 #### 2. 函数的核心工作过程
 
@@ -74,9 +77,41 @@ strlcat(dst, src, 4);
 
 #### 6. strlcat 和 strlcpy 的区别
 
-|函数|作用|
-|---|---|
-|`strlcpy`|复制字符串|
-|`strlcat`|追加字符串|
-|`strlcpy(dst, src, size)`|`dst ← src`|
-|`strlcat(dst, src, size)`|`dst ← dst + src`|
+| 函数                        | 作用                |
+| ------------------------- | ----------------- |
+| `strlcpy`                 | 复制字符串             |
+| `strlcat`                 | 追加字符串             |
+| `strlcpy(dst, src, size)` | `dst ← src`       |
+| `strlcat(dst, src, size)` | `dst ← dst + src` |
+
+#### 7. 自己实现ft_strlcat
+
+核心思路：
+```txt
+1. 找 dst 的长度
+2. 找 src 的长度
+3. 判断 size 是否足够
+4. 如果足够，把 src 全部追加
+5. 如果不够，只追加能够容纳的部分
+6. 最后保证 '\0'
+7. 返回“原 dst 长度 + src 长度”
+   
+   
+                size
+                 │
+                 ▼
+        ┌─────────────────┐
+        │   dst 总容量     │
+        └─────────────────┘
+                 │
+        ┌────────┴────────┐
+        ▼                 ▼
+    dst_len          剩余空间
+                         │
+                         ▼
+                  size-dst_len-1
+                         │
+                         ▼
+                    追加 src
+```
+`strlcat(dst, src, size)` 中的 `size` 是 **dst 整个缓冲区的容量**，而返回值是 **原 `dst` 长度 + `src` 长度**，不是实际追加了多少字符
