@@ -92,6 +92,7 @@ strlcat(dst, src, 4);
 2. 找 src 的长度
 3. 判断 size 是否足够，如果 size <= dst_len：返回 size + src_len
    否则：计算最多可以追加多少字符
+   最多追加的字符数 = size - dst_len - 1
 4. 如果足够，把 src 全部追加
 5. 如果不够，只追加能够容纳的部分
 6. 最后添加 '\0'
