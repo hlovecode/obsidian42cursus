@@ -3,6 +3,8 @@
 #### 1. Prototype
 
 ```c
+#include <string.h>
+
 void	*memmove(void *dst, const void *src, size_t n);
 				  ↑           ↑                 ↑ 
 				目标地址      源地址             字节数
