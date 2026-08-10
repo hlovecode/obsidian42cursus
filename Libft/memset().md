@@ -131,3 +131,9 @@ X X X X X X X X X X
         ↓
 ⑥ 返回原来的 s
 ```
+
+```c
+memset(tab, 1, sizeof(tab));
+
+不是把tab中的每个元素设为1，而是把tab占用的每一个byte都设为0x01
+```
