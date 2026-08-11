@@ -1,4 +1,4 @@
-C'est là qu'il faut vraiment maîtriser le projet `Libft`.
+C'est ici qu'il faut vraiment maîtriser le projet `Libft`.
 
 Un Makefile typique :
 ```Makefile
@@ -38,7 +38,7 @@ s'occupe de :
 ```Makefile
 .c -> .o
 ```
-et :
+tandis que :
 ```Makefile
 $(NAME): $(OBJS)
 	ar rcs $(NAME) $(OBJS)
@@ -58,7 +58,7 @@ Donc toute la logique du Makefile :
                          libft.a
 ```
 
-`ar` traite principalement les membres `archive`, c'est-à-dire `.o`, et le code source C `.c` doit d'abord être compilé via `cc`, donc ce devrait être :
+`ar` traite principalement les membres `archive`, c'est-à-dire `.o`, et le code source C `.c` doit d'abord passer par la compilation `cc`, donc cela devrait être :
 ```bash
 .c
  ↓ cc
@@ -93,7 +93,7 @@ pour obtenir :
 libft.a
 ```
 
-3. Voir ce que contient la bibliothèque statique :
+3. Voir le contenu d'une bibliothèque statique :
 ```bash
 ar -t libft.a
 ```
@@ -143,4 +143,4 @@ On peut comprendre `Libft` comme :
               └──────────────┘
 ```
 
-**`cc` compile `.c` en `.o` ; `ar` regroupe plusieurs `.o` en une bibliothèque statique `.a` ; enfin, l'éditeur de liens extrait de `.a` le code nécessaire au programme pour générer l'exécutable.**
+**`cc` compile `.c` en `.o` ; `ar` regroupe plusieurs `.o` dans une bibliothèque statique `.a` ; enfin, l'éditeur de liens extrait le code nécessaire du `.a` pour générer l'exécutable.**

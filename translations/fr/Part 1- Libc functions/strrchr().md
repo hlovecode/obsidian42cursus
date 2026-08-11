@@ -1,1 +1,1 @@
-Explication détaillée de la fonction de la bibliothèque standard C `strrchr`.
+Testez ceci

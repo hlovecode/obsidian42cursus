@@ -1,4 +1,4 @@
-`bzero` is a function used to **fill a block of memory with `0`.**
+`bzero` is a function used to **set an entire memory region to `0`**.
 
 #### 1. Prototype
 ```c
@@ -6,7 +6,7 @@
  
 void	bzero(void *s, size_t n);
 ```
-Its purpose is to set a consecutive number of `n` bytes, starting from the memory address pointed to by `s`, to `0`.
+Its purpose is to start from the memory address pointed to by `s` and set `n` consecutive bytes to `0`.
 It has no return value; it simply performs a memory modification operation.
 
 For example:
@@ -41,7 +41,7 @@ bzero(str, 3);
 即从 `str` 开始的3个byte被清零
 ```
 
-The function means: starting from address `s`, access `n` consecutive bytes, and write every single byte as `0x00`.
+The meaning of the function is to start from address `s`, access `n` consecutive bytes, and write each byte as `0x00`.
 
 #### 2. Understanding the Function Parameters
 
@@ -50,16 +50,16 @@ The function means: starting from address `s`, access `n` consecutive bytes, and
 2. `size_t n` represents how many bytes to zero out.
 Note that this is not the number of elements, but the number of bytes.
 
-**The essential meaning of the function is `bzero(起始地址，字节数量)`.**
+**The essential meaning of the function is `bzero(起始地址，字节数量)`**.
 
-#### 3. Special Note: bzero works by byte
+#### 3. Special Note: bzero works on a per-byte basis
 Example:
 ```c
 int tab[5];
 
 bzero(tab, 5);
 ```
-It is not:
+Is not:
 ```c
 tab[0] = 0
 tab[1] = 0
@@ -67,7 +67,7 @@ tab[2] = 0
 tab[3] = 0
 tab[4] = 0
 ```
-Instead, it only zeroes out the first 5 bytes. Assuming an `int` is 4 bytes, then:
+Instead, it only zeros out the first 5 bytes. Assuming an int is 4 bytes, then:
 ```c
 tab:
 
@@ -96,8 +96,8 @@ bzero(tab, sizeof(tab));
 
 #### 4. Purpose of the Function
 
-Its most typical use case is zeroing out memory.
+Its most typical use case is to zero out memory.
 
-However, note that this function does not "delete data" nor does it free the memory; it merely modifies the contents of the specified memory. Although the memory is zeroed out—meaning the memory region is set to 0—the memory remains occupied.
+However, note that this function does not "delete data" nor does it release memory; it merely modifies the contents of the specified memory. Although the memory is zeroed out, meaning the region is set to 0, the memory remains allocated. 
 
 [[memset()]]

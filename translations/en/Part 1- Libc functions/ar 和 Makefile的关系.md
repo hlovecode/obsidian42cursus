@@ -1,6 +1,6 @@
-This is where the `Libft` project truly needs to be mastered.
+这是 `Libft` 项目真正要掌握的地方.
 
-A typical Makefile:
+典型的Makefile:
 ```Makefile
 NAME = libft.a
 
@@ -29,25 +29,25 @@ fclean: clean
 
 re: fclean all
 ```
-Here:
+这里：
 ```Makefile
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 ```
-is responsible for:
+负责：
 ```Makefile
 .c -> .o
 ```
-whereas:
+而：
 ```Makefile
 $(NAME): $(OBJS)
 	ar rcs $(NAME) $(OBJS)
 ```
-is responsible for:
+负责：
 ```Makefile
 .o → libft.a
 ```
-Therefore, the overall logic of the Makefile:
+所以 Makefile 的整个逻辑：
 ```Makefile
                 cc
 .c ─────────────────────→ .o
@@ -58,7 +58,7 @@ Therefore, the overall logic of the Makefile:
                          libft.a
 ```
 
-`ar` mainly handles `archive` members, which are `.o`, and the C source code `.c` needs to be compiled via `cc` first, so it should be:
+`ar` 主要处理的的是 `archive` 成员，也就是 `.o` ，而C源代码`.c` 需要首先经过 `cc` 编译，所以应该是：
 ```bash
 .c
  ↓ cc
@@ -66,51 +66,51 @@ Therefore, the overall logic of the Makefile:
  ↓ ar
 .a
 ```
-instead of:
+而不是：
 ```bash
 .c
  ↓ ar
 .a
 ```
 
-#### Remember 4 commands:
+#### 记住4个命令：
 
-1. Compile a `.c` file:
+1. 编译一个 `.c` 文件：
 ```bash
 cc -Wall -Wextra -Werror -c ft_strlen.c
 ```
-to get:
+得到：
 ```bash
 ft_strlen.o
 ```
 
-2. Create a static library:
+2. 创建静态库：
 ```bash
 ar rcs libft.a ft_strlen.o
 ```
-to get:
+得到：
 ```bash
 libft.a
 ```
 
-3. View the contents of a static library:
+3. 查看静态库里面有什么：
 ```bash
 ar -t libft.a
 ```
-to get:
+得到：
 ```bash
 ft_strlen.o
 ...
 ```
 
-4. Delete the static library:
+4. 删除静态库
 ```bash
 rm -f libft.a
 ```
 
-#### Connecting the entire Libft workflow
+#### 把整个 Libft 流程串起来
 
-You can understand `Libft` as:
+可以把 `Libft` 理解成：
 ```bash
               你的 C 源代码
                      │
@@ -143,4 +143,4 @@ You can understand `Libft` as:
               └──────────────┘
 ```
 
-**`cc` compiles `.c` into `.o`; `ar` organizes multiple `.o` into a `.a` static library; finally, the linker extracts the code needed by the program from `.a` to generate the executable file.**
+**`cc` 把 `.c` 编译成 `.o`；`ar` 把多个 `.o` 组织成 `.a` 静态库；最终链接器从 `.a` 中提取程序需要的代码，生成可执行文件.**

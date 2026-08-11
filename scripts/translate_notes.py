@@ -3,6 +3,7 @@ import re
 import json
 import time
 import random
+import hashlib
 import urllib.request
 import urllib.error
 
@@ -12,6 +13,10 @@ MODEL = "gemini-3.5-flash-lite"
 
 SOURCE_DIR = "Libft"
 TRANSLATION_DIR = "translations"
+HASH_FILE = os.path.join(
+    TRANSLATION_DIR,
+    ".translation_hashes.json"
+)
 
 MAX_RETRIES = 5
 BASE_DELAY = 2
@@ -72,16 +77,80 @@ def get_translation_path(source_file, language):
     )
 
 
-def file_needs_translation(source_file, translation_file):
-    if not os.path.exists(translation_file):
-        return True
+def calculate_hash(text):
+    return hashlib.sha256(
+        text.encode("utf-8")
+    ).hexdigest()
 
-    source_mtime = os.path.getmtime(source_file)
-    translation_mtime = os.path.getmtime(
-        translation_file
+
+def load_hashes():
+    if not os.path.exists(HASH_FILE):
+        return {}
+
+    try:
+        with open(
+            HASH_FILE,
+            "r",
+            encoding="utf-8"
+        ) as file:
+            data = json.load(file)
+
+        if isinstance(data, dict):
+            return data
+
+    except (
+        json.JSONDecodeError,
+        OSError
+    ):
+        print(
+            "WARNING: Could not read hash file."
+        )
+
+    return {}
+
+
+def save_hashes(hashes):
+    os.makedirs(
+        TRANSLATION_DIR,
+        exist_ok=True
     )
 
-    return source_mtime > translation_mtime
+    temporary_file = HASH_FILE + ".tmp"
+
+    with open(
+        temporary_file,
+        "w",
+        encoding="utf-8"
+    ) as file:
+        json.dump(
+            hashes,
+            file,
+            ensure_ascii=False,
+            indent=2
+        )
+        file.write("\n")
+
+    os.replace(
+        temporary_file,
+        HASH_FILE
+    )
+
+
+def has_real_content(text):
+    lines = text.splitlines()
+
+    for line in lines:
+        stripped = line.strip()
+
+        if not stripped:
+            continue
+
+        if stripped.startswith("#"):
+            continue
+
+        return True
+
+    return False
 
 
 def translate(text, language):
@@ -125,7 +194,9 @@ Text:
         ]
     }
 
-    request_data = json.dumps(data).encode("utf-8")
+    request_data = json.dumps(data).encode(
+        "utf-8"
+    )
 
     for attempt in range(MAX_RETRIES):
         try:
@@ -142,19 +213,63 @@ Text:
                 request,
                 timeout=120
             ) as response:
-                result = json.loads(
-                    response.read().decode("utf-8")
+                response_text = response.read().decode(
+                    "utf-8"
                 )
 
-            return result[
-                "candidates"
-            ][0][
-                "content"
-            ][
-                "parts"
-            ][0][
+            result = json.loads(response_text)
+
+            if "error" in result:
+                print(
+                    "  Gemini API error:"
+                )
+                print(
+                    json.dumps(
+                        result["error"],
+                        ensure_ascii=False,
+                        indent=2
+                    )
+                )
+
+                raise RuntimeError(
+                    "Gemini API returned an error."
+                )
+
+            candidates = result.get(
+                "candidates",
+                []
+            )
+
+            if not candidates:
+                raise RuntimeError(
+                    "Gemini returned no candidates."
+                )
+
+            content = candidates[0].get(
+                "content",
+                {}
+            )
+
+            parts = content.get(
+                "parts",
+                []
+            )
+
+            if not parts:
+                raise RuntimeError(
+                    "Gemini response contains no parts."
+                )
+
+            translation = parts[0].get(
                 "text"
-            ]
+            )
+
+            if not translation:
+                raise RuntimeError(
+                    "Gemini response contains no text."
+                )
+
+            return translation
 
         except urllib.error.HTTPError as error:
             if error.code not in (
@@ -182,7 +297,10 @@ Text:
 
             time.sleep(delay)
 
-        except urllib.error.URLError:
+        except (
+            urllib.error.URLError,
+            RuntimeError
+        ) as error:
             if attempt == MAX_RETRIES - 1:
                 raise
 
@@ -192,14 +310,20 @@ Text:
             )
 
             print(
-                f"  Network error. "
-                f"Retrying in {delay:.1f}s..."
+                f"  API response error: {error}"
+            )
+
+            print(
+                f"  Retrying in {delay:.1f}s..."
             )
 
             time.sleep(delay)
 
 
-def translate_file(source_file):
+def translate_file(
+    source_file,
+    hashes
+):
     english_file = get_translation_path(
         source_file,
         "English"
@@ -210,17 +334,45 @@ def translate_file(source_file):
         "French"
     )
 
-    english_needed = file_needs_translation(
+    with open(
         source_file,
+        "r",
+        encoding="utf-8"
+    ) as file:
+        original = file.read()
+
+    if not has_real_content(original):
+        print(
+            f"SKIP EMPTY: {source_file}"
+        )
+        return
+
+    relative_path = os.path.relpath(
+        source_file,
+        SOURCE_DIR
+    )
+
+    current_hash = calculate_hash(
+        original
+    )
+
+    old_hash = hashes.get(
+        relative_path
+    )
+
+    english_exists = os.path.exists(
         english_file
     )
 
-    french_needed = file_needs_translation(
-        source_file,
+    french_exists = os.path.exists(
         french_file
     )
 
-    if not english_needed and not french_needed:
+    if (
+        old_hash == current_hash
+        and english_exists
+        and french_exists
+    ):
         print(
             f"SKIP: {source_file}"
         )
@@ -230,19 +382,17 @@ def translate_file(source_file):
         f"\nPROCESS: {source_file}"
     )
 
-    with open(
-        source_file,
-        "r",
-        encoding="utf-8"
-    ) as file:
-        original = file.read()
-
     protected_text, protected = protect_markdown(
         original
     )
 
-    if english_needed:
-        print("  Translating -> English")
+    if (
+        old_hash != current_hash
+        or not english_exists
+    ):
+        print(
+            "  Translating -> English"
+        )
 
         english = translate(
             protected_text,
@@ -273,11 +423,16 @@ def translate_file(source_file):
         time.sleep(REQUEST_DELAY)
     else:
         print(
-            "  English already up to date"
+            "  English already exists"
         )
 
-    if french_needed:
-        print("  Translating -> French")
+    if (
+        old_hash != current_hash
+        or not french_exists
+    ):
+        print(
+            "  Translating -> French"
+        )
 
         french = translate(
             protected_text,
@@ -306,11 +461,15 @@ def translate_file(source_file):
         )
     else:
         print(
-            "  French already up to date"
+            "  French already exists"
         )
+
+    hashes[relative_path] = current_hash
 
 
 def main():
+    hashes = load_hashes()
+
     files = find_markdown_files()
 
     print(
@@ -318,7 +477,21 @@ def main():
     )
 
     for source_file in files:
-        translate_file(source_file)
+        try:
+            translate_file(
+                source_file,
+                hashes
+            )
+        except Exception as error:
+            print(
+                f"\nERROR: {source_file}"
+            )
+            print(
+                f"  {error}"
+            )
+            continue
+
+    save_hashes(hashes)
 
     print(
         "\nTranslation process completed."
