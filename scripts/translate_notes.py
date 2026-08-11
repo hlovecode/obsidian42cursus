@@ -6,7 +6,7 @@ import urllib.request
 
 API_KEY = os.environ["GEMINI_API_KEY"]
 MODEL = "gemini-3.5-flash-lite"
-SOURCE_FILE = "Libft/Part 1- Libc functions/strlen().md"
+SOURCE_DIR = "Libft"
 
 
 def protect_markdown(text):
