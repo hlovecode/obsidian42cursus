@@ -7,6 +7,7 @@ import urllib.request
 API_KEY = os.environ["GEMINI_API_KEY"]
 MODEL = "gemini-3.5-flash-lite"
 SOURCE_DIR = "Libft"
+TRANSLATION_DIR = "translations"
 
 
 def protect_markdown(text):
@@ -29,6 +30,17 @@ def restore_markdown(text, protected):
     return text
 
 
+def find_markdown_files():
+    files = []
+
+    for root, dirs, filenames in os.walk(SOURCE_DIR):
+        for filename in filenames:
+            if filename.endswith(".md"):
+                files.append(os.path.join(root, filename))
+
+    return sorted(files)
+
+
 def translate(text, language):
     prompt = f"""Translate the following Markdown text into {language}.
 
@@ -39,6 +51,7 @@ Important rules:
 - Do not translate placeholders such as ___PROTECTED_0___.
 - Keep the original meaning accurate.
 - This is a technical programming note.
+- Preserve C programming terminology accurately.
 
 Text:
 
@@ -75,8 +88,25 @@ Text:
     return result["candidates"][0]["content"]["parts"][0]["text"]
 
 
-def main():
-    with open(SOURCE_FILE, "r", encoding="utf-8") as file:
+def get_translation_path(source_file, language):
+    relative_path = os.path.relpath(source_file, SOURCE_DIR)
+
+    if language == "English":
+        language_dir = "en"
+    else:
+        language_dir = "fr"
+
+    return os.path.join(
+        TRANSLATION_DIR,
+        language_dir,
+        relative_path
+    )
+
+
+def translate_file(source_file):
+    print(f"\nTranslating: {source_file}")
+
+    with open(source_file, "r", encoding="utf-8") as file:
         original = file.read()
 
     protected_text, protected = protect_markdown(original)
@@ -87,8 +117,8 @@ def main():
     english = restore_markdown(english, protected)
     french = restore_markdown(french, protected)
 
-    english_file = "translations/en/" + os.path.basename(SOURCE_FILE)
-    french_file = "translations/fr/" + os.path.basename(SOURCE_FILE)
+    english_file = get_translation_path(source_file, "English")
+    french_file = get_translation_path(source_file, "French")
 
     os.makedirs(os.path.dirname(english_file), exist_ok=True)
     os.makedirs(os.path.dirname(french_file), exist_ok=True)
@@ -99,8 +129,19 @@ def main():
     with open(french_file, "w", encoding="utf-8") as file:
         file.write(french)
 
-    print("English:", english_file)
-    print("French:", french_file)
+    print(f"  English -> {english_file}")
+    print(f"  French  -> {french_file}")
+
+
+def main():
+    files = find_markdown_files()
+
+    print(f"Found {len(files)} Markdown files.")
+
+    for source_file in files:
+        translate_file(source_file)
+
+    print("\nTranslation completed.")
 
 
 if __name__ == "__main__":
