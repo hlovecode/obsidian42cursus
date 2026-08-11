@@ -5,9 +5,8 @@ on:
     branches:
       - main
     paths:
-      - 'Libft/**'
+      - '**/*.md'
       - 'scripts/translate_notes.py'
-      - 'translations/.translation_hashes.json'
   workflow_dispatch:
 
 permissions:
