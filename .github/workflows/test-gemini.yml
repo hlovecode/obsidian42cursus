@@ -15,18 +15,4 @@ jobs:
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
-          curl -i -sS \
-           "https://generativelanguage.googleapis.com/v1beta/models?key=${GEMINI_API_KEY}" \
-            -H "Content-Type: application/json" \
-            -X POST \
-            -d '{
-              "contents": [
-                {
-                  "parts": [
-                    {
-                      "text": "Translate this sentence into English. Return only the translation: C语言中的字符串以空字符结尾。"
-                    }
-                  ]
-                }
-              ]
-            }'
+          curl -i -sS "https://generativelanguage.googleapis.com/v1beta/models?key=${GEMINI_API_KEY}"
