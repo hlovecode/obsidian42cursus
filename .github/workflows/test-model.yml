@@ -1,0 +1,29 @@
+name: Test GitHub Models
+
+on:
+  workflow_dispatch:
+
+permissions:
+  models: read
+
+jobs:
+  test-model:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Call GitHub Model
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          curl "https://models.github.ai/inference/chat/completions" \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer $GITHUB_TOKEN" \
+            -d '{
+              "messages": [
+                {
+                  "role": "user",
+                  "content": "Translate this sentence into English: C语言中的字符串以空字符结尾。"
+                }
+              ],
+              "model": "openai/gpt-4.1"
+            }'
