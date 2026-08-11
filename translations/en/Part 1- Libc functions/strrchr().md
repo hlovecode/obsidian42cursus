@@ -1,0 +1,1 @@
+Detailed explanation of the C standard library function `strrchr`.
