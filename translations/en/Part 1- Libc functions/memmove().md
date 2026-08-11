@@ -21,4 +21,4 @@ dst == src  => 什么都不用做
 ```
 
 If the destination region and the source region may overlap, the copy direction is chosen based on the relative positions of `dst` and `src`:
-**If the destination is ahead, copy from front to back; if the destination is behind, copy from back to front**
+**If the destination is ahead, copy from front to back; if the destination is behind, copy from back to front.**

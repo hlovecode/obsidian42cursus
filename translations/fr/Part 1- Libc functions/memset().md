@@ -7,9 +7,9 @@
 
 void	*memset(void *s, int c, size_t n);
 ```
-Son rôle peut être simplement compris comme suit : à partir de s, définir les n octets consécutifs pour qu'ils soient tous égaux aux 8 bits de poids faible de c. 
-Les 8 bits de poids faible correspondent, dans la représentation binaire d'un entier, aux 8 bits situés tout à droite. Si memset utilise ces 8 bits, c'est parce qu'il doit finalement écrire un octet (dont la plage de valeurs va de 0 à 255), sachant que 1 octet = 8 bits. 
-(Remarque : 1 bit n'a que 2 états : 0 et 1)
+Son action peut être simplement comprise comme suit : à partir de s, définir les n octets consécutifs pour qu'ils soient tous égaux aux 8 bits de poids faible de c. 
+Les 8 bits de poids faible correspondent, dans la représentation binaire d'un entier, aux 8 bits les plus à droite. La raison pour laquelle memset utilise ces 8 bits est qu'il doit finalement écrire un octet (dont la plage de valeurs va de 0 à 255), et que 1 octet = 8 bits. 
+(ps : 1 bit n'a que 2 états : 0 et 1)
 
 Les 3 paramètres de la fonction :
 ```txt
@@ -23,17 +23,17 @@ Les 3 paramètres de la fonction :
    起始地址    要设置的   设置多少
                字节值     个字节
 ```
-Renvoie l'adresse de départ s de la zone mémoire modifiée, de type `void *`, qui est une adresse mémoire générique. 
+Renvoie l'adresse de départ s de la zone mémoire modifiée, dont le type est `void *`, une adresse mémoire générique. 
 
-`memset` modifie n octets à partir d'une certaine adresse. Lorsque n == 0, cela signifie que 0 octet est modifié, rien n'est modifié, ce qui équivaut à ne rien faire. 
-Attention, n est un nombre d'octets, et non un nombre d'éléments. 
+`memset` commence à une certaine adresse et modifie n octets. Lorsque n == 0, cela signifie que 0 octet est modifié, rien n'est modifié, ce qui peut être compris comme ne rien faire. 
+Attention, n est le nombre d'octets, et non le nombre d'éléments. 
 
-`memset(s, c, n)` signifie : à partir de l'adresse `s`, écrire les `n` octets consécutifs avec les 8 bits de poids faible de `c`, et renvoyer `s`. Les « 8 bits de poids faible » sont les 8 bits situés tout à droite dans la représentation binaire d'un entier ; si `memset` utilise finalement cette partie, c'est parce qu'il convertit `c` en `unsigned char`, puis écrit de manière répétée dans la mémoire avec l'octet comme unité.
+`memset(s, c, n)` signifie : à partir de l'adresse `s`, écrire les `n` octets consécutifs avec les 8 bits de poids faible de `c`, et renvoyer `s`. Les « 8 bits de poids faible » sont les 8 bits les plus à droite de la représentation binaire d'un entier ; si `memset` utilise finalement cette partie, c'est parce qu'il convertit `c` en un `unsigned char`, puis écrit de manière répétée dans la mémoire avec l'octet comme unité.
 
 #### 2. Comprendre les paramètres de la fonction
 
 1. Le 1er paramètre `void *s`
-Représente l'adresse de départ de la zone mémoire à manipuler. `void *` est utilisé car memset ne se soucie pas du type réel que vous transmettez ; il opère sur des octets (bytes) et non sur des types C tels que char, int, double, etc.
+Indique l'adresse de départ de la zone mémoire à manipuler. `void *` est dû au fait que memset ne se soucie pas du type exact que vous lui passez ; il manipule des octets (bytes), et non des types C tels que char, int, double, etc.
 Par exemple :
 ```c
 char str[10];
@@ -47,8 +47,8 @@ memset(tab, ...);
 memset(values, ...);
 ```
 
-2. Le 2ème paramètre `int c`
-Définit les n octets avec la valeur convertie en unsigned char de c. 
+2. Le 2e paramètre `int c`
+Définit n octets à la valeur unsigned char convertie de c. 
 Par exemple :
 ```c
 char str[5];
@@ -58,7 +58,7 @@ memset(str, 'A', 5);
 Valeur ASCII de 'A' : 'A' = 65 = 0x41
 Par conséquent, 65 converti en hexadécimal donne 0x41, et chaque octet devient 41 41 41 41 41, c'est-à-dire A A A A A.
 
-3. Le 3ème paramètre `size_t n`
+3. Le 3e paramètre `size_t n`
 Indique le nombre d'octets à modifier.
 Par exemple :
 ```c
@@ -74,7 +74,7 @@ Signifie :
 ```
 Ce qui fait un total de 3 octets.
 
-Remarque : Un int fait généralement 4 octets.
+PS : En général, un int fait 4 octets.
 
 #### 3. Utilisations les plus courantes de memset
 
@@ -171,23 +171,23 @@ memset(tab, 1, sizeof(tab));
     在常见平台上是8 bits
 ```
 
-Exemple : comprendre les 2 lignes de code suivantes
+Exemple : comprendre ces 2 lignes de code
 ```c
 char str[4];
 
 memset(str, 0x12345678, 4);
 ```
 La compréhension se fait en 4 étapes :
-Étape 1 : Le 2ème paramètre c est 0x12345678.
+Étape 1 : Le 2e paramètre c est 0x12345678.
 Étape 2 : Conversion en unsigned char, en ne conservant qu'un seul octet : 0x78.
-Étape 3 : Le 3ème paramètre n = 4, il faut écrire 4 octets.
+Étape 3 : Le 3e paramètre n = 4, il faut écrire 4 octets.
 ```c
 byte 0
 byte 1
 byte 2
 byte 3
 ```
-Étape 4 : Tout écrire avec 0x78.
+Étape 4 : Tout écrire à 0x78.
 ```c
 ┌──────┬──────┬──────┬──────┐
 │ 0x78 │ 0x78 │ 0x78 │ 0x78 │
@@ -195,9 +195,9 @@ byte 3
 ```
 C'est ce que fait `memset(str, 0x12345678, 4);`.
 
-Remarque : Comprendre l'écriture 0x78
-0x -> Indique au compilateur que le nombre 78 qui suit est représenté en hexadécimal. L'écriture 0x est une convention en langage C.
-	On peut comprendre `0x` comme : « le nombre qui suit est représenté en hexadécimal ».
-78 -> La partie qui représente réellement la valeur est 78.
+PS : Comprendre l'écriture 0x78
+0x -> Indique au compilateur que le nombre 78 qui suit est exprimé en hexadécimal. L'écriture 0x est une convention en langage C.
+	On peut comprendre `0x` comme : « Le nombre qui suit est représenté en hexadécimal ».
+78 -> La partie qui représente réellement la valeur numérique est 78.
 
 [[bzero()]]

@@ -9,7 +9,7 @@ strlcat
 │
 └── str = string
 ```
-`strlcat` can be understood as "string length-limited concatenate".
+strlcat can be understood as string length-limited concatenate.
 
 #### 1. Prototype
 
@@ -18,17 +18,17 @@ strlcat
 
 size_t strlcat(char *dst, const char *src, size_t size);
 ```
-Its purpose is to append the `src` string to the end of the `dst` string, using at most the `size` bytes provided by `dst`.
+Its function is to append the `src` string to the end of the `dst` string, while using at most `size` bytes provided by `dst`.
 
-It returns the total length of the string trying to be created. If both `dst` and `src` are normal, `\0`-terminated strings, it returns `strlen(dst) + strlen(src)` (note that this is the length of `dst` before concatenation).
+Returns the total length of the string trying to be created. If both dst and src are normal '\0'-terminated strings, it returns `strlen(dst) + strlen(src)`. Note that this is the length of dst before concatenation.
 
-**Note that the function parameter `size` is the total capacity of the first parameter `dst`, not the length to be appended.**
+**Note: The function parameter size is the total capacity of the first parameter dst, not the length to be appended.**
 
 #### 2. Core Working Process of the Function
 
-1. Find the string length of `dst`.
+1. Find the string length of dst.
 2. Calculate how much space is left.
-3. Append `src`.
+3. Append src.
 
 #### 3. Still Returns the Full Length When Space is Insufficient
 
@@ -37,7 +37,7 @@ Example:
 char dst[10] = "Hello"; // 长度是5
 char src[] = " World!!!"; // 长度是9
 ```
-The length of the string returned by `strlcat(...)` is 14, but `dst` might actually only become "Hello Wo" with a length of 8. It still returns 14 because the function is telling you: "If there had been enough space, I would have produced a string of length 14." Therefore, you can check whether string truncation has occurred:
+The string length returned by strlcat(...) is 14, but dst may actually only become "Hello Wo" with a length of 8, yet it still returns 14. This is because the function tells you that if there were enough space, it would have liked to produce a string of length 14, which allows you to determine if string truncation has occurred:
 ```c
 char dst[10] = "Hello";
 char src[] = " World!!!";
@@ -51,20 +51,20 @@ if (ret >= sizeof(dst))
 	printf("字符串被截断了\n");
 }
 ```
-Here, `ret = 14`, `sizeof(dst) = 10`, indicating that `dst` has insufficient capacity and `src` was not fully appended.
+Here ret = 14, sizeof(dst) = 10, indicating that the capacity of dst is insufficient and src was not fully appended.
 
-#### 4. The Case Where `size = 0` in `strlcat`
+#### 4. Case where size = 0 in strlcat
 
 For example:
 ```c
 strlcat(dst, src, 0);
 ```
-This means the available capacity of the destination buffer is 0, so nothing can be written. However, the function still needs to compute the return value. If `dst` is a normal string:
+This means the available capacity of the target buffer is 0, so nothing can be written. However, the function still needs to calculate the return value. If dst is a normal string:
 ```c
 return strlen(dst) + strlen(src);
 ```
 
-#### 5. `size <=` Current Length of `dst`
+#### 5. size <= Current Length of dst
 
 For example:
 ```c
@@ -73,18 +73,18 @@ char src[] = "World";
 
 strlcat(dst, src, 4);
 ```
-Here `size = 4, strlen(dst) = 5, size < strlen(dst)`, which means the range specified by `size` cannot even accommodate the complete `dst` string. In this case, `strlcat` should not continue accessing beyond `size` to look for `\0`. The return value in this special case is `size + strlen(src)`, i.e., $4 + 5 = 9$. This is a very important rule in the implementation of `strlcat`.
+Here `size = 4, strlen(dst) = 5, size < strlen(dst)`, meaning the range represented by size cannot even accommodate the complete dst string. In this case, strlcat should not continue accessing beyond the size range to look for '\0'. The special return case is `size + strlen(src)`, which is 4 + 5 = 9. This is a very important rule in the implementation of strlcat.
 
-#### 6. Differences Between `strlcat` and `strlcpy`
+#### 6. Differences Between strlcat and strlcpy
 
-| Function                        | Action                |
+| Function                  | Action            |
 | ------------------------- | ----------------- |
-| `strlcpy`                 | Copy string             |
-| `strlcat`                 | Append string             |
+| `strlcpy`                 | Copy string       |
+| `strlcat`                 | Append string     |
 | `strlcpy(dst, src, size)` | `dst ← src`       |
 | `strlcat(dst, src, size)` | `dst ← dst + src` |
 
-#### 7. Implementing `ft_strlcat` Yourself
+#### 7. Implementing ft_strlcat Yourself
 
 Core logic:
 ```txt
@@ -116,4 +116,4 @@ Core logic:
                          ▼
                     追加 src
 ```
-In `strlcat(dst, src, size)`, `size` is **the total capacity of the `dst` buffer**, and the return value is **the original `dst` length + `src` length**, not the actual number of characters appended.
+In `strlcat(dst, src, size)`, `size` is the **total capacity of the dst buffer**, and the return value is **original `dst` length + `src` length**, not the number of characters actually appended.

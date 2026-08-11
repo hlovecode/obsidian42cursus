@@ -1,4 +1,4 @@
-`isascii()` and `isalpha()`, `isdigit()`, `isalnum()` all belong to **character classification functions**, but there is a very important difference: `isascii()` does not check whether "it is a letter or a digit", but rather "whether this character is an ASCII character".
+`isascii()` and `isalpha()`, `isdigit()`, `isalnum()` alike, belong to **character classification functions**, but there is a very important difference: `isascii()` does not determine whether "it is a letter or a digit", but rather "whether the character is an ASCII character".
 
 #### 1. Prototype
 
@@ -7,7 +7,7 @@
 
 int isascii(int c);
 ```
-Its function is very simple: it checks whether the parameter c falls within the ASCII character range.
+Its function is very simple: it determines whether the argument `c` falls within the ASCII character range.
 The ASCII range is 0 to 127 (128 values), which is hexadecimal 0x00 to 0x7F, namely:
 ```txt
 0
@@ -32,9 +32,9 @@ The ASCII range is 0 to 127 (128 values), which is hexadecimal 0x00 to 0x7F, nam
 │
 └── 127           DEL
 ```
-Therefore, 0 <= parameter c <= 127 means it is ASCII.
+Therefore, $0 \le \text{argument } c \le 127$ means it is ASCII.
 
-#### 2. ASCII does not equal printable characters; it also includes a large number of non-printable characters
+#### 2. ASCII is not equal to printable characters; it also includes a large number of non-printable characters
 
 ```txt
 ASCII

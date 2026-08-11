@@ -1,4 +1,4 @@
-`isalnum()` is a very basic and commonly used **character classification function** in the C standard library `<ctype.h>`, used to determine whether a character is an alphanumeric character (a letter or a digit).
+`isalnum()` is a very fundamental and commonly used **character classification function** in the C standard library `<ctype.h>`, used to determine whether a character is an alphanumeric character (a letter or a digit).
 
 #### 1. Prototype
 
@@ -7,14 +7,14 @@
 
 int isalnum(int c);
 ```
-It checks:
+It determines:
 ```txt
 A-Z
 a-z
 0-9
 ```
-- Returns non-zero if it is a letter or a digit.
-- Returns zero otherwise.
+- Returns a non-zero value if it is a letter or a digit
+- Returns 0 otherwise
 
 **Relationship between `isalnum` and `isalpha`, `isdigit`**:
 ```txt

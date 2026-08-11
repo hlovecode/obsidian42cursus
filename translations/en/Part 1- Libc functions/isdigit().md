@@ -3,7 +3,7 @@ The range checked by `isdigit()` is strictly:
 ```c
 '0' '1' '2' '3' '4' '5' '6' '7' '8' '9'
 ```
-Which is ASCII: 48 ~ 57.
+Which in ASCII is: 48 to 57
 ##### 1. Prototype
 ```c
 #include <ctype.h> 
@@ -12,8 +12,8 @@ int isdigit(int c);
 ```
 Its purpose is very simple: to determine whether `c` represents one of the characters '0' through '9'.
 Return value:
-- Returns non-zero if it is a digit character '0' ~ '9'.
-- Returns zero if it is not.
+- Returns non-zero if it is a digit character '0' through '9'
+- Returns zero if it is not
 For example:
 ```c
 isdigit('0');   // 非 0
@@ -27,8 +27,8 @@ isdigit('-');   // 0
 isdigit('\n');  // 0
 ```
 
-##### 2. `isdigit()` checks "characters", not "numbers"
-`isdigit()` can only check **a single character** at a time.
+##### 2. `isdigit()` checks for "characters", not "numbers"
+`isdigit()` checks only **one character** at a time.
 
 For example:
 ```c
@@ -40,7 +40,7 @@ isdigit('1')
 isdigit('2')
 isdigit('3')
 ```
-To determine whether an entire string consists of digits, you need to check it character by character:
+If you want to determine whether an entire string consists of digits, you need to check it character by character:
 ```c
 int i;
 
@@ -54,6 +54,6 @@ while (str[i])
 return (1);
 ```
 
-**`isdigit()` does not check for negative signs, nor does it check for decimal points**; anything that is not a digit character will return 0.
+**`isdigit()` does not check for negative signs or decimal points**; anything that is not a digit character will return 0.
 
 [[isalnum()]]

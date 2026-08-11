@@ -1,4 +1,4 @@
-`strlcpy` est une fonction utilisée pour **copier des chaînes de caractères en C**
+`strlcpy` est une fonction utilisée pour **copier des chaînes de caractères en C**.
 
 #### 1. Prototype
 
@@ -8,10 +8,10 @@
 size_t strlcpy(char *dst, const char *src, size_t size);
 ```
 La fonction a pour rôle de copier la chaîne pointée par `src` vers `dst`, d'écrire au maximum `size - 1` caractères, et de garantir que la chaîne cible se termine par `'\0'`.
-Elle retourne la longueur totale de src, c'est-à-dire strlen(src).
+Elle retourne la longueur complète de src, c'est-à-dire strlen(src).
 
 Pourquoi écrit-on au maximum `size - 1` caractères ?
-Parce que la dernière position est réservée pour '\0', c'est-à-dire que dst peut contenir size octets, mais il y a au maximum `size - 1` caractères.
+Parce que la dernière position est réservée à '\0', ce qui signifie que dst peut contenir size octets, mais qu'il y a au maximum `size - 1` caractères.
 
 ```
 ┌──────────────────────────────┐
@@ -30,7 +30,7 @@ Parce que la dernière position est réservée pour '\0', c'est-à-dire que dst 
 |`src`|`const char *`|Chaîne source|
 |`size`|`size_t`|Nombre maximal d'octets que `dst` peut contenir|
 
-Notez que le cas où size == 0 est un cas très particulier ; dans ce cas, `size - 1` n'a pas de sens, donc rien ne peut être écrit dans dst, y compris '\0', dst ne sera pas modifié, mais la fonction retourne tout de même strlen(src), c'est-à-dire la longueur de la chaîne source.
+Notez que lorsque size == 0, il s'agit d'un cas très particulier : `size - 1` n'a alors aucun sens, rien ne peut donc être écrit dans dst, y compris '\0', dst ne sera pas modifié, mais la fonction retourne tout de même strlen(src), c'est-à-dire la longueur de la chaîne source.
 
 ```
                  strlcpy(dst, src, size)
@@ -48,7 +48,7 @@ Notez que le cas où size == 0 est un cas très particulier ; dans ce cas, `size
                        返回 strlen(src)
 ```
 
-###### `strlcpy` copie `src` vers `size` d'une capacité de `dst`, en copiant au maximum `size - 1` caractères, et garantit de se terminer par `size > 0` lors de `'\0'` ; qu'il y ait troncature ou non, elle retourne la longueur totale de `src`
+###### `strlcpy` Copie `src` dans `size` d'une capacité de `dst`, en copiant au maximum `size - 1` caractères, et garantit de se terminer par `size > 0` lors de `'\0'` ; qu'il y ait troncature ou non, elle retourne la longueur complète de `src`
 Formule correspondante :
 ```
 size == 0
@@ -61,7 +61,7 @@ size > 0
     → return strlen(src)
 ```
 
-**Une méthode pratique pour déterminer s'il y a eu une troncature de chaîne :**
+**Une méthode pratique pour déterminer s'il y a eu troncature de chaîne :**
 ```
 if (strlcpy(dst, src, sizeof(dst)) >= sizeof(dst))
 {
@@ -71,7 +71,7 @@ if (strlcpy(dst, src, sizeof(dst)) >= sizeof(dst))
 `strlcpy(dst, src, sizeof(dst))` retourne `strlen(src)`, si :
 `strlen(src) >= sizeof(dst)`, cela indique que `src 的完整字符串长度>= dst 可容纳的空间`
 
-| Fonction        | Objet de l'opération | Se soucie de `'\0'` ? |  Limite la taille de la cible ? |
+| Fonction        | Objet manipulé | Se soucie de `'\0'` ? |  Limite la taille de la cible ? |
 | --------- | ---- | ----------: | --------: |
 | `strcpy`  | Chaîne  |           Oui |         Non |
 | `strlcpy` | Chaîne  |           Oui |         Oui |

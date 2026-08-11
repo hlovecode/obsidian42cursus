@@ -1,4 +1,4 @@
-Si l'argument transmis est une lettre minuscule anglaise `'a'`～`'z'`, elle est convertie en la lettre majuscule correspondante `'A'`～`'Z'` ; sinon, elle est renvoyée telle quelle.
+Si le caractère passé est une lettre alphabétique minuscule `'a'`～`'z'`, elle est convertie en sa majuscule correspondante `'A'`～`'Z'` ; sinon, elle est renvoyée telle quelle.
 
 #### 1. Prototype
 
@@ -7,13 +7,13 @@ Si l'argument transmis est une lettre minuscule anglaise `'a'`～`'z'`, elle est
 
 int toupper(int c);
 ```
-`toupper()` prend en paramètre `int` et renvoie également `int`
+`toupper()` prend un `int` en argument et retourne également un `int`
 
 #### 2. Pourquoi le type de retour est-il int ?
 
-Les fonctions de caractères dans `ctype.h` exigent généralement que l'argument puisse représenter :
-1. Une valeur `unsigned char`
-2. Ou la valeur spéciale `EOF`, `EOF` étant généralement défini comme une valeur `int` négative.
+Les fonctions sur les caractères de `ctype.h` exigent généralement que le paramètre puisse représenter :
+1. Une valeur de type `unsigned char`
+2. Ou la valeur spéciale `EOF`, `EOF` étant généralement défini comme une valeur entière négative `int`
 Par conséquent, on utilise int pour passer les caractères.
 
 [[tolower()]]

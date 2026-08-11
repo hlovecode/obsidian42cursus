@@ -7,8 +7,8 @@
 
 int isascii(int c);
 ```
-Son rôle est très simple : déterminer si le paramètre c appartient à la plage des caractères ASCII.
-La plage ASCII va de 0 à 127 (128 valeurs), soit en hexadécimal de 0x00 à 0x7F, c'est-à-dire :
+Son rôle est très simple : déterminer si le paramètre `c` appartient à la plage des caractères ASCII.
+La plage ASCII va de 0 à 127 (128 valeurs), c'est-à-dire de 0x00 à 0x7F en hexadécimal, soit :
 ```txt
 0
 │
@@ -32,7 +32,7 @@ La plage ASCII va de 0 à 127 (128 valeurs), soit en hexadécimal de 0x00 à 0x7
 │
 └── 127           DEL
 ```
-Par conséquent, 0 <= paramètre c <= 127 correspond à l'ASCII.
+Par conséquent, tout paramètre `c` tel que `0 <= c <= 127` est un caractère ASCII.
 
 #### 2. ASCII ne signifie pas caractère imprimable, il comprend également un grand nombre de caractères non imprimables
 
@@ -57,4 +57,4 @@ ASCII
        └── 控制字符
 ```
 
-`isascii()` est souvent utilisé pour vérifier si une chaîne de caractères ne contient que des caractères ASCII, en vérifiant simplement si la valeur numérique se situe dans la plage ASCII, c'est-à-dire de 0 à 127.
+`isascii()` est souvent utilisé pour vérifier si une chaîne de caractères ne contient que des caractères ASCII, en vérifiant simplement si la valeur numérique se situe dans la plage ASCII, c'est-à-dire entre 0 et 127.

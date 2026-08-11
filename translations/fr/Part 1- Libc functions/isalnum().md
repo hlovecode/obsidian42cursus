@@ -1,4 +1,4 @@
-`isalnum()` est une **fonction de classification de caractères** très fondamentale et couramment utilisée de la bibliothèque standard C `<ctype.h>`, servant à déterminer si un caractère est une lettre ou un chiffre.
+`isalnum()` est une **fonction de classification de caractères** très basique et très couramment utilisée de la bibliothèque standard C `<ctype.h>`, servant à déterminer si un caractère est une lettre ou un chiffre.
 
 #### 1. Prototype
 
@@ -14,7 +14,7 @@ a-z
 0-9
 ```
 - Si c'est une lettre ou un chiffre, elle retourne une valeur non nulle.
-- Si ce n'est ni l'un ni l'autre, elle retourne 0.
+- Sinon, elle retourne 0.
 
 **Relation entre `isalnum` et `isalpha`, `isdigit`** :
 ```txt
@@ -27,7 +27,7 @@ isalnum 判断是不是字母或数字
          └── 0-9
 ```
 
-#### 2. isalnum ne considère ni le tiret bas _, ni les nombres négatifs
+#### 2. isalnum ne prend pas en compte le tiret bas _, ni les nombres négatifs
 
 ```c
 isalnum('_') // 不是字母和数字，返回0

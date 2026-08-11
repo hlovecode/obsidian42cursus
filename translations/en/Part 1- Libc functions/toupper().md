@@ -1,4 +1,4 @@
-If a lowercase English letter `'a'` through `'z'` is passed in, convert it to the corresponding uppercase letter `'A'` through `'Z'`; otherwise, return it unchanged.
+If a lowercase English letter `'a'` to `'z'` is passed, convert it to the corresponding uppercase letter `'A'` to `'Z'`; otherwise, return it unchanged.
 
 #### 1. Prototype
 
@@ -7,13 +7,13 @@ If a lowercase English letter `'a'` through `'z'` is passed in, convert it to th
 
 int toupper(int c);
 ```
-`toupper()` accepts an `int`, and also returns an `int`
+`toupper()` accepts `int` and also returns `int`
 
 #### 2. Why is the return type int?
 
 Character functions in `ctype.h` typically require the parameter to be able to represent:
-1. A valid `unsigned char` value
+1. A `unsigned char` value
 2. Or the special value `EOF`, where `EOF` is generally defined as a negative `int` value
-Therefore, ___int___ is used to pass characters.
+Therefore, int is used to pass characters
 
 [[tolower()]]

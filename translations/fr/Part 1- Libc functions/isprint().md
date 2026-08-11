@@ -6,7 +6,7 @@
 
 int isprint(int c);
 ```
-Son rôle est de déterminer si le paramètre c est un caractère pouvant être affiché normalement.
+Son rôle est de déterminer si le paramètre c est un caractère pouvant être affiché et imprimé normalement.
 - S'il s'agit d'un caractère imprimable, retourne une valeur non nulle.
 - Sinon, retourne 0.
 
@@ -21,7 +21,7 @@ Les caractères ASCII sont grossièrement divisés en :
 Par conséquent, la plage de vérification de `isprint()` va de 32 à 126, c'est-à-dire 32 <= paramètre c <= 126.
 
 #### 3. L'espace ' ' est également un caractère imprimable
-Parce que la valeur ASCII de l'espace est 32 ; bien qu'il n'ait pas de représentation graphique, il peut être matérialisé sur un terminal ou un écran.
+Parce que la valeur ASCII de l'espace est 32, et bien qu'il n'ait pas de représentation graphique, il peut être matérialisé sur un terminal ou un écran.
 
-#### 4. Pourquoi les codes 0 à 31 de l'ASCII ne sont-ils pas imprimables ?
-0 à 31 sont des caractères de contrôle. Leur rôle n'est pas d'afficher un symbole ordinaire, mais de contrôler le terminal, le curseur, les sauts de ligne, etc.
+#### 4. Pourquoi les caractères de 0 à 31 ne sont-ils pas imprimables en ASCII ?
+Les caractères de 0 à 31 sont des caractères de contrôle. Leur rôle n'est pas d'afficher un symbole ordinaire, mais de contrôler le terminal, le curseur, les sauts de ligne, etc.
