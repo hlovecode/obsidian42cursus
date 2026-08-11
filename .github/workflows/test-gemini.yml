@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Translate Chinese to English
+      - name: Translate Chinese to French
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
@@ -24,7 +24,7 @@ jobs:
                 {
                   "parts": [
                     {
-                      "text": "Translate the following Chinese sentence into natural English. Return only the translation, without explanations:\n\nC语言中的字符串以空字符结尾。"
+                      "text": "Translate the following Chinese sentence into natural French. Return only the translation, without explanations:\n\nC语言中的字符串以空字符结尾。"
                     }
                   ]
                 }
