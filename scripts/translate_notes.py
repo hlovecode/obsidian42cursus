@@ -1,13 +1,21 @@
 import os
 import re
 import json
+import time
+import random
 import urllib.request
+import urllib.error
 
 
 API_KEY = os.environ["GEMINI_API_KEY"]
 MODEL = "gemini-3.5-flash-lite"
+
 SOURCE_DIR = "Libft"
 TRANSLATION_DIR = "translations"
+
+MAX_RETRIES = 5
+BASE_DELAY = 2
+REQUEST_DELAY = 2
 
 
 def protect_markdown(text):
@@ -25,7 +33,10 @@ def protect_markdown(text):
 
 def restore_markdown(text, protected):
     for i, value in enumerate(protected):
-        text = text.replace(f"___PROTECTED_{i}___", value)
+        text = text.replace(
+            f"___PROTECTED_{i}___",
+            value
+        )
 
     return text
 
@@ -36,9 +47,41 @@ def find_markdown_files():
     for root, dirs, filenames in os.walk(SOURCE_DIR):
         for filename in filenames:
             if filename.endswith(".md"):
-                files.append(os.path.join(root, filename))
+                files.append(
+                    os.path.join(root, filename)
+                )
 
     return sorted(files)
+
+
+def get_translation_path(source_file, language):
+    relative_path = os.path.relpath(
+        source_file,
+        SOURCE_DIR
+    )
+
+    if language == "English":
+        language_dir = "en"
+    else:
+        language_dir = "fr"
+
+    return os.path.join(
+        TRANSLATION_DIR,
+        language_dir,
+        relative_path
+    )
+
+
+def file_needs_translation(source_file, translation_file):
+    if not os.path.exists(translation_file):
+        return True
+
+    source_mtime = os.path.getmtime(source_file)
+    translation_mtime = os.path.getmtime(
+        translation_file
+    )
+
+    return source_mtime > translation_mtime
 
 
 def translate(text, language):
@@ -46,12 +89,19 @@ def translate(text, language):
 
 Important rules:
 - Return only the translated Markdown.
-- Preserve all Markdown structure.
+- Preserve all Markdown structure exactly.
 - Do not add explanations.
 - Do not translate placeholders such as ___PROTECTED_0___.
-- Keep the original meaning accurate.
+- Keep all placeholders unchanged.
+- Keep URLs unchanged.
+- Keep inline code unchanged.
+- Keep fenced code blocks unchanged.
+- Keep C source code unchanged.
+- Keep Markdown links unchanged.
+- Keep headings, lists, tables and emphasis.
+- Preserve the original meaning accurately.
 - This is a technical programming note.
-- Preserve C programming terminology accurately.
+- Use accurate C programming terminology.
 
 Text:
 
@@ -75,73 +125,204 @@ Text:
         ]
     }
 
-    request = urllib.request.Request(
-        url,
-        data=json.dumps(data).encode("utf-8"),
-        headers={"Content-Type": "application/json"},
-        method="POST",
-    )
+    request_data = json.dumps(data).encode("utf-8")
 
-    with urllib.request.urlopen(request) as response:
-        result = json.loads(response.read().decode("utf-8"))
+    for attempt in range(MAX_RETRIES):
+        try:
+            request = urllib.request.Request(
+                url,
+                data=request_data,
+                headers={
+                    "Content-Type": "application/json"
+                },
+                method="POST"
+            )
 
-    return result["candidates"][0]["content"]["parts"][0]["text"]
+            with urllib.request.urlopen(
+                request,
+                timeout=120
+            ) as response:
+                result = json.loads(
+                    response.read().decode("utf-8")
+                )
 
+            return result[
+                "candidates"
+            ][0][
+                "content"
+            ][
+                "parts"
+            ][0][
+                "text"
+            ]
 
-def get_translation_path(source_file, language):
-    relative_path = os.path.relpath(source_file, SOURCE_DIR)
+        except urllib.error.HTTPError as error:
+            if error.code not in (
+                408,
+                429,
+                500,
+                502,
+                503,
+                504
+            ):
+                raise
 
-    if language == "English":
-        language_dir = "en"
-    else:
-        language_dir = "fr"
+            if attempt == MAX_RETRIES - 1:
+                raise
 
-    return os.path.join(
-        TRANSLATION_DIR,
-        language_dir,
-        relative_path
-    )
+            delay = (
+                BASE_DELAY * (2 ** attempt)
+                + random.uniform(0, 1)
+            )
+
+            print(
+                f"  HTTP {error.code}. "
+                f"Retrying in {delay:.1f}s..."
+            )
+
+            time.sleep(delay)
+
+        except urllib.error.URLError:
+            if attempt == MAX_RETRIES - 1:
+                raise
+
+            delay = (
+                BASE_DELAY * (2 ** attempt)
+                + random.uniform(0, 1)
+            )
+
+            print(
+                f"  Network error. "
+                f"Retrying in {delay:.1f}s..."
+            )
+
+            time.sleep(delay)
 
 
 def translate_file(source_file):
-    print(f"\nTranslating: {source_file}")
+    english_file = get_translation_path(
+        source_file,
+        "English"
+    )
 
-    with open(source_file, "r", encoding="utf-8") as file:
+    french_file = get_translation_path(
+        source_file,
+        "French"
+    )
+
+    english_needed = file_needs_translation(
+        source_file,
+        english_file
+    )
+
+    french_needed = file_needs_translation(
+        source_file,
+        french_file
+    )
+
+    if not english_needed and not french_needed:
+        print(
+            f"SKIP: {source_file}"
+        )
+        return
+
+    print(
+        f"\nPROCESS: {source_file}"
+    )
+
+    with open(
+        source_file,
+        "r",
+        encoding="utf-8"
+    ) as file:
         original = file.read()
 
-    protected_text, protected = protect_markdown(original)
+    protected_text, protected = protect_markdown(
+        original
+    )
 
-    english = translate(protected_text, "English")
-    french = translate(protected_text, "French")
+    if english_needed:
+        print("  Translating -> English")
 
-    english = restore_markdown(english, protected)
-    french = restore_markdown(french, protected)
+        english = translate(
+            protected_text,
+            "English"
+        )
 
-    english_file = get_translation_path(source_file, "English")
-    french_file = get_translation_path(source_file, "French")
+        english = restore_markdown(
+            english,
+            protected
+        )
 
-    os.makedirs(os.path.dirname(english_file), exist_ok=True)
-    os.makedirs(os.path.dirname(french_file), exist_ok=True)
+        os.makedirs(
+            os.path.dirname(english_file),
+            exist_ok=True
+        )
 
-    with open(english_file, "w", encoding="utf-8") as file:
-        file.write(english)
+        with open(
+            english_file,
+            "w",
+            encoding="utf-8"
+        ) as file:
+            file.write(english)
 
-    with open(french_file, "w", encoding="utf-8") as file:
-        file.write(french)
+        print(
+            f"  Saved: {english_file}"
+        )
 
-    print(f"  English -> {english_file}")
-    print(f"  French  -> {french_file}")
+        time.sleep(REQUEST_DELAY)
+    else:
+        print(
+            "  English already up to date"
+        )
+
+    if french_needed:
+        print("  Translating -> French")
+
+        french = translate(
+            protected_text,
+            "French"
+        )
+
+        french = restore_markdown(
+            french,
+            protected
+        )
+
+        os.makedirs(
+            os.path.dirname(french_file),
+            exist_ok=True
+        )
+
+        with open(
+            french_file,
+            "w",
+            encoding="utf-8"
+        ) as file:
+            file.write(french)
+
+        print(
+            f"  Saved: {french_file}"
+        )
+    else:
+        print(
+            "  French already up to date"
+        )
 
 
 def main():
     files = find_markdown_files()
 
-    print(f"Found {len(files)} Markdown files.")
+    print(
+        f"Found {len(files)} Markdown files."
+    )
 
     for source_file in files:
         translate_file(source_file)
 
-    print("\nTranslation completed.")
+    print(
+        "\nTranslation process completed."
+    )
 
 
 if __name__ == "__main__":
