@@ -320,6 +320,58 @@ Text:
             time.sleep(delay)
 
 
+def cleanup_deleted_files(
+    source_files,
+    hashes
+):
+    source_set = set()
+
+    for source_file in source_files:
+        relative_path = os.path.relpath(
+            source_file,
+            SOURCE_DIR
+        )
+
+        source_set.add(relative_path)
+
+    deleted_paths = []
+
+    for relative_path in list(hashes):
+        if relative_path not in source_set:
+            deleted_paths.append(
+                relative_path
+            )
+
+    for relative_path in deleted_paths:
+        english_file = os.path.join(
+            TRANSLATION_DIR,
+            "en",
+            relative_path
+        )
+
+        french_file = os.path.join(
+            TRANSLATION_DIR,
+            "fr",
+            relative_path
+        )
+
+        if os.path.exists(english_file):
+            os.remove(english_file)
+
+            print(
+                f"DELETE: {english_file}"
+            )
+
+        if os.path.exists(french_file):
+            os.remove(french_file)
+
+            print(
+                f"DELETE: {french_file}"
+            )
+
+        del hashes[relative_path]
+
+
 def translate_file(
     source_file,
     hashes
@@ -474,6 +526,11 @@ def main():
 
     print(
         f"Found {len(files)} Markdown files."
+    )
+
+    cleanup_deleted_files(
+        files,
+        hashes
     )
 
     for source_file in files:
