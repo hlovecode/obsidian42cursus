@@ -47,6 +47,7 @@ def protect_markdown(text):
 def restore_markdown(text, protected):
     for i, value in enumerate(protected):
         placeholder = f"___PROTECTED_{i}___"
+
         text = text.replace(
             placeholder,
             value
@@ -61,9 +62,14 @@ def find_markdown_files():
     excluded_dirs = {
         ".git",
         ".github",
+        ".obsidian",
         "translations",
         "scripts",
-        ".obsidian"
+        "docs",
+        "site",
+        ".venv-pages",
+        ".venv",
+        "__pycache__"
     }
 
     for root, dirs, filenames in os.walk("."):
@@ -85,6 +91,11 @@ def find_markdown_files():
             source_file = os.path.normpath(
                 source_file
             )
+
+            if source_file.startswith(
+                f"{TRANSLATION_DIR}{os.sep}"
+            ):
+                continue
 
             files.append(source_file)
 
