@@ -33,5 +33,34 @@ strrchr(str, 'o'); // return last occurrence, o in world
 
 `strrchr` 的一个重要特点是它会搜索 '\0', 也就是它会返回字符串结束符 '\0' 的地址.
 
+#### 4. `strrchr` 的常用场景是 ”获取文件扩展名“
 
+例1：`strrchr` 在处理文件路径，文件名时非常常见
 
+```c
+char *filename = "document.txt";
+
+char *p = strrchr(filename, '.');
+```
+
+结果指针 p 指向 document.txt 的 `.txt`，所以：
+
+```c
+printf("%s\n", p); // .txt
+```
+
+例2：再看一个路径例子, 我们想找到最后一个 `/`, 可以：
+
+```c
+char *path = "/Users/lee/project/main.c";
+
+char *p = strrchr(path, '/');
+```
+
+p 指向字符串 ”/Users/lee/project/main.c" 的最后一个 `/`, 那么：
+
+```c
+printf("%s\n", p + 1);
+```
+
+得到 `main.c`
