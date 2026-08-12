@@ -11,7 +11,6 @@ import urllib.error
 API_KEY = os.environ["GEMINI_API_KEY"]
 MODEL = "gemini-3.5-flash-lite"
 
-SOURCE_DIR = "Libft"
 TRANSLATION_DIR = "translations"
 HASH_FILE = os.path.join(
     TRANSLATION_DIR,
@@ -30,16 +29,26 @@ def protect_markdown(text):
         protected.append(match.group(0))
         return f"___PROTECTED_{len(protected) - 1}___"
 
-    pattern = r"```[\s\S]*?```|`[^`\n]+`|https?://[^\s)]+"
-    text = re.sub(pattern, replace, text)
+    pattern = (
+        r"```[\s\S]*?```"
+        r"|`[^`\n]+`"
+        r"|https?://[^\s)]+"
+    )
+
+    text = re.sub(
+        pattern,
+        replace,
+        text
+    )
 
     return text, protected
 
 
 def restore_markdown(text, protected):
     for i, value in enumerate(protected):
+        placeholder = f"___PROTECTED_{i}___"
         text = text.replace(
-            f"___PROTECTED_{i}___",
+            placeholder,
             value
         )
 
@@ -49,12 +58,35 @@ def restore_markdown(text, protected):
 def find_markdown_files():
     files = []
 
-    for root, dirs, filenames in os.walk(SOURCE_DIR):
+    excluded_dirs = {
+        ".git",
+        ".github",
+        "translations",
+        "scripts",
+        ".obsidian"
+    }
+
+    for root, dirs, filenames in os.walk("."):
+        dirs[:] = [
+            directory
+            for directory in dirs
+            if directory not in excluded_dirs
+        ]
+
         for filename in filenames:
-            if filename.endswith(".md"):
-                files.append(
-                    os.path.join(root, filename)
-                )
+            if not filename.endswith(".md"):
+                continue
+
+            source_file = os.path.join(
+                root,
+                filename
+            )
+
+            source_file = os.path.normpath(
+                source_file
+            )
+
+            files.append(source_file)
 
     return sorted(files)
 
@@ -62,7 +94,7 @@ def find_markdown_files():
 def get_translation_path(source_file, language):
     relative_path = os.path.relpath(
         source_file,
-        SOURCE_DIR
+        "."
     )
 
     if language == "English":
@@ -157,6 +189,7 @@ def translate(text, language):
     prompt = f"""Translate the following Markdown text into {language}.
 
 Important rules:
+
 - Return only the translated Markdown.
 - Preserve all Markdown structure exactly.
 - Do not add explanations.
@@ -194,9 +227,9 @@ Text:
         ]
     }
 
-    request_data = json.dumps(data).encode(
-        "utf-8"
-    )
+    request_data = json.dumps(
+        data
+    ).encode("utf-8")
 
     for attempt in range(MAX_RETRIES):
         try:
@@ -213,16 +246,21 @@ Text:
                 request,
                 timeout=120
             ) as response:
-                response_text = response.read().decode(
-                    "utf-8"
+                response_text = (
+                    response
+                    .read()
+                    .decode("utf-8")
                 )
 
-            result = json.loads(response_text)
+            result = json.loads(
+                response_text
+            )
 
             if "error" in result:
                 print(
                     "  Gemini API error:"
                 )
+
                 print(
                     json.dumps(
                         result["error"],
@@ -329,7 +367,7 @@ def cleanup_deleted_files(
     for source_file in source_files:
         relative_path = os.path.relpath(
             source_file,
-            SOURCE_DIR
+            "."
         )
 
         source_set.add(relative_path)
@@ -401,7 +439,7 @@ def translate_file(
 
     relative_path = os.path.relpath(
         source_file,
-        SOURCE_DIR
+        "."
     )
 
     current_hash = calculate_hash(
@@ -434,8 +472,8 @@ def translate_file(
         f"\nPROCESS: {source_file}"
     )
 
-    protected_text, protected = protect_markdown(
-        original
+    protected_text, protected = (
+        protect_markdown(original)
     )
 
     if (
@@ -473,6 +511,7 @@ def translate_file(
         )
 
         time.sleep(REQUEST_DELAY)
+
     else:
         print(
             "  English already exists"
@@ -511,6 +550,7 @@ def translate_file(
         print(
             f"  Saved: {french_file}"
         )
+
     else:
         print(
             "  French already exists"
@@ -539,13 +579,16 @@ def main():
                 source_file,
                 hashes
             )
+
         except Exception as error:
             print(
                 f"\nERROR: {source_file}"
             )
+
             print(
                 f"  {error}"
             )
+
             continue
 
     save_hashes(hashes)

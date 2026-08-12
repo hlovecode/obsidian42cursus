@@ -1,1 +1,0 @@
-Ceci est un test de traduction incrémentielle SHA-256.

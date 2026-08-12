@@ -1,0 +1,42 @@
+`memcpy`: Copies the contents of one memory block to another.
+
+#### 1. Prototype
+
+```c
+#include <string.h>
+
+void	*memcpy(void *dest, const void *src, size_t n);
+```
+Its purpose is to copy `n` bytes from the memory area pointed to by `src` to the memory area pointed to by `dest`.
+This can be understood as:
+```txt
+src  ──────────────► 读取
+                      │
+                      │ n 个 byte
+                      ▼
+dest ──────────────► 写入
+```
+Returns the starting address of the destination memory area.
+
+Note that this function is not specifically designed for copying strings; it does not care about what the data is. Essentially, it is a byte-by-byte copy of raw memory, which is also why it can copy structs—it copies the entire memory occupied by the struct.
+
+#### 2. Function Parameters
+
+Reads `n` bytes starting from `src`, and then writes them to `dest`.
+
+|Parameter|Meaning|
+|---|---|
+|`dest`|destination, target address|
+|`src`|source, source address|
+|`n`|Number of bytes to copy|
+- dest: The starting address of the destination memory area
+- src: The starting address of the source memory area; const void \*src indicates that the data pointed to by src cannot be modified within this function
+
+#### 3. Precautions
+
+- memcpy does not automatically append '\0'
+- memcpy cannot handle overlapping memory; that is, it cannot handle situations where the source and destination regions might overlap. It is `undefined behavoir`. To handle overlapping memory, use `memmove()`
+- When n = 0, i.e., memcpy(dest, src, 0), 0 bytes are copied, so no actual data is copied, but the function still returns dest
+- dest and src must have sufficient space, which is a very important security concern.
+
+[[strlcpy()]]
