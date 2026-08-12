@@ -98,7 +98,7 @@ def create_homepage():
 
 ### <span style="color: #668F80; font-weight: bold;">Welcome to my 42 Common Core learning notes -- Hua</span>
 
-## Languages
+## <span style="color: #607D8B; font-weight: bold;">Languages</span>
 
 - [中文](zh/index.md)
 - [English](en/index.md)
