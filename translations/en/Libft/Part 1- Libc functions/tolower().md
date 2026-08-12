@@ -8,4 +8,6 @@
 int tolower(int c);
 ```
 
+Test: automatic translation and deployment
+
 [[toupper()]]
