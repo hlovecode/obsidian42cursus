@@ -1,4 +1,4 @@
-`strchr` serves a very simple purpose: it searches for the first occurrence of a specific character in a string from beginning to end.
+`strchr` serves a very simple purpose: it searches for the first occurrence of a specific character within a string from beginning to end.
 
 #### Prototype
 
@@ -7,11 +7,11 @@
 
 char *strchr(const char *s, int c);
 ```
-`strchr` **does not return the character itself**, but instead returns: 
-- If the character is found, it returns the **address** of that character in the string. 
-- If the character is not found, it returns `NULL` (0). 
+`strchr` **does not return the character itself**, but instead returns:
+- If the character is found while searching from left to right, it returns the **address** of this character within the string.
+- If the character is not found, it returns `NULL` (0).
 
-`strchr` reads the string, but does not modify the string's contents.
+`strchr` reads the string, but does not modify the string's content.
 
 ```
 从字符串的第一个字符开始

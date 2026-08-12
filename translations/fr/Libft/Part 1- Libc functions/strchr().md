@@ -1,4 +1,4 @@
-`strchr` a un rôle très simple : il cherche la première occurrence d'un caractère dans une chaîne de caractères, du début à la fin.
+`strchr` a un rôle très simple : il cherche la première occurrence d'un caractère donné dans une chaîne de caractères, du début à la fin.
 
 #### Prototype
 
@@ -7,9 +7,9 @@
 
 char *strchr(const char *s, int c);
 ```
-`strchr` **ne renvoie pas le caractère lui-même**, mais : 
-- Si le caractère est trouvé, il renvoie son **adresse** dans la chaîne. 
-- S'il n'est pas trouvé, il renvoie NULL (0). 
+`strchr` **ne renvoie pas le caractère lui-même**, mais renvoie : 
+- Si le caractère est trouvé en cherchant de gauche à droite, il renvoie l'**adresse** de ce caractère dans la chaîne. 
+- Si le caractère n'est pas trouvé, il renvoie NULL (0). 
 
 `strchr` lit la chaîne de caractères, mais ne modifie pas son contenu.
 
