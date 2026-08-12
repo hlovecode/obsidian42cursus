@@ -1,4 +1,4 @@
-This is where the `Libft` project truly needs to be mastered.
+This is where the `Libft` project really needs to be mastered.
 
 A typical Makefile:
 ```Makefile
@@ -47,7 +47,7 @@ is responsible for:
 ```Makefile
 .o → libft.a
 ```
-Therefore, the entire logic of the Makefile:
+So the overall logic of the Makefile:
 ```Makefile
                 cc
 .c ─────────────────────→ .o
@@ -58,7 +58,7 @@ Therefore, the entire logic of the Makefile:
                          libft.a
 ```
 
-`ar` mainly handles `archive` members, which is `.o`, and the C source code `.c` needs to be compiled via `cc` first, so it should be:
+`ar` mainly deals with `archive` members, which is `.o`, and the C source code `.c` needs to be compiled via `cc` first, so it should be:
 ```bash
 .c
  ↓ cc
@@ -66,7 +66,7 @@ Therefore, the entire logic of the Makefile:
  ↓ ar
 .a
 ```
-instead of:
+Instead of:
 ```bash
 .c
  ↓ ar
@@ -93,7 +93,7 @@ To get:
 libft.a
 ```
 
-3. View what is inside a static library:
+3. View the contents of a static library:
 ```bash
 ar -t libft.a
 ```
@@ -143,4 +143,4 @@ You can understand `Libft` as:
               └──────────────┘
 ```
 
-**`cc` compiles `.c` into `.o`; `ar` organizes multiple `.o` into a `.a` static library; finally, the linker extracts the code needed by the program from `.a` to generate the executable file.**
+**`cc` compiles `.c` into `.o`; `ar` organizes multiple `.o` into the `.a` static library; finally, the linker extracts the code needed by the program from `.a` to generate the executable file.**

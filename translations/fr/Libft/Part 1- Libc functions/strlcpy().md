@@ -1,4 +1,4 @@
-`strlcpy` est une fonction utilisée pour **copier des chaînes de caractères en C**.
+`strlcpy` est une fonction utilisée pour **copier des chaînes de caractères C**
 
 #### 1. Prototype
 
@@ -7,11 +7,11 @@
 
 size_t strlcpy(char *dst, const char *src, size_t size);
 ```
-La fonction a pour rôle de copier la chaîne pointée par `src` vers `dst`, en écrivant au maximum `size - 1` caractères, et en garantissant que la chaîne de destination se termine par `'\0'`.
-Elle renvoie la longueur totale de src, c'est-à-dire strlen(src).
+La fonction a pour rôle de copier la chaîne pointée par `src` vers `dst`, en écrivant au maximum `size - 1` caractères, et en garantissant que la chaîne de caractères cible se termine par `'\0'`.
+Elle retourne la longueur totale de src, c'est-à-dire strlen(src).
 
 Pourquoi écrit-on au maximum `size - 1` caractères ?
-Parce que la dernière position est réservée à '\0', ce qui signifie que dst peut contenir size octets, mais qu'il y a au plus `size - 1` caractères.
+Parce que la dernière position est réservée à '\0', ce qui signifie que dst peut contenir size octets, mais le nombre maximal de caractères est `size - 1`.
 
 ```
 ┌──────────────────────────────┐
@@ -26,11 +26,25 @@ Parce que la dernière position est réservée à '\0', ce qui signifie que dst 
 
 |Paramètre|Type|Signification|
 |---|---|---|
-|`dst`|`char *`|Chaîne de destination|
+|`dst`|`char *`|Chaîne cible|
 |`src`|`const char *`|Chaîne source|
 |`size`|`size_t`|Nombre maximal d'octets que `dst` peut contenir|
 
-Notez que le cas où size == 0 est très particulier : dans ce cas, `size - 1` n'a pas de sens, donc rien ne peut être écrit dans dst, y compris '\0', dst ne sera pas modifié, mais la fonction renvoie tout de même strlen(src), c'est-à-dire la longueur de la chaîne source.
+Notez que le cas où size == 0 est très particulier : dans ce cas, ```
+                 strlcpy(dst, src, size)
+                              │
+                 ┌────────────┴────────────┐
+                 │                         │
+              size == 0                size > 0
+                 │                         │
+              不写任何东西            最多写 size-1 字符
+                 │                         │
+                 │                    最后写 '\0'
+                 │
+                 └────────────┬────────────┘
+                              ↓
+                       返回 strlen(src)
+``` n'a plus de sens, donc rien ne peut être écrit dans dst, y compris '\0', dst ne sera pas modifié, mais la fonction retourne tout de même strlen(src), c'est-à-dire la longueur de la chaîne source.
 
 ```
                  strlcpy(dst, src, size)
@@ -48,7 +62,7 @@ Notez que le cas où size == 0 est très particulier : dans ce cas, `size - 1` n
                        返回 strlen(src)
 ```
 
-###### `strlcpy` Copie `src` dans `dst` d'une capacité de `size`, en copiant au maximum `size - 1` caractères, et garantit une terminaison par `size > 0` si `'\0'` ; qu'il y ait troncature ou non, renvoie la longueur totale de `src`
+###### `strlcpy` copie `src` dans `dst` d'une capacité de `size`, en copiant au maximum `size - 1` caractères, et garantit de se terminer par `size > 0` lors de `'\0'` ; qu'il y ait troncature ou non, elle retourne la longueur totale de `src`
 Formule correspondante :
 ```
 size == 0
@@ -68,14 +82,14 @@ if (strlcpy(dst, src, sizeof(dst)) >= sizeof(dst))
     /* 被截断 */
 }
 ```
-`strlcpy(dst, src, sizeof(dst))` renvoie `strlen(src)`, si :
+`strlcpy(dst, src, sizeof(dst))` retourne `strlen(src)`, si :
 `strlen(src) >= sizeof(dst)`, cela indique que `src 的完整字符串长度>= dst 可容纳的空间`
 
-| Fonction        | Objet de l'opération | Se soucie-t-elle de `'\0'` ? |  Limite-t-elle la taille de la destination ? |
+| Fonction        | Objet manipulé | Se soucie de `'\0'` ? |  Limite la taille de la cible ? |
 | --------- | ---- | ----------: | --------: |
 | `strcpy`  | Chaîne de caractères  |           Oui |         Non |
 | `strlcpy` | Chaîne de caractères  |           Oui |         Oui |
-| `memcpy`  | Mémoire arbitraire |           Non | Contrôlé par `n` |
+| `memcpy`  | Mémoire arbitraire |           Non | Contrôlé via `n` |
 ```
 strcpy  => 复制字符串，不管目标大小
 

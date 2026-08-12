@@ -1,4 +1,4 @@
-`memmove` est une fonction de manipulation de mémoire au niveau de l'octet, qui copie `n` octets d'une zone mémoire vers une autre, et ce, de manière correcte même si les zones source et destination se chevauchent.
+`memmove` est une fonction de manipulation de mémoire au niveau de l'octet, qui copie `n` octets d'une zone mémoire vers une autre, et ce de manière correcte même si les zones source et destination se chevauchent.
 
 #### 1. Prototype
 

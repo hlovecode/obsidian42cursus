@@ -9,9 +9,9 @@ char *strchr(const char *s, int c);
 ```
 `strchr` **does not return the character itself**, but instead returns: 
 - If the character is found, it returns the **address** of that character in the string. 
-- If the character is not found, it returns NULL (0). 
+- If the character is not found, it returns `NULL` (0). 
 
-`strchr` reads the string, but does not modify its contents.
+`strchr` reads the string, but does not modify the string's contents.
 
 ```
 从字符串的第一个字符开始

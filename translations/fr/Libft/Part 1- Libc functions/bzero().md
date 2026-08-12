@@ -1,4 +1,4 @@
-`bzero` est une fonction utilisée pour **définir une zone de mémoire entière à `0`**.
+`bzero` est une fonction utilisée pour **remplir une zone de mémoire avec `0`**.
 
 #### 1. Prototype
 ```c
@@ -6,10 +6,10 @@
  
 void	bzero(void *s, size_t n);
 ```
-Son rôle est de commencer à partir de l'adresse mémoire pointée par `s`, et de définir les `n` octets consécutifs à `0`.
-Elle n'a pas de valeur de retour, elle effectue simplement une opération de modification de la mémoire.
+Son rôle est, à partir de l'adresse mémoire pointée par `s`, de définir `n` octets consécutifs à la valeur `0`.
+Elle ne renvoie aucune valeur, elle effectue simplement une opération de modification de la mémoire.
 
-Exemple explicatif :
+Exemple illustratif :
 ```c
 char str[10] = "abcdef";
 
@@ -41,16 +41,16 @@ bzero(str, 3);
 即从 `str` 开始的3个byte被清零
 ```
 
-Le sens de la fonction est de commencer à partir de l'adresse `s`, d'accéder à `n` octets consécutifs, et d'écrire chaque octet à `0x00`
+Le sens de la fonction est de commencer à l'adresse `s`, d'accéder à `n` octets consécutifs, et d'écrire chaque octet avec `0x00`.
 
 #### 2. Comprendre les paramètres de la fonction
 
-1. `size_t n` représente l'adresse d'un objet de type quelconque.
+1. `void *` représente l'adresse d'un objet de type quelconque.
 
-2. `size_t n` représente le nombre d'octets à effacer (mettre à zéro).
-Attention, il ne s'agit pas du nombre d'éléments, mais du nombre d'octets.
+2. `size_t n` représente le nombre d'octets à mettre à zéro.
+Attention, il ne s'agit pas du nombre d'éléments, mais bien du nombre d'octets.
 
-**Le sens fondamental de la fonction est `bzero(起始地址，字节数量)`**
+**Le sens fondamental de la fonction est `bzero(起始地址，字节数量)`.**
 
 #### 3. Attention particulière : bzero fonctionne par octet
 Exemple :
@@ -67,7 +67,7 @@ tab[2] = 0
 tab[3] = 0
 tab[4] = 0
 ```
-Mais cela efface seulement les 5 premiers octets. En supposant qu'un `int` = 4 octets, alors :
+Mais cela met uniquement à zéro les 5 premiers octets. En supposant qu'un `int` fait 4 octets, alors :
 ```c
 tab:
 
@@ -88,7 +88,7 @@ L'exécution de `bzero(tab, 5);` donnera seulement :
 ^^^^^^^^^^^^^^
   5 bytes
 ```
-C'est-à-dire que cela efface complètement uniquement `tab[0]`, puis efface le premier octet de `tab[1]`, ce qui n'est pas l'effet escompté.
+C'est-à-dire que cela efface complètement `tab[0]`, puis efface le premier octet de `tab[1]`, ce qui n'est pas le résultat attendu.
 Par conséquent, la bonne écriture est :
 ```c
 bzero(tab, sizeof(tab));
@@ -98,6 +98,6 @@ bzero(tab, sizeof(tab));
 
 Son utilisation la plus typique est de mettre la mémoire à zéro.
 
-Cependant, notez que cette fonction n'est pas une « suppression de données », elle ne libère pas la mémoire, elle modifie seulement le contenu de la mémoire spécifiée. Bien que la mémoire soit mise à zéro (définie à 0), elle reste occupée.
+Cependant, notez que cette fonction ne « supprime » pas les données et ne libère pas la mémoire ; elle modifie simplement le contenu de la mémoire spécifiée. Bien que la mémoire soit mise à zéro, ce qui signifie que la zone de mémoire est définie à 0, elle reste occupée.
 
 [[memset()]]

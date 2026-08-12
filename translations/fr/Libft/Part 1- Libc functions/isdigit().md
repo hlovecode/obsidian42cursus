@@ -1,19 +1,19 @@
 `isdigit()` est une fonction de la bibliothèque standard C `<ctype.h>` utilisée pour **déterminer si un caractère est un chiffre décimal**.
-`isdigit()` évalue strictement la plage suivante :
+La plage évaluée par `isdigit()` est strictement :
 ```c
 '0' '1' '2' '3' '4' '5' '6' '7' '8' '9'
 ```
-C'est-à-dire les codes ASCII : 48 à 57
+C'est-à-dire en ASCII : 48 à 57.
 ##### 1. Prototype
 ```c
 #include <ctype.h> 
 
 int isdigit(int c);
 ```
-Son rôle est très simple : déterminer si c représente l'un des caractères '0' à '9'.
+Son rôle est très simple : déterminer si c représente l'un des caractères de '0' à '9'.
 Valeur de retour :
-- Renvoie une valeur non nulle s'il s'agit d'un caractère chiffre '0' ~ '9'
-- Renvoie 0 dans le cas contraire
+- Renvoie une valeur non nulle s'il s'agit d'un caractère numérique '0' ~ '9'.
+- Renvoie 0 dans le cas contraire.
 Par exemple :
 ```c
 isdigit('0');   // 非 0
@@ -40,7 +40,7 @@ isdigit('1')
 isdigit('2')
 isdigit('3')
 ```
-Pour vérifier si une chaîne de caractères entière est composée de chiffres, il est nécessaire de l'examiner caractère par caractère :
+Si vous souhaitez vérifier si une chaîne de caractères entière est composée de chiffres, vous devez l'examiner caractère par caractère :
 ```c
 int i;
 
@@ -54,6 +54,6 @@ while (str[i])
 return (1);
 ```
 
-**isdigit() ne prend pas en compte le signe moins ni le point décimal** ; tout ce qui n'est pas un chiffre renvoie 0.
+**isdigit() ne prend en compte ni le signe moins ni le point décimal**, il renvoie 0 pour tout ce qui n'est pas un chiffre.
 
 [[isalnum()]]

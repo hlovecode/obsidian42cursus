@@ -9,7 +9,7 @@ char *strchr(const char *s, int c);
 ```
 `strchr` **ne renvoie pas le caractère lui-même**, mais : 
 - Si le caractère est trouvé, il renvoie son **adresse** dans la chaîne. 
-- Si le caractère n'est pas trouvé, il renvoie NULL (0). 
+- S'il n'est pas trouvé, il renvoie NULL (0). 
 
 `strchr` lit la chaîne de caractères, mais ne modifie pas son contenu.
 

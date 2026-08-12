@@ -7,8 +7,8 @@
 
 void	*memset(void *s, int c, size_t n);
 ```
-Its effect can be simply understood as setting a contiguous sequence of n bytes starting from s to the lower 8 bits of c. 
-The lower 8 bits refer to the rightmost 8 bits in the binary representation of an integer. The reason memset takes these 8 bits is that it ultimately writes a byte (with a value range from 0 to 255), and 1 byte = 8 bits. 
+Its effect can be simply understood as setting the consecutive n bytes starting from s to the lower 8 bits of c. 
+The lower 8 bits are the rightmost 8 bits in the binary representation of an integer. The reason memset takes these 8 bits is that it ultimately writes a byte (with a value range of 0 ~ 255), and 1 byte = 8 bits. 
 (ps: 1 bit has only 2 states: 0 and 1)
 
 The 3 parameters of the function:
@@ -23,16 +23,16 @@ The 3 parameters of the function:
    起始地址    要设置的   设置多少
                字节值     个字节
 ```
-Returns the starting address s of the modified memory region, whose type is `void *`, a generic memory address. 
+Returns the starting address s of the modified memory region, of type `void *`, which is a generic memory address. 
 
-`memset` starts from a certain address and modifies n bytes. When n == 0, it means modifying 0 bytes, modifying nothing, which can be understood as doing nothing. 
+`memset` modifies n bytes starting from a certain address. When n == 0, it means modifying 0 bytes, modifying nothing, which can be understood as doing nothing. 
 Note that n is the number of bytes, not the number of elements. 
 
-`memset(s, c, n)` means: starting from the address `s`, write the lower 8 bits of `c` to a contiguous sequence of `n` bytes, and return `s`. The "lower 8 bits" are the rightmost 8 bits in the binary representation of an integer; the reason `memset` ultimately uses this part is that it converts `c` into an `unsigned char`, and then repeatedly writes it into memory in units of one byte.
+`memset(s, c, n)` means: starting from address `s`, write the lower 8 bits of `c` to `n` consecutive bytes, and return `s`. The "lower 8 bits" are the rightmost 8 bits in the binary representation of an integer; the reason `memset` ultimately uses this part is that it converts `c` into an `unsigned char` and then repeatedly writes it to memory in units of one byte.
 
 #### 2. Understanding Function Parameters
 
-1. First parameter `void *s`
+1. The 1st parameter `void *s`
 Represents the starting address of the memory region to be operated on. `void *` is because memset does not care what type you pass in; it operates on bytes, not C types like char, int, double, etc.
 For example:
 ```c
@@ -47,7 +47,7 @@ memset(tab, ...);
 memset(values, ...);
 ```
 
-2. Second parameter `int c`
+2. The 2nd parameter `int c`
 Sets n bytes to the converted unsigned char value of c. 
 For example:
 ```c
@@ -56,9 +56,9 @@ char str[5];
 memset(str, 'A', 5);
 ```
 ASCII value of 'A': 'A' = 65 = 0x41
-Therefore, 65 converts to hexadecimal 0x41, and every byte becomes 41 41 41 41 41, which is A A A A A.
+So 65 converted to hexadecimal is 0x41, and each byte becomes 41 41 41 41 41, which is A A A A A.
 
-3. Third parameter `size_t n`
+3. The 3rd parameter `size_t n`
 Represents how many bytes to modify.
 For example:
 ```c
@@ -74,7 +74,7 @@ Means:
 ```
 A total of 3 bytes.
 
-PS: Typically, an int is 4 bytes.
+PS: Usually an int is 4 bytes.
 
 #### 3. Most Common Uses of memset
 
@@ -116,7 +116,7 @@ char buffer[10];
 
 memset(buffer, 'X', 10);
 ```
-Resulting in:
+Yields:
 ```txt
 X X X X X X X X X X
 ```
@@ -177,27 +177,27 @@ char str[4];
 
 memset(str, 0x12345678, 4);
 ```
-Understanding broken down into 4 steps:
-Step 1: The second parameter c is 0x12345678
-Step 2: Converted to unsigned char, keeping only 1 byte: 0x78
-Step 3: The third parameter n=4, requires writing 4 bytes
+Understanding it in 4 steps:
+Step 1: The 2nd parameter c is 0x12345678.
+Step 2: Convert to unsigned char, keeping only 1 byte: 0x78.
+Step 3: The 3rd parameter n = 4, requiring 4 bytes to be written.
 ```c
 byte 0
 byte 1
 byte 2
 byte 3
 ```
-Step 4: All written as 0x78
+Step 4: Write all of them as 0x78.
 ```c
 ┌──────┬──────┬──────┬──────┐
 │ 0x78 │ 0x78 │ 0x78 │ 0x78 │
 └──────┴──────┴──────┴──────┘
 ```
-This is `memset(str, 0x12345678, 4);`
+This is `memset(str, 0x12345678, 4);`.
 
 PS: Understanding the notation 0x78
 0x -> Tells the compiler that the following number 78 is represented in hexadecimal; the 0x notation is a convention in the C language.
-	You can understand `0x` as: "The following number is represented in hexadecimal."
+	Understand `0x` as: "The following number is represented in hexadecimal."
 78 -> The part that actually represents the value is 78.
 
 [[bzero()]]
