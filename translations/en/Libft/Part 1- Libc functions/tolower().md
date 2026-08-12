@@ -1,4 +1,4 @@
-`tolower()` is a function in C used to **convert uppercase English letters to lowercase**. It is the counterpart to `toupper()`.
+`tolower()` is a function in the C programming language used to **convert uppercase English letters to lowercase letters**. It is the counterpart to `toupper()`.
 
 #### Prototype
 
@@ -8,6 +8,6 @@
 int tolower(int c);
 ```
 
-Test: automatic translation and deployment
+Test: Automatic Git push test.
 
 [[toupper()]]
