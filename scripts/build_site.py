@@ -94,9 +94,9 @@ def copy_markdown_files(
 
 
 def create_homepage():
-    homepage = """# 42 Common Core Notes
+    homepage = """# <span style="font-weight: bold;">42 Common Core Notes</span>
 
-### <span style="color: #668F80;">Welcome to my 42 Common Core learning notes -- Hua</span>
+### <span style="color: #668F80; font-weight: bold;">Welcome to my 42 Common Core learning notes -- Hua</span>
 
 ## Languages
 
