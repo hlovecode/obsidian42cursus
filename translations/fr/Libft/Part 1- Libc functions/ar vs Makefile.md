@@ -103,12 +103,12 @@ ft_strlen.o
 ...
 ```
 
-4. Supprimer la bibliothèque statique
+4. Supprimer la bibliothèque statique :
 ```bash
 rm -f libft.a
 ```
 
-#### Résumer l'ensemble du processus de Libft
+#### Assembler tout le processus de Libft
 
 On peut comprendre `Libft` comme :
 ```bash
@@ -143,4 +143,4 @@ On peut comprendre `Libft` comme :
               └──────────────┘
 ```
 
-**`cc` compile `.c` en `.o` ; `ar` regroupe plusieurs `.o` dans la bibliothèque statique `.a` ; enfin, l'éditeur de liens extrait le code nécessaire au programme à partir de `.a` pour générer l'exécutable.**
+**`cc` compile `.c` en `.o` ; `ar` organise plusieurs `.o` en une bibliothèque statique `.a` ; enfin, l'éditeur de liens extrait de `.a` le code dont le programme a besoin pour générer l'exécutable.**

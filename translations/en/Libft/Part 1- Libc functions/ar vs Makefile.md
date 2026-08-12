@@ -47,7 +47,7 @@ is responsible for:
 ```Makefile
 .o → libft.a
 ```
-So the overall logic of the Makefile:
+Therefore, the overall logic of the Makefile:
 ```Makefile
                 cc
 .c ─────────────────────→ .o
@@ -93,7 +93,7 @@ To get:
 libft.a
 ```
 
-3. View the contents of a static library:
+3. View the contents of the static library:
 ```bash
 ar -t libft.a
 ```
@@ -103,12 +103,12 @@ ft_strlen.o
 ...
 ```
 
-4. Delete a static library:
+4. Remove the static library:
 ```bash
 rm -f libft.a
 ```
 
-#### Connecting the Entire Libft Workflow
+#### Connecting the entire Libft workflow
 
 You can understand `Libft` as:
 ```bash
@@ -143,4 +143,4 @@ You can understand `Libft` as:
               └──────────────┘
 ```
 
-**`cc` compiles `.c` into `.o`; `ar` organizes multiple `.o` into the `.a` static library; finally, the linker extracts the code needed by the program from `.a` to generate the executable file.**
+**`cc` compiles `.c` into `.o`; `ar` organizes multiple `.o` into a `.a` static library; finally, the linker extracts the code needed by the program from `.a` to generate the executable file.**
