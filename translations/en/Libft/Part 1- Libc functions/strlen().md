@@ -5,26 +5,27 @@
 
 size_t strlen(const char *s);
 ```
-Its function is very simple: it calculates the number of characters in a string, excluding the terminating `'\0`. 
+Its function is very simple: it calculates the number of characters in a string, excluding the ending `'\0`. 
 
 #### 2. Why is '\0' not counted?
 
-Strings in C are not an independent data type; they are actually a sequence of `char`s. 
-The role of '\0' is to tell C that the string ends here. 
+Strings in C are not an independent data type; they are actually a sequence of `char`. 
+The purpose of '\0' is to tell C that the string ends here. 
 If the logical length of the string is 5, the actual character array space occupied is 6.
 
-`strlen()` only reads the string and will not modify its contents.
-The function parameter must point to a valid C string terminated by '\0'.
 
-`strlen("")` is an empty string, which is actually just '\0'; the function returns 0.
-Note: An empty string is not devoid of memory, but rather contains a '\0'.
+`strlen()` only reads the string and does not modify its contents.
+The function argument must point to a valid C string terminated by '\0'.
 
-`strlen(NULL)` is illegal and results in undefined behavior, because `strlen` will attempt to access something that has no valid string at all. Therefore, do not write:
+`strlen("")` is an empty string, which is actually just `'\0'`, and the function returns 0.
+Note: An empty string does not mean no memory; rather, it contains a `'\0'`.
+
+`strlen(NULL)` is illegal and results in undefined behavior, because `strlen` will attempt to access something that is not a valid string at all. Therefore, do not write:
 ```c
 char *str = NULL;
 strlen(str);
 ```
-Nor should you use `strlen` to determine whether `str` is `NULL`. Do not write:
+Nor should you use `strlen` to check if `str` is `NULL`. Do not write:
 ```c
 if (strlen(str) == 0) 来判断 str == NULL
 ```
@@ -42,19 +43,19 @@ else if (strlen(str) == 0)
 }
 ```
 
-#### 3. The `size_t` Type
+#### 3. Type size_t
 
-It is an unsigned integer type, `unsigned int` or `unsigned long`, declared and defined by `<stddef.h>`. It is the safest type to use for any integer data objects used as array indices, without having to worry that a small array will evolve into a very large array as the program changes.
+It is an unsigned integer type `unsigned int` or `unsigned long`, declared and defined by `<stddef.h>`. It is the safest type to use for any integer data objects used as array indices, without having to worry that a small array might evolve into a very large array as the program changes.
 
-When using `size_t`, index arithmetic will never overflow. In a program, `size_t` should be used for all arithmetic operations on array indices or addresses. The downside is that negative values cannot be used. 
+When using `size_t`, index arithmetic will never overflow. In a program, all places that perform arithmetic operations on array indices or addresses should use the `size_t` type. The downside is that negative values cannot be used. 
 
 `size_t` is an unsigned integer type defined by the C standard, specifically used to represent:
 - Object size
 - Array size
 - Memory size
-- Byte count
+- Number of bytes
 
 
-## GitHub Actions Testing
+## GitHub Actions Test
 
-This is a GitHub Actions automated translation test.
+This is an automated GitHub Actions translation test.
