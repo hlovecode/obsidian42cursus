@@ -1,4 +1,4 @@
-`tolower()` est une fonction en langage C utilisée pour **convertir une lettre majuscule anglaise en lettre minuscule**. C'est la fonction inverse de `toupper()`.
+`tolower()` est une fonction en langage C utilisée pour **convertir les lettres anglaises majuscules en minuscules**. Elle forme une paire de fonctions opposées avec `toupper()`.
 
 #### Prototype
 
@@ -8,6 +8,5 @@
 int tolower(int c);
 ```
 
-Test: Automatic Git push test.
 
 [[toupper()]]
