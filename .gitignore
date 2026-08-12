@@ -22,3 +22,7 @@ Thumbs.db
 
 #忽略垃圾箱文件夹
 .trash/
+
+#Github Pages相关
+site/
+.venv-pages/
