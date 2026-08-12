@@ -1,4 +1,4 @@
-`isalnum()` est une **fonction de classification de caractères** très fondamentale et très couramment utilisée dans la bibliothèque standard C `<ctype.h>`, servant à déterminer si un caractère est une lettre ou un chiffre.
+`isalnum()` est une fonction de classification de caractères très fondamentale et très couramment utilisée de la bibliothèque standard C `<ctype.h>`, qui sert à déterminer si un caractère est une lettre ou un chiffre.
 
 #### 1. Prototype
 

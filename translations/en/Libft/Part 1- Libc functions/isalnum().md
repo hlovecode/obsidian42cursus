@@ -7,16 +7,16 @@
 
 int isalnum(int c);
 ```
-It checks:
+It checks whether:
 ```txt
 A-Z
 a-z
 0-9
 ```
-- Returns non-zero if it is a letter or digit
-- Returns zero if it is not
+- If it is a letter or a digit, it returns a non-zero value.
+- If it is not, it returns 0.
 
-**The relationship between `isalnum`, `isalpha`, and `isdigit`**:
+**The relationship between `isalnum` and `isalpha`, `isdigit`**:
 ```txt
 isalnum 判断是不是字母或数字
    │
@@ -27,7 +27,7 @@ isalnum 判断是不是字母或数字
          └── 0-9
 ```
 
-#### 2. isalnum does not check underscores _, nor does it handle negative numbers
+#### 2. isalnum does not check for the underscore _, nor does it handle negative numbers
 
 ```c
 isalnum('_') // 不是字母和数字，返回0

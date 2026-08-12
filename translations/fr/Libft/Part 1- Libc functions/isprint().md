@@ -1,4 +1,4 @@
-`isprint()` et les fonctions `isalpha()`, `isdigit()`, `isalnum()`, `isascii()` que vous avez étudiées précédemment font partie du même groupe de **fonctions de classification des caractères C (character classification functions)**, utilisées pour déterminer si un caractère est un **caractère imprimable (printing character)**.
+`isprint()` et `isalpha()`, `isdigit()`, `isalnum()`, `isascii()` que vous avez étudiés précédemment font partie du même groupe de **fonctions de classification de caractères C (character classification functions)**, utilisées pour déterminer si un caractère est un **caractère imprimable (printing character)**.
 
 #### 1. Prototype
 ```c
@@ -21,7 +21,7 @@ Les caractères ASCII sont grossièrement divisés en :
 Par conséquent, la plage de vérification de `isprint()` est de 32 à 126, c'est-à-dire 32 <= paramètre c <= 126.
 
 #### 3. L'espace ' ' est également un caractère imprimable
-Parce que la valeur ASCII de l'espace est 32, bien qu'il n'ait pas de représentation graphique, il peut être matérialisé sur un terminal ou un écran.
+Parce que la valeur ASCII de l'espace est 32, bien qu'il n'ait pas de représentation graphique, il peut être affiché sur un terminal ou un écran.
 
-#### 4. Pourquoi les codes 0 à 31 de l'ASCII ne sont-ils pas imprimables ?
-Les codes 0 à 31 sont des caractères de contrôle. Leur rôle n'est pas d'afficher un symbole ordinaire, mais de contrôler le terminal, le curseur, les sauts de ligne, etc.
+#### 4. Pourquoi les caractères de 0 à 31 ne sont-ils pas imprimables en ASCII ?
+De 0 à 31, ce sont des caractères de contrôle. Leur rôle n'est pas d'afficher un symbole ordinaire, mais de contrôler le terminal, le curseur, les retours à la ligne, etc.
