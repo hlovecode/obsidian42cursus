@@ -9,6 +9,6 @@
 int tolower(int c);
 ```
 
-Test: automatic translation and deployment
+Test: Automatic Git push test.
 
 [[toupper()]]
