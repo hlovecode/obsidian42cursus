@@ -2,6 +2,8 @@ site_name: 42 Common Core Notes
 site_description: Personal learning notes for the 42 Common Core
 site_url: ""
 
+docs_dir: docs
+
 theme:
   name: material
 
