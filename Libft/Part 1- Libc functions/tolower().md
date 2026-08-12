@@ -9,6 +9,5 @@
 int tolower(int c);
 ```
 
-Test: Automatic Git push test.
 
 [[toupper()]]
