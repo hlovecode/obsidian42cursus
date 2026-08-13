@@ -23,3 +23,23 @@ int strncmp(const char *s1, const char *s2, size_t n);
 #### 2. `strncmp` 和 `strcmp` 的区别
 
 `strcmp` 比较整个字符串，而 `strncmp` 最多比较前 n 个字符.
+
+|       | strcmp     | strncmp    |
+| ----- | ---------- | ---------- |
+| 头文件   | <string.h> | <string.h> |
+| 比较字符串 | yes        | yes        |
+|       |            |            |
+
+
+#### 3. `strncmp` 的应用
+
+该函数非常适合判断字符串的前缀.
+
+例如：判断 “quit_now" 是否以 quit 开头
+
+```c
+if (strncmp(command, "quit", 4) == 0)
+{
+	...
+}
+```
