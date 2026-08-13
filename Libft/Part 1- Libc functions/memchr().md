@@ -20,3 +20,33 @@ void *memchr(const void *s, int c, size_t n);
 #### 2. `memchir` 可以处理没有 '\0' 的数据
 
 `memchr` 和其他字符串函数最大的区别之一就是它可以处理没有 '\0' 的数据，它不需 '\0' 来确定结束位置， 它只依赖 n. 
+
+`memchr` 本质上是逐字节检查，它可以处理任意内存.
+
+#### 3.  `memchir`  vs  `strchr` 
+
+|特性|`strchr`|`memchr`|
+|---|---|---|
+|所属|`<string.h>`|`<string.h>`|
+|搜索对象|C 字符串|内存区域|
+|是否需要 `'\0'`|是|否|
+|是否遇到 `'\0'` 就停止|是|否|
+|搜索范围|到 `'\0'`|前 `n` 个 byte|
+|`n` 参数|没有|有|
+|可以搜索二进制数据|不适合|非常适合|
+|返回值|`char *`|`void *`|
+|找不到|`NULL`|`NULL`|
+
+- `strchr` : 搜索字符串中的字符
+- `memchr` : 搜索内存中的字节
+
+#### 4. `memchr` 的实现思路
+
+1. 把 s 转换成 unsigned char *
+2. 从 i = 0 开始检查 i < n
+3. 检查 s\[i] 是否等于 (unsigned char)c:
+	- 相等，返回 `&s[i]`
+	- 不相等，i++
+	- 循环结束，如果还是不相等，返回NULL
+
+`memchr(s, c, n)` 从 `s` 开始，把内存看成一串 byte，严格检查前 `n` 个 byte，寻找第一个等于 `(unsigned char)c` 的 byte；找到就返回它的地址，找不到就返回 `NULL`. 
