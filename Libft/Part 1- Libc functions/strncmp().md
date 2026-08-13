@@ -19,3 +19,7 @@ int strncmp(const char *s1, const char *s2, size_t n);
 |`s1` 小于 `s2`|`< 0`|
 |`s1` 大于 `s2`|`> 0`|
 注意：不要依赖具体返回 -1 或 1，标准只保证 < 0 , = 0 , 或 > 0 .
+
+#### 2. `strncmp` 和 `strcmp` 的区别
+
+`strcmp` 比较整个字符串，而 `strncmp` 最多比较前 n 个字符.
