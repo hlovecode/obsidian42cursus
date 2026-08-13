@@ -1,6 +1,6 @@
-`memchr` recherche un octet spécifique dans les `n` premiers octets d'un bloc de mémoire, sans se soucier du caractère `'\0'`.
-`memchr` recherche l'octet `byte` et non un caractère, mais comme un caractère occupe généralement un octet dans les chaînes ASCII ordinaires, il semble que l'on recherche un caractère.
-Cette fonction lit uniquement la mémoire et ne la modifie pas.
+`memchr` 在一块内存的前 `n` 个字节中查找某个字节，它根本不关心 `'\0'`。
+`memchr` 搜索的是字节 byte，而不是字符，只是当搜索的是普通 ASCII 字符串时，一个字符通常刚好占一个 byte，所以看起来好像是在搜索字符。
+该函数只读取内存，不修改内存。
 
 #### 1. Prototype
 
@@ -10,11 +10,13 @@ Cette fonction lit uniquement la mémoire et ne la modifie pas.
 void *memchr(const void *s, int c, size_t n);
 ```
 
-Son rôle est de commencer à partir de la zone mémoire `s`, d'examiner les `n` premiers octets et de rechercher le premier octet dont la valeur est égale à `(unsigned char)c`.
+它的作用是从内存区域 `s` 开始，检查前 `n` 个字节，寻找第一个值等于 `(unsigned char)c` 的字节。
 
-Valeur de retour :
+返回值：
 
-- En cas de succès, retourne un pointeur vers cet octet.
-- Si le caractère n'est pas trouvé, retourne `NULL`.
+- 如果找到，返回指向这个字节的指针
+- 如果没有找到，则返回 NULL
 
-#### 2.
+#### 2. `memchir` 可以处理没有 '\0' 的数据
+
+`memchr` 和其他字符串函数最大的区别之一就是它可以处理没有 '\0' 的数据，它不需 '\0' 来确定结束位置，它只依赖 n。
