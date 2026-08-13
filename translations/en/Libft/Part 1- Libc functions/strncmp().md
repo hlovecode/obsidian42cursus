@@ -8,6 +8,4 @@
 int strncmp(const char *s1, const char *s2, size_t n);
 ```
 
-Its function is to compare `s1` and `s2` byte by byte from the beginning, up to a maximum of `n` characters; it can stop upon encountering the first differing character or `\0`. If all characters within the comparison range are identical, it returns `0`. Otherwise, it returns a negative or positive value based on the relative magnitude of the first differing character.
-
-fanyifanyi
+Its function is to compare `s1` and `s2` byte by byte from the beginning, up to a maximum of `n` characters. It can stop when the first differing character or `\0` is encountered. If all characters within the comparison range are identical, it returns `0`; otherwise, it returns a negative or positive value based on the relative size of the first differing character.
