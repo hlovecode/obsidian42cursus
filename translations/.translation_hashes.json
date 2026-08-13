@@ -18,5 +18,6 @@
   "Libft/Part 1- Libc functions/ar vs Makefile.md": "a8a8e6e9a1e63f718129a595a6c5df3c7a664b8d737d27b681411e7b06357209",
   "Libft/Project_Requirements.md": "cc7465b2b11de8edf27fa0f97dcf2d96c05a375ef9a2b245f5c79c598328e019",
   "Libft/Part 1- Libc functions/strncmp().md": "cf2135aaab1d5d51a261d4601c3c4a359ef6751dfa4e3234361639f9ad1a51c2",
-  "Libft/Part 1- Libc functions/memchr().md": "bdab89d7e5368b411cd01db1645946a7d62437972c5f5970c246e4b040713cbc"
+  "Libft/Part 1- Libc functions/memchr().md": "bdab89d7e5368b411cd01db1645946a7d62437972c5f5970c246e4b040713cbc",
+  "Libft/Part 1- Libc functions/memcmp().md": "57f8d927f2f6c86054090cb1135f03831ebfec18089319e4cc840e7223b1c06d"
 }
