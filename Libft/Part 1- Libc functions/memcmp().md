@@ -59,3 +59,28 @@ address
  97   98  100    0
 
 ```
+
+执行 `memcmp(a, b, 3);` 实际上比较：
+
+```c
+first byte: 97 == 97
+
+second byte: 98 == 98
+
+third byte: 99 != 100
+
+```
+
+因为 99 < 100, 因此 `memcmp(a, b, 3) < 0`
+
+#### 3. `memcmp` vs `memcpy` vs `memmove`
+
+| 函数        | 做什么             |
+| --------- | --------------- |
+| `memset`  | 把一块内存设置成某个 byte |
+| `memcpy`  | 把一块内存复制到另一块内存   |
+| `memmove` | 安全地移动/复制可能重叠的内存 |
+| `memchr`  | 在内存中寻找某个 byte   |
+| `memcmp`  | 比较两块内存          |
+| `strlen`  | 计算字符串长度         |
+| `strcmp`  | 比较字符串           |
