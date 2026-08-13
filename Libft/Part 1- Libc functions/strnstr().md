@@ -1,0 +1,1 @@
+`strnstr` 用于在字符串 `haystack` 的前 `len` 个字符范围内，寻找字符串 `needle` 第一次出现的位置
