@@ -10,7 +10,7 @@
 void *memchr(const void *s, int c, size_t n);
 ```
 
-它的作用是从从内存区域 `s` 开始，检查前 `n` 个字节，寻找第一个值等于 `(unsigned char)c` 的字节. 
+它的作用是从内存区域 `s` 开始，检查前 `n` 个字节，寻找第一个值等于 `(unsigned char)c` 的字节. 
 
 返回值：
 
