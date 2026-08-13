@@ -1,0 +1,1 @@
+`strnstr` is used to find the first occurrence of the string `needle` within the first `len` characters of the string `haystack`

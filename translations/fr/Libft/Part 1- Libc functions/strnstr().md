@@ -1,0 +1,1 @@
+`strnstr` est utilisé pour rechercher la première occurrence de la chaîne `needle` dans les `len` premiers caractères de la chaîne `haystack`
