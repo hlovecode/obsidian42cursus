@@ -1,6 +1,6 @@
-`memchr` 在一块内存的前 `n` 个字节中查找某个字节，它根本不关心 `'\0'`。
-`memchr` 搜索的是字节 byte，而不是字符，只是当搜索的是普通 ASCII 字符串时，一个字符通常刚好占一个 byte，所以看起来好像是在搜索字符。
-该函数只读取内存，不修改内存。 
+`memchr` Searches for a specific byte in the first `n` bytes of a block of memory, and it does not care about `'\0'`.
+`memchr` Searches for a byte (byte) rather than a character. It is just that when searching for ordinary ASCII strings, a character usually occupies exactly one byte, so it appears to be searching for characters.
+This function only reads memory and does not modify it.
 
 #### 1. Prototype
 
@@ -10,11 +10,13 @@
 void *memchr(const void *s, int c, size_t n);
 ```
 
-它的作用是从内存区域 `s` 开始，检查前 `n` 个字节，寻找第一个值等于 `(unsigned char)c` 的字节。 
+Its function is to start from the memory area `s`, check the first `n` bytes, and look for the first byte whose value equals `(unsigned char)c`. 
 
-返回值：
+Return value:
 
-- 如果找到，返回指向这个字节的指针
-- 如果没有找到，则返回 NULL
+- If found, returns a pointer to this byte
+- If not found, returns NULL
 
-#### 2.
+#### 2. `memchir` can handle data without '\0'
+
+One of the biggest differences between `memchr` and other string functions is that it can handle data without '\0'. It does not need '\0' to determine the end position; it relies solely on n.
