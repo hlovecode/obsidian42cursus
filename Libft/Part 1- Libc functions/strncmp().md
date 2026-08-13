@@ -24,12 +24,14 @@ int strncmp(const char *s1, const char *s2, size_t n);
 
 `strcmp` 比较整个字符串，而 `strncmp` 最多比较前 n 个字符.
 
-|       | strcmp     | strncmp    |
-| ----- | ---------- | ---------- |
-| 头文件   | <string.h> | <string.h> |
-| 比较字符串 | yes        | yes        |
-|       |            |            |
-
+|          | strcmp     | strncmp    |
+| -------- | ---------- | ---------- |
+| 头文件      | <string.h> | <string.h> |
+| 比较字符串    | yes        | yes        |
+| 参数数量     | 2          | 3          |
+| 限制比较长度   | no         | yes        |
+| 最多比较多少字符 | 不限制        | n 个字符      |
+| 返回 0     | 相等         | 前 n 个字符相等  |
 
 #### 3. `strncmp` 的应用
 
