@@ -1,5 +1,5 @@
-`memcmp` compare le contenu des `n` premiers octets de deux blocs mémoire, et non des chaînes de caractères.
-Il traite la mémoire comme une séquence d'octets et les compare un par un.
+`memcmp` compare les contenus des `n` premiers octets de deux blocs de mémoire, et non des chaînes de caractères.
+La mémoire est vue comme une suite d'octets, qui sont ensuite comparés un par un.
 
 #### 1. Prototype
 
@@ -9,17 +9,17 @@ Il traite la mémoire comme une séquence d'octets et les compare un par un.
 int memcmp(const void *s1, const void *s2, size_n);
 ```
 
-Son rôle est de comparer les `n` premiers octets des deux zones mémoire commençant respectivement à `s1` et `s2`, c'est-à-dire le nombre maximal d'octets à comparer.
+Son rôle est de comparer les `n` premiers octets des deux zones de mémoire commençant respectivement à `s1` et `s2`, c'est-à-dire le nombre maximal d'octets à comparer.
 
 Valeur de retour :
 
-|Résultat de la comparaison|Valeur de retour de `memcmp`|
-|---|---|
-|Les deux blocs mémoire sont totalement identiques|`0`|
-|Le premier octet différent dans `s1` est **inférieur** à l'octet correspondant dans `s2`|Inférieur à `0`|
-|Le premier octet différent dans `s1` est **supérieur** à l'octet correspondant dans `s2`|Supérieur à `0`|
+| Résultat de la comparaison | Valeur de retour de `memcmp` |
+| --- | --- |
+| Les deux blocs de mémoire sont totalement identiques | `0` |
+| Le premier octet différent dans `s1` est **inférieur** à l'octet correspondant dans `s2` | Inférieur à `0` |
+| Le premier octet différent dans `s1` est **supérieur** à l'octet correspondant dans `s2` | Supérieur à `0` |
 
-La norme C garantit seulement le signe de la valeur de retour ou zéro, mais ne garantit pas la valeur exacte retournée. En d'autres termes, il faut effectuer l'un des tests suivants plutôt que `memcmp(s1, s2, n) == -1`, car la norme C ne stipule pas qu'elle doit nécessairement retourner -1 :
+La norme C garantit uniquement le signe de la valeur de retour (positif, négatif ou nul), mais pas la valeur exacte. Cela signifie qu'il faut effectuer l'un des tests suivants, et non `memcmp(s1, s2, n) == -1`, car la norme C ne stipule pas qu'elle doit nécessairement retourner -1 :
 
 ```c
 if (memcmp(s1, s2, n) > 0)
@@ -59,3 +59,28 @@ address
  97   98  100    0
 
 ```
+
+L'exécution de `memcmp(a, b, 3);` compare en réalité :
+
+```c
+first byte: 97 == 97
+
+second byte: 98 == 98
+
+third byte: 99 != 100
+
+```
+
+Puisque 99 < 100, par conséquent `memcmp(a, b, 3) < 0`
+
+#### 3. `memcmp` vs `memcpy` vs `memmove`
+
+| Fonction | Rôle |
+| --- | --- |
+| `memset` | Remplit un bloc de mémoire avec un octet donné |
+| `memcpy` | Copie un bloc de mémoire vers un autre |
+| `memmove` | Déplace/copie en toute sécurité de la mémoire potentiellement chevauchante |
+| `memchr` | Recherche un octet dans la mémoire |
+| `memcmp` | Compare deux blocs de mémoire |
+| `strlen` | Calcule la longueur d'une chaîne de caractères |
+| `strcmp` | Compare des chaînes de caractères |
