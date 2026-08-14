@@ -125,19 +125,19 @@ def create_language_homepage(
     if language_code == "zh":
         content = """# 中文笔记
 
-这里是我的 42 Common Core 中文学习笔记
+这里是我的 42 Common Core 学习笔记
 """
 
     elif language_code == "en":
         content = """# English Notes
 
-These are my English 42 Common Core learning notes
+Here are my 42 Common Core learning notes
 """
 
     else:
         content = """# Notes en français
 
-Voici mes notes d'apprentissage du 42 Common Core en français
+Voici mes notes d'apprentissage du 42 Common Core
 """
 
     language_dir = os.path.join(
