@@ -38,5 +38,7 @@ char	*strnstr(const char *haystack, const char *needle, size_t len);
 | `strrchr` | 单个字符最后一次出现 | 不限制      |
 | `strncmp` | 比较两个字符串    | 限制       |
 
-- `strchr`: 找到一个字符
-- `strstr`
+- `strchr`: 找一个字符
+- `strstr`: 找一个字符串
+- `strnstr`: 在限定长度内找一个字符串
+- `strncmp`: 比较两个字符串的前 n 个字符
