@@ -18,7 +18,15 @@ char	*strnstr(const char *haystack, const char *needle, size_t len);
 
 指向 haystack 中第1次出现 needle 的位置的指针，如果没有找到，则返回 NULL，如果 needle 是空字符串，就返回 haystack
 
-#### 2. 对比类似函数
+#### 2. `strnstr` 核心逻辑
+
+1. needle 是不是空字符串？如果是，返回 haystack
+2. 在 haystack 的前 len 个字符中寻找可能的起点
+3. 每一个可能的起点：检查 needle 是否完整匹配
+4. 匹配成功吗？如果是，返回当前位置
+5. 有没有全部检查完？如果是
+
+#### 3. 对比类似函数
 
 | 函数        | 搜索对象       | 是否限制搜索范围 |
 | --------- | ---------- | -------- |
