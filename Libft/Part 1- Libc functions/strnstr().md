@@ -16,7 +16,7 @@ char	*strnstr(const char *haystack, const char *needle, size_t len);
 
 返回值：
 
-指向 haystack 中第1次出现 needle 的位置的指针，如果没有找到，则返回 NULL，如果 needle 是空字符串，就返回 
+指向 haystack 中第1次出现 needle 的位置的指针，如果没有找到，则返回 NULL，如果 needle 是空字符串，就返回 haystack
 
 #### 2. 对比类似函数
 
