@@ -1,4 +1,4 @@
-`strnstr` est utilisé pour rechercher la première occurrence de la chaîne `needle` dans les premiers len caractères de la chaîne `haystack`.
+`strnstr` sert à chercher la première occurrence de la chaîne `needle` dans les premiers len caractères de la chaîne `haystack`.
 
 #### 1. Prototype
 
@@ -12,31 +12,33 @@ Paramètres :
 
 - haystack : la chaîne dans laquelle effectuer la recherche
 - needle : la chaîne à rechercher, c'est-à-dire la sous-chaîne
-- len : nombre maximal de caractères de haystack à parcourir ; cela contrôle la limite de la recherche dans haystack
+- len : le nombre maximal de caractères de haystack à parcourir, contrôle la limite de recherche dans haystack
 
 Valeur de retour :
 
-Un pointeur vers la première occurrence de needle dans haystack, ou NULL si needle n'est pas trouvé. Si needle est une chaîne vide, retourne haystack.
+Un pointeur vers la première occurrence de needle dans haystack, ou NULL si la sous-chaîne n'est pas trouvée, ou haystack si needle est une chaîne vide.
 
-#### 2. Logique principale de `strnstr`
+#### 2. Logique centrale de `strnstr`
 
-1. Est-ce que needle est une chaîne vide ? Si oui, retourne haystack.
-2. Rechercher les points de départ possibles dans les premiers len caractères de haystack.
-3. Pour chaque point de départ possible : vérifier si needle correspond entièrement.
-4. La correspondance a-t-elle réussi ? Si oui, retourner la position actuelle.
-5. Tout a-t-il été vérifié ? Si oui, retourner NULL.
+1. needle est-elle une chaîne vide ? Si oui, retourner haystack
+2. Chercher les points de départ possibles dans les len premiers caractères de haystack
+3. Pour chaque point de départ possible : vérifier si needle correspond entièrement
+4. La correspondance est-elle réussie ? Si oui, retourner la position actuelle
+5. A-t-on tout vérifié ? Si oui, retourner NULL
 
-`strnstr` : Recherche la première occurrence complète de `needle` dans les `len` premiers caractères de `haystack` ; retourne un pointeur en cas de succès, `NULL` en cas d'échec, ou `haystack` si `needle` est une chaîne vide.
+`strnstr` : Recherche la première occurrence complète de `needle` dans les `len` premiers caractères de `haystack` ; renvoie un pointeur si elle est trouvée, `NULL` si elle ne l'est pas, et `needle` si `haystack` est une chaîne vide.
 
 #### 3. Comparaison avec des fonctions similaires
 
-| Fonction    | Objet de la recherche | Limite la plage de recherche |
+| Fonction | Objet de la recherche | Limite de la zone de recherche |
 | --------- | ---------- | -------- |
-| `strstr`  | Sous-chaîne dans une chaîne | Non |
-| `strnstr` | Sous-chaîne dans une chaîne | Oui |
-| `strchr`  | Caractère unique | Non |
-| `strrchr` | Dernière occurrence d'un caractère unique | Non |
-| `strncmp` | Comparaison de deux chaînes | Oui |
+| `strstr` | Sous-chaîne dans une chaîne | Non limitative |
+| `strnstr` | Sous-chaîne dans une chaîne | Limitative |
+| `strchr` | Caractère unique | Non limitative |
+| `strrchr` | Dernière occurrence d'un caractère unique | Non limitative |
+| `strncmp` | Comparaison de deux chaînes | Limitative |
 
-- `strchr` : Trouve un caractère
-- `strstr`
+- `strchr` : Recherche un caractère
+- `strstr` : Recherche une chaîne
+- `strnstr` : Recherche une chaîne sur une longueur limitée
+- `strncmp` : Compare les n premiers caractères de deux chaînes
