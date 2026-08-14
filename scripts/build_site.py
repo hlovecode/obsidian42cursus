@@ -97,15 +97,14 @@ def create_homepage():
     homepage = """# <span style="font-weight: bold;">42 Common Core Notes</span>
 
 ### <span style="color: #668F80; font-weight: bold;">欢迎来到我的42 Common Core 学习笔记</span>
+- [中文](zh/index.md)
 ### <span style="color: #668F80; font-weight: bold;">Welcome to my 42 Common Core learning notes</span>
+- [English](en/index.md)
 ### <span style="color: #668F80; font-weight: bold;">Bienvenu(e) sur mes notes pour 42 Common Core</span>
-### <span style="color: #668F80; font-weight: bold;">             -- Hua</span>
+- [Français](fr/index.md)
+### <span style="color: #668F80; font-weight: bold;"> -- Hua</span>
 
 ### <span style="color: #4169E1; font-weight: bold;">Languages</span>
-
-- [中文](zh/index.md)
-- [English](en/index.md)
-- [Français](fr/index.md)
 """
 
     homepage_file = os.path.join(
@@ -127,19 +126,19 @@ def create_language_homepage(
     if language_code == "zh":
         content = """# 中文笔记
 
-这里是我的 42 Common Core 中文学习笔记。
+这里是我的 42 Common Core 中文学习笔记
 """
 
     elif language_code == "en":
         content = """# English Notes
 
-These are my English 42 Common Core learning notes.
+These are my English 42 Common Core learning notes
 """
 
     else:
         content = """# Notes en français
 
-Voici mes notes d'apprentissage du 42 Common Core en français.
+Voici mes notes d'apprentissage du 42 Common Core en français
 """
 
     language_dir = os.path.join(
