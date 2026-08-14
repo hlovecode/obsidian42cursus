@@ -104,7 +104,6 @@ def create_homepage():
 - [Français](fr/index.md)
 ### <span style="color: #668F80; font-weight: bold;"> -- Hua</span>
 
-### <span style="color: #4169E1; font-weight: bold;">Languages</span>
 """
 
     homepage_file = os.path.join(
