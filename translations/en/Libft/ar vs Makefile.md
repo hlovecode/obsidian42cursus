@@ -1,4 +1,4 @@
-This is where the `Libft` project really needs to be mastered.
+This is where `Libft` project really needs to be mastered.
 
 A typical Makefile:
 ```Makefile
@@ -38,7 +38,7 @@ is responsible for:
 ```Makefile
 .c -> .o
 ```
-While:
+while:
 ```Makefile
 $(NAME): $(OBJS)
 	ar rcs $(NAME) $(OBJS)
@@ -47,7 +47,7 @@ is responsible for:
 ```Makefile
 .o → libft.a
 ```
-Therefore, the overall logic of the Makefile:
+So the entire logic of the Makefile:
 ```Makefile
                 cc
 .c ─────────────────────→ .o
@@ -58,7 +58,7 @@ Therefore, the overall logic of the Makefile:
                          libft.a
 ```
 
-`ar` mainly deals with `archive` members, which is `.o`, and the C source code `.c` needs to be compiled via `cc` first, so it should be:
+`ar` mainly deals with `archive` members, which are `.o`, and the C source code `.c` needs to be compiled by `cc` first, so it should be:
 ```bash
 .c
  ↓ cc
@@ -66,7 +66,7 @@ Therefore, the overall logic of the Makefile:
  ↓ ar
 .a
 ```
-Instead of:
+instead of:
 ```bash
 .c
  ↓ ar
@@ -79,7 +79,7 @@ Instead of:
 ```bash
 cc -Wall -Wextra -Werror -c ft_strlen.c
 ```
-To get:
+to get:
 ```bash
 ft_strlen.o
 ```
@@ -88,16 +88,16 @@ ft_strlen.o
 ```bash
 ar rcs libft.a ft_strlen.o
 ```
-To get:
+to get:
 ```bash
 libft.a
 ```
 
-3. View the contents of the static library:
+3. View what is inside a static library:
 ```bash
 ar -t libft.a
 ```
-To get:
+to get:
 ```bash
 ft_strlen.o
 ...
@@ -143,4 +143,4 @@ You can understand `Libft` as:
               └──────────────┘
 ```
 
-**`cc` compiles `.c` into `.o`; `ar` organizes multiple `.o` into a `.a` static library; finally, the linker extracts the code needed by the program from `.a` to generate the executable file.**
+**`cc` compiles `.c` into `.o`; `ar` organizes multiple `.o` into the `.a` static library; finally, the linker extracts the code needed by the program from `.a` to generate the executable file.**
