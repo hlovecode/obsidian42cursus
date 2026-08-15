@@ -1,5 +1,5 @@
-Implémenter certaines fonctions en langage C, telles que la ré-implémentation de la libc, en créant un Makefile, en exécutant la commande `make`, afin de générer une bibliothèque statique publique `libft.a`.
-<font color="red">Il s'agit de la bibliothèque de base pour l'ensemble du Common Core.</font>
+Implémenter certaines fonctions en langage C, telles que la réimplémentation de la libc, en créant un makefile et en exécutant la commande `make` pour générer une bibliothèque statique publique `libft.a`.
+<font color="red">Ceci est la bibliothèque de base de tout le Common Core.</font>
 ###### Groupe 1 : Caractères
 ```c
 ft_isalpha
@@ -54,7 +54,7 @@ tolower
 ```c
 atoi
 ```
-###### Groupe 6 : Allocation dynamique
+###### Groupe 6 : Mémoire dynamique
 ```c
 calloc // 不同系统，行为可能不同
 strdup
@@ -84,32 +84,32 @@ ft_putnbr_fd
 | `ft_lstdelone`    | Supprimer un nœud          |
 | `ft_lstclear`     | Supprimer toute la liste   |
 | `ft_lstiter`      | Parcourir la liste et exécuter une fonction sur chaque nœud |
-| `ft_lstmap`       | Transformer le contenu de chaque nœud pour générer une nouvelle liste |
+| `ft_lstmap`       | Convertir le contenu de chaque nœud pour générer une nouvelle liste |
 
 ### 1. Considérations techniques (Technical considerations)
 
 1. **Interdiction d'utiliser des variables globales**
-Puisque Libft est une bibliothèque publique, elle doit toujours donner la même sortie pour une même entrée -> *Same input -> Always same s, output*.
-S'il y a des variables globales, la modification de ces variables entraînera une modification du résultat final.
+Puisque Libft est une bibliothèque publique, elle doit toujours donner la même sortie pour la même entrée.
+S'il y a des variables globales, leur modification entraînera une variation du résultat final.
 
-2. **Les fonctions helper (auxiliaires) doivent être `static`**
-Par exemple : 
+2. **Les fonctions d'assistance (Helper Functions) doivent être `static`**
+Par exemple :
 ```c
 ft_split()
 ```
-qui nécessite
+Nécessite
 ```c
 int count_words()
 void copy_word()
 free_all()
 ```
-Ces fonctions ne doivent pas être exposées à l'extérieur et doivent être écrites ainsi :
+Ces fonctions ne doivent pas être exposées aux autres et doivent être écrites ainsi :
 ```c
 static int count_words()
 static void copy_word()
 static free_all()
 ```
-Car le mot-clé `static` signifie <font color="red">qu'elles ne peuvent être utilisées que dans ce fichier</font> et ne polluent pas l'ensemble de la bibliothèque.
+Parce que `static` signifie <font color="red">utilisable uniquement dans ce fichier</font> et ne polluera pas l'ensemble de la bibliothèque.
 
 3. **Tous les fichiers doivent se trouver dans le répertoire racine, comme suit :**
 ```
@@ -123,28 +123,29 @@ ft_strlen.c
 ft_memcpy.c
 ...
 ```
-Tout est placé directement à la racine.
+Tout placer directement à la racine.
 
-4. **Il est interdit de rendre des fichiers non utilisés**
+4. **Il est interdit de soumettre des fichiers non utilisés**
 Par exemple :
 ```c
 test.c
 old.c
 abc.c
 ```
-Si le Makefile ne les utilise pas du tout, ne les rendez pas.
+Si le Makefile ne les utilise pas du tout, ne les soumettez pas.
 
 5. **Tous les fichiers `.c` doivent :**
+
 ```bash
 -Wall
 -Wextra
 -Werror
 ```
-Compiler sans aucun avertissement (Warning).
+Être compilables sans avertissement (Warning).
 
-6. **Il est obligatoire d'utiliser la commande `ar`**
-`ar` est l'abréviation d'*archive*. C'est un outil sous les systèmes Unix/Linux/macOS utilisé pour regrouper plusieurs fichiers objets (`.o`) dans un fichier d'archive.
-L'objet de travail principal de `ar` est `.o`
+6. **L'utilisation de la commande `ar` est obligatoire**
+`ar` est l'abréviation de *archive*. C'est un outil sous les systèmes Unix/Linux/macOS utilisé pour regrouper plusieurs fichiers objets (`.o`) dans un fichier d'archive.
+Les principaux objets de travail de `ar` sont `.o`
 
 L'utilisation la plus typique dans un projet C est : plusieurs fichiers `.o` -> `ar` -> une bibliothèque statique `.a`.
 Par exemple pour Libft :
@@ -174,9 +175,9 @@ Par conséquent :
  ↓ ar
 .a
 ```
-Cette chaîne est extrêmement importante.
+Cette chaîne est très importante.
 
-`libft.a` n'est pas une bibliothèque en cours d'exécution ; il s'agit en fait d'un fichier d'archive contenant de nombreux fichiers `.o`, ce qui peut se comprendre grossièrement par :
+`libft.a` n'est pas une bibliothèque en cours d'exécution ; c'est en réalité un fichier archive contenant de nombreux fichiers `.o`, ce que l'on peut approximativement résumer par :
 ```c
 libft.a
 │
@@ -196,18 +197,18 @@ Par conséquent, ce que fait `ar` consiste essentiellement à organiser et empaq
 > ```bash
 >	ar rcs libft.a *.o
 > ```
-> `ar` : appelle l'outil d'archivage
+> `ar` : Appelle l'outil d'archivage
 > `rcs` :
->	- `r` = *replace* (remplacer) : ajoute les fichiers `.o` spécifiés à l'archive. Si un membre portant le même nom existe déjà dans l'archive, il est remplacé ; s'il n'existe pas, il est créé.
->	- `c` = *create* (créer) : crée l'archive si elle n'existe pas.
->	- `s` : crée un index de symboles (*symbol index*) pour l'archive.
+>	- `r = replace` : Ajoute les fichiers `.o` spécifiés à l'archive. Si un membre du même nom existe déjà dans l'archive, il est remplacé ; s'il n'existe pas, il est créé.
+>	- `c = create` : Crée l'archive si elle n'existe pas.
+>	- `s` : Crée un index des symboles (symbol index) pour l'archive.
 
 La commande :
 ```bash
 </> Bash
 ar rcs libft.a *.o
 ```
-est la méthode la plus typique de création de bibliothèque statique, qui peut se comprendre ainsi :
+Est la méthode la plus typique pour créer une bibliothèque statique, que l'on peut comprendre comme :
 ```bash
 ar
 │
@@ -216,46 +217,48 @@ ar
 └── s → 建立符号索引
 ```
 
-| Outil         | Rôle principal               |
-| ------------- | ---------------------------- |
-| `cc` / `gcc` | Compiler le C                |
-| `ar`         | Créer / gérer les archives   |
-| `linker`      | Lier les fichiers objets/bibliothèques pour former le programme final |
+| Outil          | Rôle principal               |
+| ------------ | -------------------------- |
+| `cc` / `gcc` | Compiler le C              |
+| `ar`         | Créer / Gérer l'archive    |
+| `linker`     | Lier les fichiers objets/bibliothèques pour former le programme final |
+
 Le projet exige explicitement d'utiliser `ar` pour créer `libft.a`, et interdit l'utilisation de `libtool`
 
-7. **`libft.a` doit se trouver à la racine**
+7. **`libft.a` doit se trouver dans le répertoire racine**
+
 `libft.a` se trouve juste à côté de `Makefile`.
 
-### 2. Exigences du README
+### 2. Exigences pour le README (README Requirements)
 
-`README.md` fait partie intégrante du projet et il est exigé qu'il soit présent à la racine du dépôt.
+`README.md` fait partie du projet et il est obligatoire de le fournir à la racine du dépôt.
 
-`README` doit contenir au moins les éléments suivants :
+`README` doit contenir au minimum les éléments suivants :
 1. **La première ligne doit être en italique et son contenu doit être strictement :**
 ```
 *This activity has been created as part of the 42 curriculum by <login>.*
 ```
 En cas de travail en groupe, plusieurs identifiants (*login*) peuvent être écrits à la suite.
 
-2. **Description (Présentation du projet)**, expliquant :**
-- Qu'est-ce que Libft
+2. **Description du projet, expliquant :**
+- Ce qu'est Libft
 - Les objectifs du projet
 - Le contenu principal implémenté
 
-3. **Instructions (Mode d'emploi)**, par exemple :
+3. **Instructions d'utilisation (Instructions)**, par exemple :
 - La compilation, par exemple `make`
 - La génération de `libft.a`
 - L'utilisation de cette bibliothèque statique dans d'autres projets
 
-4. **Resources (Références)**
+4. **Ressources (Resources)**
 Lister les références consultées pendant l'apprentissage, par exemple :
-- La documentation de la bibliothèque standard C (les pages `man`)
+- La documentation de la bibliothèque standard C (pages man)
 - Des tutoriels
 - Des articles techniques, etc.
-De plus, il est obligatoire d'expliquer **l'utilisation de l'IA dans le projet**, par exemple pour l'explication de concepts, la revue de code ou le débogage, tout en précisant quelles parties ont été réalisées par vous-même.
+En outre, il est obligatoire d'expliquer **l'utilisation de l'IA dans le projet**, par exemple pour l'explication de concepts, la revue de code ou le débogage, tout en précisant quelles parties ont été réalisées par vous-même.
 
 5. **Présentation détaillée de la bibliothèque créée**
 Fournir une description détaillée de la bibliothèque `libft` elle-même, par exemple :
 - Les catégories de fonctions incluses
-- L'utilité de chaque catégorie de fonctions
-- Le rôle de cette bibliothèque dans les projets 42 ultérieurs
+- L'utilité de chaque catégorie de fonction
+- Le rôle de cette bibliothèque dans les futurs projets 42

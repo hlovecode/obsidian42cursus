@@ -44,13 +44,13 @@ strnstr
 
 strdup
 ```
-###### Group 4 Character conversions
+###### Group 4 Character conversion
 ```c
 toupper
 
 tolower
 ```
-###### Group 5 Number conversions
+###### Group 5 Number conversion
 ```c
 atoi
 ```
@@ -59,7 +59,7 @@ atoi
 calloc // 不同系统，行为可能不同
 strdup
 ```
-###### Group 7 Mandatory new functions to write yourself
+###### Group 7 Custom functions required to write yourself
 ```c
 ft_substr
 ft_strjoin
@@ -77,27 +77,27 @@ ft_putnbr_fd
 | Function          | Description          |
 | ----------------- | -------------------- |
 | `ft_lstnew`       | Create a new node                |
-| `ft_lstadd_front` | Add node at the beginning |
+| `ft_lstadd_front` | Insert at the beginning   |
 | `ft_lstsize`      | Count the number of nodes               |
 | `ft_lstlast`      | Get the last node             |
-| `ft_lstadd_back`  | Add node at the end                  |
+| `ft_lstadd_back`  | Insert at the end   |
 | `ft_lstdelone`    | Delete a node               |
 | `ft_lstclear`     | Delete the entire list               |
-| `ft_lstiter`      | Iterate through the list and apply a function to each node       |
-| `ft_lstmap`       | Iterate through the list, apply a function to each node's content, and create a new list |
+| `ft_lstiter`      | Iterate through the list and execute a function on each node       |
+| `ft_lstmap`       | Transform the content of each node to generate a new list |
 
-### 1. Technical considerations Technical Requirements
+### 1. Technical considerations Technical requirements
 
-1. **Global variables are forbidden**
-Because Libft is a public library, it should always have the same input -> always the same output.
-If there are global variables, modifying them would cause the final result to change.
+1. **Global variables are prohibited**
+Because Libft is a public library, same input -> always same output.
+If there are global variables, modifying them will cause the final result to change.
 
 2. **Helper functions must be static**
 For example: 
 ```c
 ft_split()
 ```
-needs inside:
+which needs
 ```c
 int count_words()
 void copy_word()
@@ -123,9 +123,9 @@ ft_strlen.c
 ft_memcpy.c
 ...
 ```
-Everything must be placed directly in the root directory.
+All placed directly in the root directory.
 
-4. **Do not submit unused files**
+4. **Submitting non-existent files is not allowed**
 For example:
 ```c
 test.c
@@ -134,19 +134,20 @@ abc.c
 ```
 If the Makefile does not use them at all, do not submit them.
 
-5. **All .c files must:**
+5. **All `.c` files must:**
+
 ```bash
 -Wall
 -Wextra
 -Werror
 ```
-Be able to compile without warnings.
+Be compilable without warnings.
 
 6. **Must use the `ar` command**
-`ar` is short for archive. It is a utility in Unix/Linux/macOS systems used to bundle multiple object files (`.o`) into an archive file.
-The primary objects for `ar` are `.o`
+`ar` is short for archive, which is a tool in Unix/Linux/macOS systems used to pack multiple object files (`.o`) into an archive file.
+The main working objects of `ar` are `.o`
 
-The most typical use case in C projects is multiple `.o` files -> `ar` -> a `.a` static library.
+The most typical usage in C projects is multiple `.o` files -> `ar` -> a `.a` static library.
 For example, Libft:
 ```c
 ft_strlen.o
@@ -174,7 +175,7 @@ Therefore:
  ↓ ar
 .a
 ```
-This chain is extremely important.
+This chain is very important.
 
 `libft.a` is not a running library; it is actually an archive file containing many `.o` files, which can be roughly understood as:
 ```c
@@ -191,23 +192,23 @@ libft.a
 └── ...
 ```
 
-Therefore, what `ar` does is essentially organizing and packaging many object files into a static library file.
+Therefore, what `ar` does is essentially organizing/packing many object files into a static library file.
 > Understanding the command
 > ```bash
 >	ar rcs libft.a *.o
 > ```
-> `ar`: Call the archive tool
+> `ar`: invokes the archive tool
 > `rcs`:
->	- `r` = replace: Insert the specified `.o` files into the archive. If a member with the same name already exists in the archive, replace it; if it does not exist, create it.
->	- `c` = create: Create the archive if it does not already exist.
->	- `s`: Create a symbol index for the archive.
+>	- `r` = replace: inserts the specified `.o` files into the archive. If a member with the same name already exists in the archive, it replaces it; otherwise, it creates it.
+>	- `c` = create: creates the archive if it does not already exist.
+>	- `s`: creates a symbol index for the archive.
 
 The command:
 ```bash
 </> Bash
 ar rcs libft.a *.o
 ```
-is the most typical way to create a static library, which can be understood as:
+is the most typical static library creation method, which can be understood as:
 ```bash
 ar
 │
@@ -221,10 +222,12 @@ ar
 | `cc` / `gcc` | Compile C           |
 | `ar`         | Create/manage archives  |
 | linker       | Link object files/libraries into the final program |
-The project explicitly requires using `ar` to create `libft.a`, and prohibits using `libtool`
+
+The project explicitly requires using `ar` to create `libft.a`; using `libtool` is prohibited.
 
 7. **`libft.a` must be located in the root directory**
-`libft.a` is right next to `Makefile`
+
+`libft.a` is right next to `Makefile`.
 
 ### 2. README Requirements
 
@@ -235,27 +238,27 @@ The project explicitly requires using `ar` to create `libft.a`, and prohibits us
 ```
 *This activity has been created as part of the 42 curriculum by <login>.*
 ```
-If working in a team, multiple logins can be listed in order.
+If collaborating with multiple people, multiple logins can be listed sequentially.
 
 2. **Description of the project, explaining:**
 - What Libft is
-- Project objectives
-- Main implementation contents
+- Project goals
+- Main implemented contents
 
 3. **Instructions for use**, such as:
 - Compilation, e.g., `make`
 - Generating `libft.a`
 - Using the static library in other projects
 
-4. **Resources**
+4. **Resources (Reference materials)**
 List references used during the learning process, such as:
 - C standard library documentation (man pages)
 - Tutorials
 - Technical articles, etc.
-In addition, you must also state **how AI was used in the project** (e.g., for conceptual explanations, code review, or debugging) and which parts were completed by yourself.
+In addition, you must explain **the use of AI in the project**, such as for concept explanation, code review, or debugging, but specify which parts were completed by yourself.
 
-5. **Detailed introduction of the created library**
-Provide a detailed explanation of the `libft` library itself, such as:
+5. **Detailed introduction to the created library**
+Provide a detailed description of the `libft` library itself, such as:
 - What categories of functions are included
 - The purpose of each category of functions
 - The role of this library in subsequent 42 projects
