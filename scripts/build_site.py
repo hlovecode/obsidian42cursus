@@ -6,7 +6,7 @@ TRANSLATION_DIR = "translations"
 DOCS_DIR = "docs"
 
 LANGUAGES = {
-    "zh": "中文",
+    "cn": "中文",
     "en": "English",
     "fr": "Français",
 }
@@ -122,7 +122,7 @@ def create_homepage():
 def create_language_homepage(
     language_code
 ):
-    if language_code == "zh":
+    if language_code == "cn":
         content = """# 中文笔记
 
 这里是我的 42 Common Core 学习笔记
@@ -197,12 +197,12 @@ def build_site_content():
 
     create_homepage()
 
-    create_language_homepage("zh")
+    create_language_homepage("cn")
     create_language_homepage("en")
     create_language_homepage("fr")
 
     build_language(
-        "zh",
+        "cn",
         "."
     )
 
