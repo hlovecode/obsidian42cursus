@@ -6,7 +6,7 @@ TRANSLATION_DIR = "translations"
 DOCS_DIR = "docs"
 
 LANGUAGES = {
-    "cn": "中文",
+    "zh": "中文",
     "en": "English",
     "fr": "Français",
 }
@@ -97,7 +97,7 @@ def create_homepage():
     homepage = """# <span style="font-weight: bold;">42 Common Core</span>
 
 ### <span style="color: #668F80; font-weight: bold;">欢迎来到我的42 Common Core 学习笔记</span>
-- [中文](cn/index.md)
+- [中文](zh/index.md)
 ### <span style="color: #668F80; font-weight: bold;">Welcome to my 42 Common Core learning notes</span>
 - [English](en/index.md)
 ### <span style="color: #668F80; font-weight: bold;">Bienvenu(e) sur mes notes pour 42 Common Core</span>
@@ -122,7 +122,7 @@ def create_homepage():
 def create_language_homepage(
     language_code
 ):
-    if language_code == "cn":
+    if language_code == "zh":
         content = """# 中文笔记
 
 这里是我的 42 Common Core 学习笔记
@@ -197,12 +197,12 @@ def build_site_content():
 
     create_homepage()
 
-    create_language_homepage("cn")
+    create_language_homepage("zh")
     create_language_homepage("en")
     create_language_homepage("fr")
 
     build_language(
-        "cn",
+        "zh",
         "."
     )
 
