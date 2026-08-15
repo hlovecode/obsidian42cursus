@@ -89,10 +89,12 @@ ft_putnbr_fd
 ### 1. Technical considerations 技术要求
 
 1. **禁止使用全局变量**
+
 因为Libft是一个公共库，应该同样输入 -> 永远同样输出.
 如果有全局变量，当修改了该变量，会引发最终的结果发生变化.
 
 2. **Helper Function 必须static**
+
 例如: 
 ```c
 ft_split()
@@ -112,6 +114,7 @@ static free_all()
 因为static 表示<font color="red">只能本文件使用</font>，不会污染整个库.
 
 3. **所有文件放在根目录, 如下：**
+
 ```
 libft/
 
@@ -126,6 +129,7 @@ ft_memcpy.c
 全部直接放根目录.
 
 4. **不允许提交没有的文件**
+
 例如：
 ```c
 test.c
