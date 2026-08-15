@@ -1,5 +1,5 @@
-Implémenter certaines fonctions en langage C, telles que la réimplémentation de la libc, en créant un makefile et en exécutant la commande make pour générer une bibliothèque statique publique libft.a.
-<font color="red">Il s'agit de la bibliothèque de base de l'ensemble du Common Core.</font>
+Implémenter certaines fonctions en langage C, telles que la ré-implémentation de la libc, en créant un Makefile, en exécutant la commande `make`, afin de générer une bibliothèque statique publique `libft.a`.
+<font color="red">Il s'agit de la bibliothèque de base pour l'ensemble du Common Core.</font>
 ###### Groupe 1 : Caractères
 ```c
 ft_isalpha
@@ -59,7 +59,7 @@ atoi
 calloc // 不同系统，行为可能不同
 strdup
 ```
-###### Groupe 7 : Nouvelles fonctions demandées
+###### Groupe 7 : Nouvelles fonctions requises à écrire soi-même
 ```c
 ft_substr
 ft_strjoin
@@ -74,41 +74,42 @@ ft_putendl_fd
 ft_putnbr_fd
 ```
 ###### Groupe 8 : Fonctions de listes chaînées (Linked List)
-| Fonction            | Fonctionnalité          |
-| ----------------- | -------------------- |
-| `ft_lstnew`       | Créer un nouveau nœud        |
-| `ft_lstadd_front` | Insertion en tête         |
-| `ft_lstsize`      | Compter le nombre de nœuds   |
-| `ft_lstlast`      | Obtenir le dernier nœud      |
-| `ft_lstadd_back`  | Insertion en queue        |
-| `ft_lstdelone`    | Supprimer un nœud         |
-| `ft_lstclear`     | Supprimer toute la liste     |
+| Fonction          | Fonctionnalité             |
+| ----------------- | -------------------------- |
+| `ft_lstnew`       | Créer un nouveau nœud      |
+| `ft_lstadd_front` | Insertion en tête          |
+| `ft_lstsize`      | Compter le nombre de nœuds |
+| `ft_lstlast`      | Obtenir le dernier nœud    |
+| `ft_lstadd_back`  | Insertion en queue         |
+| `ft_lstdelone`    | Supprimer un nœud          |
+| `ft_lstclear`     | Supprimer toute la liste   |
 | `ft_lstiter`      | Parcourir la liste et exécuter une fonction sur chaque nœud |
 | `ft_lstmap`       | Transformer le contenu de chaque nœud pour générer une nouvelle liste |
+
 ### 1. Considérations techniques (Technical considerations)
 
 1. **Interdiction d'utiliser des variables globales**
-Puisque Libft est une bibliothèque publique, elle doit respecter : même entrée -> toujours même sortie.
-S'il y a des variables globales, leur modification entraînera une modification du résultat final.
+Puisque Libft est une bibliothèque publique, elle doit toujours donner la même sortie pour une même entrée -> *Same input -> Always same s, output*.
+S'il y a des variables globales, la modification de ces variables entraînera une modification du résultat final.
 
-2. **Les fonctions d'assistance (Helper Functions) doivent être static**
+2. **Les fonctions helper (auxiliaires) doivent être `static`**
 Par exemple : 
 ```c
 ft_split()
 ```
-nécessite
+qui nécessite
 ```c
 int count_words()
 void copy_word()
 free_all()
 ```
-Ces fonctions ne doivent pas être exposées aux autres et doivent être écrites ainsi :
+Ces fonctions ne doivent pas être exposées à l'extérieur et doivent être écrites ainsi :
 ```c
 static int count_words()
 static void copy_word()
 static free_all()
 ```
-Car static signifie <font color="red">utilisable uniquement dans ce fichier</font>, ce qui évite de polluer l'ensemble de la bibliothèque.
+Car le mot-clé `static` signifie <font color="red">qu'elles ne peuvent être utilisées que dans ce fichier</font> et ne polluent pas l'ensemble de la bibliothèque.
 
 3. **Tous les fichiers doivent se trouver dans le répertoire racine, comme suit :**
 ```
@@ -124,16 +125,16 @@ ft_memcpy.c
 ```
 Tout est placé directement à la racine.
 
-4. **Il est interdit de soumettre des fichiers superflus**
+4. **Il est interdit de rendre des fichiers non utilisés**
 Par exemple :
 ```c
 test.c
 old.c
 abc.c
 ```
-Si le Makefile ne les utilise pas du tout, ne les soumettez pas.
+Si le Makefile ne les utilise pas du tout, ne les rendez pas.
 
-5. **Tous les fichiers .c doivent :**
+5. **Tous les fichiers `.c` doivent :**
 ```bash
 -Wall
 -Wextra
@@ -141,11 +142,11 @@ Si le Makefile ne les utilise pas du tout, ne les soumettez pas.
 ```
 Compiler sans aucun avertissement (Warning).
 
-6. **Utilisation obligatoire de la commande ar**
-ar est l'abréviation de archive. C'est un outil sous les systèmes Unix/Linux/macOS utilisé pour regrouper plusieurs fichiers objets (`.o`) dans un fichier archive.
-L'objet de travail principal de ar est `.o`
+6. **Il est obligatoire d'utiliser la commande `ar`**
+`ar` est l'abréviation d'*archive*. C'est un outil sous les systèmes Unix/Linux/macOS utilisé pour regrouper plusieurs fichiers objets (`.o`) dans un fichier d'archive.
+L'objet de travail principal de `ar` est `.o`
 
-L'utilisation la plus typique dans un projet C est : plusieurs fichiers .o -> ar -> une bibliothèque statique .a.
+L'utilisation la plus typique dans un projet C est : plusieurs fichiers `.o` -> `ar` -> une bibliothèque statique `.a`.
 Par exemple pour Libft :
 ```c
 ft_strlen.o
@@ -175,7 +176,7 @@ Par conséquent :
 ```
 Cette chaîne est extrêmement importante.
 
-`libft.a` n'est pas une bibliothèque en cours d'exécution, c'est en réalité un fichier d'archive contenant de nombreux fichiers `.o`, ce qui peut se comprendre grossièrement par :
+`libft.a` n'est pas une bibliothèque en cours d'exécution ; il s'agit en fait d'un fichier d'archive contenant de nombreux fichiers `.o`, ce qui peut se comprendre grossièrement par :
 ```c
 libft.a
 │
@@ -190,23 +191,23 @@ libft.a
 └── ...
 ```
 
-Par conséquent, ce que fait `ar` consiste fondamentalement à organiser et empaqueter de nombreux fichiers objets dans un fichier de bibliothèque statique.
+Par conséquent, ce que fait `ar` consiste essentiellement à organiser et empaqueter de nombreux fichiers objets dans un fichier de bibliothèque statique.
 > Comprendre la commande
 > ```bash
 >	ar rcs libft.a *.o
 > ```
-> ar : Appelle l'outil d'archivage (archive)
-> rcs :
->	- r = replace (remplacer) : Ajoute les fichiers `.o` spécifiés à l'archive. Si un membre du même nom existe déjà dans l'archive, il est remplacé ; s'il n'existe pas, il est créé.
->	- c = create (créer) : Crée l'archive si elle n'existe pas.
->	- s : Crée un index de symboles (symbol index) pour l'archive.
+> `ar` : appelle l'outil d'archivage
+> `rcs` :
+>	- `r` = *replace* (remplacer) : ajoute les fichiers `.o` spécifiés à l'archive. Si un membre portant le même nom existe déjà dans l'archive, il est remplacé ; s'il n'existe pas, il est créé.
+>	- `c` = *create* (créer) : crée l'archive si elle n'existe pas.
+>	- `s` : crée un index de symboles (*symbol index*) pour l'archive.
 
 La commande :
 ```bash
 </> Bash
 ar rcs libft.a *.o
 ```
-est la méthode de création de bibliothèque statique la plus typique, qui peut se comprendre comme :
+est la méthode la plus typique de création de bibliothèque statique, qui peut se comprendre ainsi :
 ```bash
 ar
 │
@@ -215,46 +216,46 @@ ar
 └── s → 建立符号索引
 ```
 
-| Outil          | Rôle principal           |
-| ------------ | -------------- |
-| `cc` / `gcc` | Compiler le C           |
-| `ar`         | Créer/gérer l'archive  |
-| linker       | Lier les fichiers objets/bibliothèques pour former le programme final |
+| Outil         | Rôle principal               |
+| ------------- | ---------------------------- |
+| `cc` / `gcc` | Compiler le C                |
+| `ar`         | Créer / gérer les archives   |
+| `linker`      | Lier les fichiers objets/bibliothèques pour former le programme final |
 Le projet exige explicitement d'utiliser `ar` pour créer `libft.a`, et interdit l'utilisation de `libtool`
 
-7. **libft.a doit se trouver dans le répertoire racine**
+7. **`libft.a` doit se trouver à la racine**
 `libft.a` se trouve juste à côté de `Makefile`.
 
-### 2. Exigences du README (README Requirements)
+### 2. Exigences du README
 
-`README.md` fait partie intégrante du projet et doit obligatoirement être fourni à la racine du dépôt.
+`README.md` fait partie intégrante du projet et il est exigé qu'il soit présent à la racine du dépôt.
 
-`README` doit contenir au minimum les éléments suivants :
-1. **La première ligne doit être en italique et son contenu doit être exactement :**
+`README` doit contenir au moins les éléments suivants :
+1. **La première ligne doit être en italique et son contenu doit être strictement :**
 ```
 *This activity has been created as part of the 42 curriculum by <login>.*
 ```
-En cas de travail en groupe, plusieurs logins peuvent être écrits à la suite.
+En cas de travail en groupe, plusieurs identifiants (*login*) peuvent être écrits à la suite.
 
-2. **Description (Présentation du projet), expliquant :**
-- Ce qu'est Libft
+2. **Description (Présentation du projet)**, expliquant :**
+- Qu'est-ce que Libft
 - Les objectifs du projet
 - Le contenu principal implémenté
 
-3. **Instructions (Instructions d'utilisation)**, par exemple :
-- La compilation, par exemple make
+3. **Instructions (Mode d'emploi)**, par exemple :
+- La compilation, par exemple `make`
 - La génération de `libft.a`
 - L'utilisation de cette bibliothèque statique dans d'autres projets
 
 4. **Resources (Références)**
-Lister les sources consultées pendant l'apprentissage, par exemple :
-- La documentation de la bibliothèque standard C (man pages)
+Lister les références consultées pendant l'apprentissage, par exemple :
+- La documentation de la bibliothèque standard C (les pages `man`)
 - Des tutoriels
 - Des articles techniques, etc.
-De plus, il est obligatoire d'expliquer **l'utilisation de l'IA dans le projet** (par exemple, pour l'explication de concepts, la revue de code ou le débogage), tout en précisant quelles parties ont été réalisées par vous-même.
+De plus, il est obligatoire d'expliquer **l'utilisation de l'IA dans le projet**, par exemple pour l'explication de concepts, la revue de code ou le débogage, tout en précisant quelles parties ont été réalisées par vous-même.
 
 5. **Présentation détaillée de la bibliothèque créée**
 Fournir une description détaillée de la bibliothèque `libft` elle-même, par exemple :
 - Les catégories de fonctions incluses
-- L'utilité de chaque catégorie de fonction
-- Le rôle de cette bibliothèque dans les futurs projets 42
+- L'utilité de chaque catégorie de fonctions
+- Le rôle de cette bibliothèque dans les projets 42 ultérieurs
