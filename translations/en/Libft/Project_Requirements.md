@@ -1,6 +1,6 @@
-Implement some functions in C, such as re-implementing libc, by creating a Makefile and executing the `make` command to generate a static public library `libft.a`.
-<font color="red">This is the foundational library of the entire Common Core.</font>
-###### Group 1: Character Classification
+Implement several functions in C, such as re-implementing libc, by creating a Makefile, executing the `make` command, and generating a static public library `libft.a`.
+<font color="red">This is the foundation library of the entire Common Core.</font>
+###### Group 1 Character checks:
 ```c
 ft_isalpha
 
@@ -12,7 +12,7 @@ ft_isascii
 
 ft_isprint
 ```
-###### Group 2: Memory Operations
+###### Group 2 Memory operations
 ```c
 memset
 
@@ -26,7 +26,7 @@ memcmp
 
 memchr
 ```
-###### Group 3: String Functions
+###### Group 3 String functions
 ```c
 strlen
 
@@ -44,22 +44,22 @@ strnstr
 
 strdup
 ```
-###### Group 4: Character Conversion
+###### Group 4 Character conversion
 ```c
 toupper
 
 tolower
 ```
-###### Group 5: Number Conversion
+###### Group 5 Number conversion
 ```c
 atoi
 ```
-###### Group 6: Dynamic Memory
+###### Group 6 Dynamic memory
 ```c
 calloc // 不同系统，行为可能不同
 strdup
 ```
-###### Group 7: Required New Functions to Write Yourself
+###### Group 7 Mandatory new functions
 ```c
 ft_substr
 ft_strjoin
@@ -73,39 +73,39 @@ ft_putstr_fd
 ft_putendl_fd
 ft_putnbr_fd
 ```
-###### Group 8: Linked List Functions
+###### Group 8 Linked List functions
 | Function          | Description                |
 | ----------------- | -------------------- |
 | `ft_lstnew`       | Create a new node                |
-| `ft_lstadd_front` | Insert at the beginning    |
+| `ft_lstadd_front` | Insert node at the beginning   |
 | `ft_lstsize`      | Count the number of nodes               |
 | `ft_lstlast`      | Get the last node             |
-| `ft_lstadd_back`  | Insert at the end          |
+| `ft_lstadd_back`  | Insert node at the end   |
 | `ft_lstdelone`    | Delete a node               |
-| `ft_lstclear`     | Delete the entire list               |
-| `ft_lstiter`      | Iterate through the list and execute a function on each node       |
-| `ft_lstmap`       | Transform the content of each node to generate a new list |
+| `ft_lstclear`     | Delete the entire linked list               |
+| `ft_lstiter`      | Iterate through the list and apply a function to each node       |
+| `ft_lstmap`       | Apply a function to the content of each node to create a new list |
 
-### 1. Technical considerations Technical Requirements
+### 1. Technical considerations Technical requirements
 
 1. **Global variables are strictly prohibited**
 
-Because Libft is a public library, it should follow: same input -> always same output.
+Since Libft is a public library, it should follow the principle: same input -> always same output.
 If global variables exist, modifying them will cause the final result to change.
 
-2. **Helper Functions must be static**
+2. **Helper functions must be static**
 
-For example: 
+For example:
 ```c
 ft_split()
 ```
-which requires
+needs
 ```c
 int count_words()
 void copy_word()
 free_all()
 ```
-These functions must not be exposed to others and should be written as:
+These functions should not be exposed externally and should be written as:
 ```c
 static int count_words()
 static void copy_word()
@@ -126,9 +126,9 @@ ft_strlen.c
 ft_memcpy.c
 ...
 ```
-All files must be placed directly in the root directory.
+Everything must be placed directly in the root directory.
 
-4. **Submitting unused files is not allowed**
+4. **Do not submit unused files**
 
 For example:
 ```c
@@ -145,11 +145,13 @@ If the Makefile does not use them at all, do not submit them.
 -Wextra
 -Werror
 ```
-be able to compile without warnings.
+Be able to compile without warnings.
 
 6. **Must use the `ar` command**
-`ar` stands for archiver and is a tool in Unix/Linux/macOS systems used to bundle multiple object files (`.o`) into an archive file.
+
+`ar` is short for archive. It is a utility in Unix/Linux/macOS systems used to pack multiple object files (`.o`) into an archive file.
 The primary working objects of `ar` are `.o`
+
 
 The most typical usage in a C project is multiple `.o` files -> `ar` -> a `.a` static library.
 For example, Libft:
@@ -167,7 +169,7 @@ Through:
 </> Bash
 ar
 ```
-Ultimately resulting in:
+Ultimately obtaining:
 ```bash
 libft.a
 ```
@@ -196,16 +198,16 @@ libft.a
 └── ...
 ```
 
-Therefore, what `ar` does is essentially organizing/bundling many object files into a static library file.
+Therefore, what `ar` does is essentially organizing/packing many object files into a static library file.
 > Understanding the command
 > ```bash
 >	ar rcs libft.a *.o
 > ```
-> `ar`: invoke the archiver tool
+> `ar`: invoke the archive utility
 > `rcs`:
->	- `r` = replace: Insert the specified `.o` files into the archive. If a member with the same name already exists in the archive, replace it; if it does not exist, create it.
->	- `c` = create: Create the archive if it does not already exist.
->	- `s` = Create an archive symbol index.
+>	- `r` = replace: insert the specified `.o` files into the archive. If a member with the same name already exists in the archive, replace it; if it does not exist, create it.
+>	- `c` = create: create the archive if it does not exist.
+>	- `s`: create a symbol index for the archive.
 
 The command:
 ```bash
@@ -221,13 +223,13 @@ ar
 └── s → 建立符号索引
 ```
 
-| Tool           | Main Purpose       |
+| Tool           | Main Role           |
 | ------------ | -------------- |
 | `cc` / `gcc` | Compile C           |
-| `ar`         | Create/manage archives  |
+| `ar`         | Create/Manage archives  |
 | linker       | Link object files/libraries into the final program |
 
-The project explicitly requires using `ar` to create `libft.a`; using `libtool` is prohibited.
+The project explicitly requires using `ar` to create `libft.a`, and using `libtool` is prohibited.
 
 7. **`libft.a` must be located in the root directory**
 
@@ -235,10 +237,10 @@ The project explicitly requires using `ar` to create `libft.a`; using `libtool` 
 
 ### 2. README Requirements
 
-`README.md` is part of the project and is required to be present in the root directory of the repository.
+`README.md` is part of the project, and it is required to be provided in the root directory of the repository.
 
-`README` should at least contain the following contents:
-1. **The first line must be in italics, with the fixed content:**
+`README` should contain at least the following:
+1. **The first line must be in italics, and the content must be fixed as:**
 ```
 *This activity has been created as part of the 42 curriculum by <login>.*
 ```
@@ -254,14 +256,14 @@ If working in a team, multiple logins can be listed sequentially.
 - Generating `libft.a`
 - Using the static library in other projects
 
-4. **Resources (References)**
-List the references used during the learning process, such as:
+4. **Resources**
+List references used during the learning process, such as:
 - C standard library documentation (man pages)
 - Tutorials
 - Technical articles, etc.
-In addition, you must also explain **the use of AI in the project**, such as for conceptual explanations, code review, or debugging, while specifying which parts were completed by yourself.
+Additionally, you must state **how AI was used in the project**, such as for concept explanation, code review, or debugging, while specifying which parts were completed by yourself.
 
-5. **Detailed introduction to the created library**
+5. **Detailed introduction of the created library**
 Provide a detailed explanation of the `libft` library itself, such as:
 - What categories of functions are included
 - The purpose of each category of functions
