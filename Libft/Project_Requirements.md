@@ -88,12 +88,12 @@ ft_putnbr_fd
 
 ### 1. Technical considerations 技术要求
 
-1. **禁止使用全局变量**
+1 **禁止使用全局变量**
 
 因为Libft是一个公共库，应该同样输入 -> 永远同样输出.
 如果有全局变量，当修改了该变量，会引发最终的结果发生变化.
 
-2. **Helper Function 必须static**
+2 **Helper Function 必须static**
 
 例如: 
 ```c
@@ -113,7 +113,7 @@ static free_all()
 ```
 因为static 表示<font color="red">只能本文件使用</font>，不会污染整个库.
 
-3. **所有文件放在根目录, 如下：**
+3 **所有文件放在根目录, 如下：**
 
 ```
 libft/
@@ -128,7 +128,7 @@ ft_memcpy.c
 ```
 全部直接放根目录.
 
-4. **不允许提交没有的文件**
+4 **不允许提交没有的文件**
 
 例如：
 ```c
@@ -138,7 +138,7 @@ abc.c
 ```
 如果Makefile根本不用它们，不要提交.
 
-5. **所有.c文件都必须：**
+5 **所有.c文件都必须：**
 
 ```bash
 -Wall
@@ -147,7 +147,7 @@ abc.c
 ```
 能够无Warning编译.
 
-6. **必须使用命令ar**
+6 **必须使用命令ar**
 
 ar 是 archive 的缩写，是Unix/Linux/macOS 系统中的一个工具，用来把多个目标文件（`.o`）打包成一个 archive 文件.
 ar 的主要工作对象是 `.o`
@@ -231,7 +231,7 @@ ar
 
 项目明确要求使用 `ar` 创建 `libft.a`，禁止使用 `libtool`
 
-7. **libft.a 必须位于根目录**
+7 **libft.a 必须位于根目录**
 
 `libft.a` 就在 `Makefile` 旁边.
 
@@ -240,30 +240,31 @@ ar
 `README.md` 是项目的一部分，要求在仓库根目录一定要提供它.
 
 `README` 至少应该包含以下内容：
-1. **第1行必须是斜体，并且内容固定为：**
+
+1 **第1行必须是斜体，并且内容固定为：**
 ```
 *This activity has been created as part of the 42 curriculum by <login>.*
 ```
 如果多人合作，可以依次写多个 login.
 
-2. **Description 项目介绍，说明：**
+2 **Description 项目介绍，说明：**
 - Libft 是什么
 - 项目目标
 - 主要实现内容
 
-3. **Instructions 使用说明**，比如：
+3 **Instructions 使用说明**，比如：
 - 编译，例如 make
 - 生成 `libft.a`
 - 在其他项目中使用该静态库
 
-4. **Resources (参考资料)**
+4 **Resources (参考资料)**
 列出学习过程中参考的资料，例如：
 - C 标准库文档（man pages）
 - 教程
 - 技术文章等
 此外，还必须说明 **AI 在项目中的使用情况**，例如用于概念解释、代码审查或调试，但哪些部分由自己完成.
 
-5. **详细介绍创建的库**
+5 **详细介绍创建的库**
 对 `libft`库本身进行详细说明，例如：
 - 包含哪些类别的函数
 - 每类函数的用途
