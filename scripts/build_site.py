@@ -97,7 +97,7 @@ def create_homepage():
     homepage = """# <span style="font-weight: bold;">42 Common Core</span>
 
 ### <span style="color: #668F80; font-weight: bold;">欢迎来到我的42 Common Core 学习笔记</span>
-- [中文](zh/index.md)
+- [中文](cn/index.md)
 ### <span style="color: #668F80; font-weight: bold;">Welcome to my 42 Common Core learning notes</span>
 - [English](en/index.md)
 ### <span style="color: #668F80; font-weight: bold;">Bienvenu(e) sur mes notes pour 42 Common Core</span>
