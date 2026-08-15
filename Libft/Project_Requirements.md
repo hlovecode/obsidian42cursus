@@ -85,6 +85,7 @@ ft_putnbr_fd
 | `ft_lstclear`     | 删除整个链表               |
 | `ft_lstiter`      | 遍历链表，对每个节点执行函数       |
 | `ft_lstmap`       | 对每个节点内容进行转换，生成一个新的链表 |
+
 ### 1. Technical considerations 技术要求
 
 1. **禁止使用全局变量**
