@@ -47,7 +47,7 @@ s'occupe de :
 ```Makefile
 .o → libft.a
 ```
-Par conséquent, toute la logique du Makefile :
+Donc, toute la logique du Makefile :
 ```Makefile
                 cc
 .c ─────────────────────→ .o
@@ -58,7 +58,7 @@ Par conséquent, toute la logique du Makefile :
                          libft.a
 ```
 
-`ar` traite principalement des membres `archive`, c'est-à-dire `.o`, et le code source C `.c` doit d'abord être compilé via `cc`, donc cela devrait être :
+`ar` gère principalement les membres `archive`, c'est-à-dire `.o`, et le code source C `.c` doit d'être compilé par `cc`, donc cela devrait être :
 ```bash
 .c
  ↓ cc
@@ -93,7 +93,7 @@ pour obtenir :
 libft.a
 ```
 
-3. Voir ce que contient la bibliothèque statique :
+3. Voir le contenu d'une bibliothèque statique :
 ```bash
 ar -t libft.a
 ```
@@ -103,14 +103,14 @@ ft_strlen.o
 ...
 ```
 
-4. Supprimer la bibliothèque statique :
+4. Supprimer la bibliothèque statique
 ```bash
 rm -f libft.a
 ```
 
 #### Assembler tout le processus de Libft
 
-On peut comprendre `Libft` comme :
+On peut voir `Libft` comme :
 ```bash
               你的 C 源代码
                      │
@@ -143,4 +143,4 @@ On peut comprendre `Libft` comme :
               └──────────────┘
 ```
 
-**`cc` compile `.c` en `.o` ; `ar` organise plusieurs `.o` en une bibliothèque statique `.a` ; enfin, l'éditeur de liens extrait de `.a` le code dont le programme a besoin pour générer l'exécutable.**
+**`cc` compile `.c` en `.o` ; `ar` regroupe plusieurs `.o` dans une bibliothèque statique `.a` ; enfin, l'éditeur de liens extrait de `.a` le code nécessaire au programme pour générer l'exécutable.**
