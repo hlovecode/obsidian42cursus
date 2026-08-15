@@ -20,6 +20,7 @@
   "Libft/Part 1- Libc functions/memchr().md": "bdab89d7e5368b411cd01db1645946a7d62437972c5f5970c246e4b040713cbc",
   "Libft/Part 1- Libc functions/memcmp().md": "6ee613df7571a52e2ce0157560009ae883702ea366c6c703250f6fe80211fee1",
   "Libft/Part 1- Libc functions/strnstr().md": "215d450719faaa40289257278f267cd92f72a610fabd2efeb169a7cdbffda965",
-  "Libft/Part 2 - Additional functions/Additional functions.md": "70b167f6158afb362d096c69e4e1f138cb7bc9bf8bbc13669aa7915d48fdc633",
-  "Libft/ar vs Makefile.md": "a8a8e6e9a1e63f718129a595a6c5df3c7a664b8d737d27b681411e7b06357209"
+  "Libft/Part 2 - Additional functions/Additional functions.md": "69e1d74e7f626cb54e86026c0c1247d4bd735cb1ede9e3607fae84489fd48b39",
+  "Libft/ar vs Makefile.md": "a8a8e6e9a1e63f718129a595a6c5df3c7a664b8d737d27b681411e7b06357209",
+  "Libft/Part 3- Linked list/Linked list.md": "5a2c047e54cd569666a8efe0a4546f87e7dfccd7b4e564bca59af4d269f3e5e4"
 }
