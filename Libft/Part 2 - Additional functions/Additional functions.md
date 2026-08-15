@@ -14,7 +14,7 @@ char *ft_strjoin(char const *s1, char const *s2);
 #### 3.  `ft_strtrim`
 
 ```c
-char *ft_strtrim(char const s*1, char const *set);
+char *ft_strtrim(char const *s1, char const *set);
 ```
 
 #### 4.  `ft_split`
