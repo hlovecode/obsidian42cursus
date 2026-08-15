@@ -135,6 +135,7 @@ abc.c
 如果Makefile根本不用它们，不要提交.
 
 5. **所有.c文件都必须：**
+
 ```bash
 -Wall
 -Wextra
@@ -221,9 +222,11 @@ ar
 | `cc` / `gcc` | 编译 C           |
 | `ar`         | 创建/管理 archive  |
 | linker       | 把目标文件/库链接成最终程序 |
+
 项目明确要求使用 `ar` 创建 `libft.a`，禁止使用 `libtool`
 
 7. **libft.a 必须位于根目录**
+
 `libft.a` 就在 `Makefile` 旁边.
 
 ### 2. README Requirements
