@@ -242,22 +242,26 @@ ar
 `README` 至少应该包含以下内容：
 
 1 **第1行必须是斜体，并且内容固定为：**
+
 ```
 *This activity has been created as part of the 42 curriculum by <login>.*
 ```
 如果多人合作，可以依次写多个 login.
 
 2 **Description 项目介绍，说明：**
+
 - Libft 是什么
 - 项目目标
 - 主要实现内容
 
 3 **Instructions 使用说明**，比如：
+
 - 编译，例如 make
 - 生成 `libft.a`
 - 在其他项目中使用该静态库
 
 4 **Resources (参考资料)**
+
 列出学习过程中参考的资料，例如：
 - C 标准库文档（man pages）
 - 教程
@@ -265,6 +269,7 @@ ar
 此外，还必须说明 **AI 在项目中的使用情况**，例如用于概念解释、代码审查或调试，但哪些部分由自己完成.
 
 5 **详细介绍创建的库**
+
 对 `libft`库本身进行详细说明，例如：
 - 包含哪些类别的函数
 - 每类函数的用途
