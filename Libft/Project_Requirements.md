@@ -148,8 +148,10 @@ abc.c
 能够无Warning编译.
 
 6. **必须使用命令ar**
+
 ar 是 archive 的缩写，是Unix/Linux/macOS 系统中的一个工具，用来把多个目标文件（`.o`）打包成一个 archive 文件.
 ar 的主要工作对象是 `.o`
+
 
 C项目里最典型的用途就是多个.o文件 -> ar -> 一个 .a 静态库.
 例如 Libft:
