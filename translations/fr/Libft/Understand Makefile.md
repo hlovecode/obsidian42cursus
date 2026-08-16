@@ -1,0 +1,1 @@
+Un projet contient d'innombrables fichiers sources, répartis dans plusieurs répertoires selon leur type, leur fonction et leur module. Le makefile définit une série de règles pour spécifier quels fichiers doivent être compilés en premier, lesquels doivent l'être ensuite, lesquels doivent être recompilés, et même pour effectuer des opérations fonctionnelles plus complexes.
