@@ -1,4 +1,4 @@
-C'est là qu'il faut vraiment maîtriser le projet `Libft`.
+C'est ici qu'il faut vraiment maîtriser le projet `Libft`.
 
 Un Makefile typique :
 ```Makefile
@@ -34,7 +34,7 @@ Ici :
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 ```
-s'occupe de :
+est responsable de :
 ```Makefile
 .c -> .o
 ```
@@ -43,7 +43,7 @@ tandis que :
 $(NAME): $(OBJS)
 	ar rcs $(NAME) $(OBJS)
 ```
-s'occupe de :
+est responsable de :
 ```Makefile
 .o → libft.a
 ```
@@ -58,7 +58,7 @@ Donc, toute la logique du Makefile :
                          libft.a
 ```
 
-`ar` gère principalement les membres `archive`, c'est-à-dire `.o`, et le code source C `.c` doit d'être compilé par `cc`, donc cela devrait être :
+`ar` traite principalement des membres `archive`, c'est-à-dire `.o`, et le code source C `.c` doit d'abord être compilé par `cc`, donc l'ordre devrait être :
 ```bash
 .c
  ↓ cc
@@ -72,6 +72,8 @@ et non :
  ↓ ar
 .a
 ```
+
+`ar` est un programme qui permet de maintenir des fichiers de bibliothèque en ajoutant, supprimant et extrayant des fichiers. On utilise généralement `ar` pour créer et gérer des bibliothèques d'objets utilisées par l'éditeur de liens.
 
 #### Retenez 4 commandes :
 
@@ -93,7 +95,7 @@ pour obtenir :
 libft.a
 ```
 
-3. Voir le contenu d'une bibliothèque statique :
+3. Afficher le contenu de la bibliothèque statique :
 ```bash
 ar -t libft.a
 ```
@@ -103,14 +105,14 @@ ft_strlen.o
 ...
 ```
 
-4. Supprimer la bibliothèque statique
+4. Supprimer la bibliothèque statique :
 ```bash
 rm -f libft.a
 ```
 
-#### Assembler tout le processus de Libft
+#### Relier tout le processus de Libft
 
-On peut voir `Libft` comme :
+On peut comprendre `Libft` comme :
 ```bash
               你的 C 源代码
                      │
@@ -143,4 +145,4 @@ On peut voir `Libft` comme :
               └──────────────┘
 ```
 
-**`cc` compile `.c` en `.o` ; `ar` regroupe plusieurs `.o` dans une bibliothèque statique `.a` ; enfin, l'éditeur de liens extrait de `.a` le code nécessaire au programme pour générer l'exécutable.**
+**`cc` compile `.c` en `.o` ; `ar` regroupe plusieurs `.o` pour former une bibliothèque statique `.a` ; enfin, l'éditeur de liens extrait de `.a` le code nécessaire au programme pour générer l'exécutable.**

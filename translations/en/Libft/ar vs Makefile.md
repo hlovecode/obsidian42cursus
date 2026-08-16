@@ -1,4 +1,4 @@
-This is where `Libft` project really needs to be mastered.
+This is where you truly need to master the `Libft` project.
 
 A typical Makefile:
 ```Makefile
@@ -38,7 +38,7 @@ is responsible for:
 ```Makefile
 .c -> .o
 ```
-while:
+While:
 ```Makefile
 $(NAME): $(OBJS)
 	ar rcs $(NAME) $(OBJS)
@@ -47,7 +47,7 @@ is responsible for:
 ```Makefile
 .o → libft.a
 ```
-So the entire logic of the Makefile:
+Therefore, the entire logic of the Makefile is:
 ```Makefile
                 cc
 .c ─────────────────────→ .o
@@ -58,7 +58,7 @@ So the entire logic of the Makefile:
                          libft.a
 ```
 
-`ar` mainly deals with `archive` members, which are `.o`, and the C source code `.c` needs to be compiled by `cc` first, so it should be:
+`ar` mainly deals with `archive` members, which are `.o`, and the C source code `.c` needs to be compiled by `cc` first, so the order should be:
 ```bash
 .c
  ↓ cc
@@ -73,13 +73,15 @@ instead of:
 .a
 ```
 
+`ar` is a program that maintains library archives by adding, deleting, and extracting files. Typically, `ar` is used to create and manage object libraries used by the linker.
+
 #### Remember 4 commands:
 
 1. Compile a `.c` file:
 ```bash
 cc -Wall -Wextra -Werror -c ft_strlen.c
 ```
-to get:
+To get:
 ```bash
 ft_strlen.o
 ```
@@ -88,22 +90,22 @@ ft_strlen.o
 ```bash
 ar rcs libft.a ft_strlen.o
 ```
-to get:
+To get:
 ```bash
 libft.a
 ```
 
-3. View what is inside a static library:
+3. View the contents of a static library:
 ```bash
 ar -t libft.a
 ```
-to get:
+To get:
 ```bash
 ft_strlen.o
 ...
 ```
 
-4. Remove the static library:
+4. Delete a static library:
 ```bash
 rm -f libft.a
 ```
@@ -143,4 +145,4 @@ You can understand `Libft` as:
               └──────────────┘
 ```
 
-**`cc` compiles `.c` into `.o`; `ar` organizes multiple `.o` into the `.a` static library; finally, the linker extracts the code needed by the program from `.a` to generate the executable file.**
+**`cc` compiles `.c` into `.o`; `ar` organizes multiple `.o` into a `.a` static library; ultimately, the linker extracts the code required by the program from `.a` to generate the executable file.**
