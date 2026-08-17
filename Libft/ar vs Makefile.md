@@ -77,7 +77,7 @@ ar 是一个程序，可以通过从文件中增加、删除和析取文件来�
 
 #### 记住4个命令：
 
-1. 编译一个 `.c` 文件：
+1 编译一个 `.c` 文件：
 ```bash
 cc -Wall -Wextra -Werror -c ft_strlen.c
 ```
@@ -86,7 +86,7 @@ cc -Wall -Wextra -Werror -c ft_strlen.c
 ft_strlen.o
 ```
 
-2. 创建静态库：
+2 创建静态库：
 ```bash
 ar rcs libft.a ft_strlen.o
 ```
@@ -95,11 +95,13 @@ ar rcs libft.a ft_strlen.o
 libft.a
 ```
 
-ar 本身不是编译器，它不会把 `.c` 编译成机器代码，它的作用是把已经编译好的 `.o` 文件打包归档成 `libft.a`
+libft.a` 是使用 ar 工具创建出来的静态库. 
 
-`libft.a` 是使用 ar 工具创建出来的静态库. 
+ar 本身不是编译器，它不会把 `.c` 编译成机器代码，它的作用是把已经编译好的 `.o` 文件打包归档成 `libft.a`,  `.a` 表示这是一个 archive 文件. 
 
-3. 查看静态库里面有什么：
+ar 要处理的是 `.o` 这种目标文件/归档成员，而不是负责把C源代码编译成目标代码. 
+
+3 查看静态库里面有什么：
 ```bash
 ar -t libft.a
 ```
@@ -109,7 +111,7 @@ ft_strlen.o
 ...
 ```
 
-4. 删除静态库
+4 删除静态库
 ```bash
 rm -f libft.a
 ```
