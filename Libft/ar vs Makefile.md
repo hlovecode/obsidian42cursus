@@ -95,7 +95,7 @@ ar rcs libft.a ft_strlen.o
 libft.a
 ```
 
-libft.a` 是使用 ar 工具创建出来的静态库. 
+`libft.a` 是使用 ar 工具创建出来的静态库. 
 
 ar 本身不是编译器，它不会把 `.c` 编译成机器代码，它的作用是把已经编译好的 `.o` 文件打包归档成 `libft.a`,  `.a` 表示这是一个 archive 文件. 
 
