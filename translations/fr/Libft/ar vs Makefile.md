@@ -34,7 +34,7 @@ Ici :
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 ```
-s'occupe de :
+est responsable de :
 ```Makefile
 .c -> .o
 ```
@@ -43,11 +43,11 @@ tandis que :
 $(NAME): $(OBJS)
 	ar rcs $(NAME) $(OBJS)
 ```
-s'occupe de :
+est responsable de :
 ```Makefile
 .o → libft.a
 ```
-Par conséquent, la logique globale du Makefile :
+Par conséquent, toute la logique du Makefile :
 ```Makefile
                 cc
 .c ─────────────────────→ .o
@@ -58,7 +58,7 @@ Par conséquent, la logique globale du Makefile :
                          libft.a
 ```
 
-`ar` traite principalement des membres `archive`, c'est-à-dire `.o`, et le code source C `.c` doit d'abord être compilé par `cc`, ce qui donne donc :
+`ar` traite principalement des membres `archive`, c'est-à-dire `.o`, et le code source C `.c` doit d'abord être compilé par `cc`, donc ce devrait être :
 ```bash
 .c
  ↓ cc
@@ -73,7 +73,7 @@ et non :
 .a
 ```
 
-`ar` est un programme qui permet de maintenir des fichiers de bibliothèque en y ajoutant, supprimant et extrayant des fichiers. On utilise généralement `ar` pour créer et gérer des bibliothèques objets utilisées par l'éditeur de liens.
+ar est un programme qui permet de maintenir des fichiers de bibliothèque en ajoutant, supprimant et extrayant des fichiers. On utilise généralement ar pour créer et gérer des bibliothèques objets utilisées par l'éditeur de liens.
 
 #### Retenez 4 commandes :
 
@@ -95,9 +95,11 @@ pour obtenir :
 libft.a
 ```
 
-`ar` n'est pas un compilateur en soi, il ne compile pas `.c` en code machine ; son rôle est de regrouper et d'archiver des fichiers `.o` déjà compilés en un `libft.a`.
+ar n'est pas un compilateur en soi, il ne compile pas `.c` en code machine ; son rôle est de regrouper et d'archiver des fichiers `.o` déjà compilés en un `libft.a`.
 
-3. Afficher le contenu d'une bibliothèque statique :
+	`libft.a` est la bibliothèque statique créée à l'aide de l'outil ar. 
+
+3. Afficher le contenu de la bibliothèque statique :
 ```bash
 ar -t libft.a
 ```
@@ -107,14 +109,14 @@ ft_strlen.o
 ...
 ```
 
-4. Supprimer une bibliothèque statique :
+4. Supprimer la bibliothèque statique :
 ```bash
 rm -f libft.a
 ```
 
-#### Résumé du flux global de Libft
+#### Relier tout le processus de Libft
 
-On peut comprendre `Libft` comme ceci :
+On peut comprendre `Libft` comme :
 ```bash
               你的 C 源代码
                      │
@@ -147,4 +149,4 @@ On peut comprendre `Libft` comme ceci :
               └──────────────┘
 ```
 
-**`cc` compile `.c` en `.o` ; `ar` regroupe plusieurs `.o` en une bibliothèque statique `.a` ; enfin, l'éditeur de liens extrait le code nécessaire du fichier `.a` pour générer l'exécutable.**
+**`cc` compile `.c` en `.o` ; `ar` regroupe plusieurs `.o` en une bibliothèque statique `.a` ; enfin, l'éditeur de liens extrait le code nécessaire au programme à partir de `.a` pour générer l'exécutable.**
