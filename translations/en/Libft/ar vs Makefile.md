@@ -1,4 +1,4 @@
-This is where the `Libft` project truly needs to be mastered.
+This is where the `Libft` project really needs to be mastered.
 
 A typical Makefile:
 ```Makefile
@@ -47,7 +47,7 @@ is responsible for:
 ```Makefile
 .o → libft.a
 ```
-Therefore, the entire logic of the Makefile:
+Therefore, the overall logic of the Makefile:
 ```Makefile
                 cc
 .c ─────────────────────→ .o
@@ -77,7 +77,7 @@ instead of:
 
 #### Remember 4 commands:
 
-1. Compile a `.c` file:
+1 Compile a `.c` file:
 ```bash
 cc -Wall -Wextra -Werror -c ft_strlen.c
 ```
@@ -86,7 +86,7 @@ to get:
 ft_strlen.o
 ```
 
-2. Create a static library:
+2 Create a static library:
 ```bash
 ar rcs libft.a ft_strlen.o
 ```
@@ -95,11 +95,13 @@ to get:
 libft.a
 ```
 
-`ar` itself is not a compiler; it does not compile `.c` into machine code. Its role is to pack and archive already compiled `.o` files into a `libft.a`
+`libft.a` is the static library created using the `ar` tool. 
 
-`libft.a` is the static library created using the `ar` tool.
+`ar` itself is not a compiler; it does not compile `.c` into machine code. Its role is to package and archive already compiled `.o` files into a `libft.a`, where `.a` indicates that this is an archive file. 
 
-3. View the contents of the static library:
+`ar` deals with object files/archive members like `.o`, rather than being responsible for compiling C source code into object code. 
+
+3 View the contents of the static library:
 ```bash
 ar -t libft.a
 ```
@@ -109,7 +111,7 @@ ft_strlen.o
 ...
 ```
 
-4. Delete the static library:
+4 Delete the static library:
 ```bash
 rm -f libft.a
 ```
@@ -149,4 +151,4 @@ You can understand `Libft` as:
               └──────────────┘
 ```
 
-**`cc` compiles `.c` into `.o`; `ar` organizes multiple `.o` into a `.a` static library; finally, the linker extracts the code required by the program from `.a` to generate the executable file.**
+**`cc` compiles `.c` into `.o`; `ar` organizes multiple `.o` into the `.a` static library; finally, the linker extracts the code needed by the program from `.a` to generate the executable file.**

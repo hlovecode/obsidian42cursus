@@ -38,7 +38,7 @@ s'occupe de :
 ```Makefile
 .c -> .o
 ```
-et :
+tandis que :
 ```Makefile
 $(NAME): $(OBJS)
 	ar rcs $(NAME) $(OBJS)
@@ -47,7 +47,7 @@ s'occupe de :
 ```Makefile
 .o → libft.a
 ```
-Donc, toute la logique du Makefile :
+Par conséquent, toute la logique du Makefile :
 ```Makefile
                 cc
 .c ─────────────────────→ .o
@@ -58,7 +58,7 @@ Donc, toute la logique du Makefile :
                          libft.a
 ```
 
-`ar` traite principalement des membres `archive`, c'est-à-dire `.o`, et le code source C `.c` doit d'abord être compilé via `cc`, ce qui donne donc :
+`ar` traite principalement les membres `archive`, c'est-à-dire `.o`, et le code source C `.c` doit d'abord être compilé par `cc`, ce qui donne donc :
 ```bash
 .c
  ↓ cc
@@ -66,18 +66,18 @@ Donc, toute la logique du Makefile :
  ↓ ar
 .a
 ```
-et non pas :
+et non :
 ```bash
 .c
  ↓ ar
 .a
 ```
 
-`ar` est un programme qui permet de maintenir des fichiers de bibliothèque en ajoutant, supprimant et extrayant des fichiers. On utilise généralement `ar` pour créer et gérer des bibliothèques de fichiers objets utilisées par l'éditeur de liens.
+`ar` est un programme qui permet de maintenir des fichiers de bibliothèque en ajoutant, supprimant et extrayant des fichiers. On utilise généralement `ar` pour créer et gérer les bibliothèques d'objets utilisées par l'éditeur de liens.
 
 #### Retenez 4 commandes :
 
-1. Compiler un fichier `.c` :
+1 Compiler un fichier `.c` :
 ```bash
 cc -Wall -Wextra -Werror -c ft_strlen.c
 ```
@@ -86,7 +86,7 @@ pour obtenir :
 ft_strlen.o
 ```
 
-2. Créer une bibliothèque statique :
+2 Créer une bibliothèque statique :
 ```bash
 ar rcs libft.a ft_strlen.o
 ```
@@ -95,11 +95,13 @@ pour obtenir :
 libft.a
 ```
 
-`ar` n'est pas un compilateur en soi, il ne compile pas `.c` en code machine ; son rôle est de regrouper et d'archiver des fichiers `.o` déjà compilés pour en faire un `libft.a`.
+`libft.a` est la bibliothèque statique créée à l'aide de l'outil `ar`.
 
-`libft.a` est une bibliothèque statique créée à l'aide de l'outil `ar`. 
+`ar` n'est pas un compilateur en soi, il ne compile pas `.c` en code machine, son rôle est d'empaqueter et d'archiver des fichiers `.o` déjà compilés en `libft.a`, où `.a` indique qu'il s'agit d'un fichier archive.
 
-3. Voir ce que contient la bibliothèque statique :
+`ar` traite des fichiers objets / membres d'archive tels que `.o`, et n'est pas responsable de la compilation du code source C en code objet.
+
+3 Afficher le contenu d'une bibliothèque statique :
 ```bash
 ar -t libft.a
 ```
@@ -109,12 +111,12 @@ ft_strlen.o
 ...
 ```
 
-4. Supprimer la bibliothèque statique :
+4 Supprimer la bibliothèque statique :
 ```bash
 rm -f libft.a
 ```
 
-#### Relier l'ensemble du processus de Libft
+#### Relier tout le processus de Libft
 
 On peut comprendre `Libft` comme :
 ```bash
@@ -149,4 +151,4 @@ On peut comprendre `Libft` comme :
               └──────────────┘
 ```
 
-**`cc` compile `.c` en `.o` ; `ar` regroupe plusieurs `.o` en une bibliothèque statique `.a` ; enfin, l'éditeur de liens extrait le code nécessaire au programme à partir de `.a` pour générer le fichier exécutable.**
+**`cc` compile `.c` en `.o` ; `ar` regroupe plusieurs `.o` dans la bibliothèque statique `.a` ; enfin, l'éditeur de liens extrait le code nécessaire du `.a` pour générer l'exécutable.**
