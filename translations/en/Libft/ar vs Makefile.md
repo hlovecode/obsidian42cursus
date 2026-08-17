@@ -1,4 +1,4 @@
-This is where the `Libft` project truly becomes important to master.
+This is where the `Libft` project truly needs to be mastered.
 
 A typical Makefile:
 ```Makefile
@@ -47,7 +47,7 @@ is responsible for:
 ```Makefile
 .o → libft.a
 ```
-Therefore, the overall logic of the Makefile:
+Therefore, the entire logic of the Makefile:
 ```Makefile
                 cc
 .c ─────────────────────→ .o
@@ -58,7 +58,7 @@ Therefore, the overall logic of the Makefile:
                          libft.a
 ```
 
-`ar` mainly deals with `archive` members, which is `.o`, and the C source code `.c` needs to be compiled by `cc` first, so it should be:
+`ar` mainly deals with `archive` members, which are `.o`, and the C source code `.c` needs to be compiled by `cc` first, so it should be:
 ```bash
 .c
  ↓ cc
@@ -73,7 +73,7 @@ instead of:
 .a
 ```
 
-`ar` is a program that maintains archive files by adding, deleting, and extracting files. Typically, `ar` is used to create and manage object libraries used by the linker.
+`ar` is a program that maintains library files by adding, deleting, and extracting files. Usually, `ar` is used to create and manage object library files used by the linker.
 
 #### Remember 4 commands:
 
@@ -95,11 +95,11 @@ to get:
 libft.a
 ```
 
-`ar` itself is not a compiler; it does not compile `.c` into machine code. Its role is to bundle and archive already compiled `.o` files into a `libft.a`.
+`ar` itself is not a compiler; it does not compile `.c` into machine code. Its role is to pack and archive already compiled `.o` files into a `libft.a`
 
-	`libft.a` is a static library created using the `ar` tool. 
+`libft.a` is the static library created using the `ar` tool.
 
-3. View the contents of a static library:
+3. View the contents of the static library:
 ```bash
 ar -t libft.a
 ```
@@ -109,12 +109,12 @@ ft_strlen.o
 ...
 ```
 
-4. Delete a static library:
+4. Delete the static library:
 ```bash
 rm -f libft.a
 ```
 
-#### Connecting the Entire Libft Workflow
+#### Connecting the entire Libft workflow
 
 You can understand `Libft` as:
 ```bash
@@ -149,4 +149,4 @@ You can understand `Libft` as:
               └──────────────┘
 ```
 
-**`cc` compiles `.c` into `.o`; `ar` organizes multiple `.o` into the `.a` static library; finally, the linker extracts the code required by the program from `.a` to generate the executable file.**
+**`cc` compiles `.c` into `.o`; `ar` organizes multiple `.o` into a `.a` static library; finally, the linker extracts the code required by the program from `.a` to generate the executable file.**
