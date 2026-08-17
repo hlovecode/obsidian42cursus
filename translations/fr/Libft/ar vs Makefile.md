@@ -1,6 +1,6 @@
-C'est ici qu'il faut vraiment maîtriser le projet `Libft`.
+这是 `Libft` 项目真正要掌握的地方.
 
-Un Makefile typique :
+典型的Makefile:
 ```Makefile
 NAME = libft.a
 
@@ -29,25 +29,25 @@ fclean: clean
 
 re: fclean all
 ```
-Ici :
+这里：
 ```Makefile
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 ```
-s'occupe de :
+负责：
 ```Makefile
 .c -> .o
 ```
-tandis que :
+而：
 ```Makefile
 $(NAME): $(OBJS)
 	ar rcs $(NAME) $(OBJS)
 ```
-s'occupe de :
+负责：
 ```Makefile
 .o → libft.a
 ```
-Par conséquent, toute la logique du Makefile :
+所以 Makefile 的整个逻辑：
 ```Makefile
                 cc
 .c ─────────────────────→ .o
@@ -58,7 +58,7 @@ Par conséquent, toute la logique du Makefile :
                          libft.a
 ```
 
-`ar` traite principalement les membres `archive`, c'est-à-dire `.o`, et le code source C `.c` doit d'abord être compilé par `cc`, ce qui donne donc :
+`ar` 主要处理的的是 `archive` 成员，也就是 `.o` ，而C源代码`.c` 需要首先经过 `cc` 编译，所以应该是：
 ```bash
 .c
  ↓ cc
@@ -66,59 +66,59 @@ Par conséquent, toute la logique du Makefile :
  ↓ ar
 .a
 ```
-et non :
+而不是：
 ```bash
 .c
  ↓ ar
 .a
 ```
 
-`ar` est un programme qui permet de maintenir des fichiers de bibliothèque en ajoutant, supprimant et extrayant des fichiers. On utilise généralement `ar` pour créer et gérer les bibliothèques d'objets utilisées par l'éditeur de liens.
+ar 是一个程序，可以通过从文件中增加、删除和析取文件来维护库文件. 通常使用 ar 是为了创建和管理连接程序使用的目标库文件.
 
-#### Retenez 4 commandes :
+#### 记住4个命令：
 
-1 Compiler un fichier `.c` :
+1 编译一个 `.c` 文件：
 ```bash
 cc -Wall -Wextra -Werror -c ft_strlen.c
 ```
-pour obtenir :
+得到：
 ```bash
 ft_strlen.o
 ```
 
-2 Créer une bibliothèque statique :
+2 创建静态库：
 ```bash
 ar rcs libft.a ft_strlen.o
 ```
-pour obtenir :
+得到：
 ```bash
 libft.a
 ```
 
-`libft.a` est la bibliothèque statique créée à l'aide de l'outil `ar`.
+`libft.a` 是使用 ar 工具创建出来的静态库. 
 
-`ar` n'est pas un compilateur en soi, il ne compile pas `.c` en code machine, son rôle est d'empaqueter et d'archiver des fichiers `.o` déjà compilés en `libft.a`, où `.a` indique qu'il s'agit d'un fichier archive.
+ar 本身不是编译器，它不会把 `.c` 编译成机器代码，它的作用是把已经编译好的 `.o` 文件打包归档成 `libft.a`,  `.a` 表示这是一个 archive 文件. 
 
-`ar` traite des fichiers objets / membres d'archive tels que `.o`, et n'est pas responsable de la compilation du code source C en code objet.
+ar 要处理的是 `.o` 这种目标文件/归档成员，而不是负责把C源代码编译成目标代码. 
 
-3 Afficher le contenu d'une bibliothèque statique :
+3 查看静态库里面有什么：
 ```bash
 ar -t libft.a
 ```
-pour obtenir :
+得到：
 ```bash
 ft_strlen.o
 ...
 ```
 
-4 Supprimer la bibliothèque statique :
+4 删除静态库
 ```bash
 rm -f libft.a
 ```
 
-#### Relier tout le processus de Libft
+#### 把整个 Libft 流程串起来
 
-On peut comprendre `Libft` comme :
+可以把 `Libft` 理解成：
 ```bash
               你的 C 源代码
                      │
@@ -151,4 +151,4 @@ On peut comprendre `Libft` comme :
               └──────────────┘
 ```
 
-**`cc` compile `.c` en `.o` ; `ar` regroupe plusieurs `.o` dans la bibliothèque statique `.a` ; enfin, l'éditeur de liens extrait le code nécessaire du `.a` pour générer l'exécutable.**
+**`cc` 把 `.c` 编译成 `.o`；`ar` 把多个 `.o` 组织成 `.a` 静态库；最终链接器从 `.a` 中提取程序需要的代码，生成可执行文件.**

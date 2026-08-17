@@ -38,7 +38,7 @@ is responsible for:
 ```Makefile
 .c -> .o
 ```
-while:
+While:
 ```Makefile
 $(NAME): $(OBJS)
 	ar rcs $(NAME) $(OBJS)
@@ -47,7 +47,7 @@ is responsible for:
 ```Makefile
 .o → libft.a
 ```
-Therefore, the overall logic of the Makefile:
+So the overall logic of the Makefile:
 ```Makefile
                 cc
 .c ─────────────────────→ .o
@@ -58,7 +58,7 @@ Therefore, the overall logic of the Makefile:
                          libft.a
 ```
 
-`ar` mainly deals with `archive` members, which are `.o`, and the C source code `.c` needs to be compiled by `cc` first, so it should be:
+`ar` mainly deals with `archive` members, which are `.o`, and the C source code `.c` needs to go through `cc` compilation first, so it should be:
 ```bash
 .c
  ↓ cc
@@ -66,14 +66,14 @@ Therefore, the overall logic of the Makefile:
  ↓ ar
 .a
 ```
-instead of:
+Instead of:
 ```bash
 .c
  ↓ ar
 .a
 ```
 
-`ar` is a program that maintains library files by adding, deleting, and extracting files. Usually, `ar` is used to create and manage object library files used by the linker.
+`ar` is a program that maintains library files by adding, deleting, and extracting files from them. Typically, `ar` is used to create and manage object library files used by the linker.
 
 #### Remember 4 commands:
 
@@ -81,7 +81,7 @@ instead of:
 ```bash
 cc -Wall -Wextra -Werror -c ft_strlen.c
 ```
-to get:
+Yielding:
 ```bash
 ft_strlen.o
 ```
@@ -90,22 +90,22 @@ ft_strlen.o
 ```bash
 ar rcs libft.a ft_strlen.o
 ```
-to get:
+Yielding:
 ```bash
 libft.a
 ```
 
-`libft.a` is the static library created using the `ar` tool. 
+`libft.a` is a static library created using the `ar` tool. 
 
-`ar` itself is not a compiler; it does not compile `.c` into machine code. Its role is to package and archive already compiled `.o` files into a `libft.a`, where `.a` indicates that this is an archive file. 
+`ar` itself is not a compiler; it does not compile `.c` into machine code. Its function is to package and archive already compiled `.o` files into a `libft.a`, where `.a` indicates that this is an archive file. 
 
-`ar` deals with object files/archive members like `.o`, rather than being responsible for compiling C source code into object code. 
+What `ar` processes are object files/archive members like `.o`, rather than being responsible for compiling C source code into object code. 
 
 3 View the contents of the static library:
 ```bash
 ar -t libft.a
 ```
-to get:
+Yielding:
 ```bash
 ft_strlen.o
 ...
@@ -116,7 +116,7 @@ ft_strlen.o
 rm -f libft.a
 ```
 
-#### Connecting the entire Libft workflow
+#### Connecting the Entire Libft Workflow
 
 You can understand `Libft` as:
 ```bash
