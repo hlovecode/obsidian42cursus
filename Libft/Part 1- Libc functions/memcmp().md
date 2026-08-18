@@ -82,6 +82,7 @@ third byte: 99 != 100
 | `memmove` | 安全地移动/复制可能重叠的内存 |
 | `memchr`  | 在内存中寻找某个 byte   |
 | `memcmp`  | 比较两块内存          |
+
 这组函数的共同特点是把数据看成 raw bytes, 而不是把数据理解成“字符串”
 
 #### 4. `memcmp` vs `strcmp`
