@@ -121,4 +121,5 @@ malloc 和 calloc 申请的内存大小可以相同，真正的重要区别是ma
                                   ↓
                                return ptr
 
+
 **`calloc(nmemb, size)` 申请 `nmemb` 个、每个 `size` 字节的连续动态内存，并将这块内存的所有字节初始化为 `0`**
