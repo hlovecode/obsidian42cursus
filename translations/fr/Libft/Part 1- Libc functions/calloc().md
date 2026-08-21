@@ -1,5 +1,5 @@
 calloc (**c**ontiguous **alloc**ation) est une **fonction d'allocation dynamique de mémoire** de la bibliothèque standard C.
-Son rôle est de demander un bloc de **mémoire dynamique contiguë et d'initialiser tous les octets de cette mémoire à `0`.** 
+Son rôle est d'allouer un bloc de **mémoire dynamique contiguë et d'initialiser tous les octets de cette mémoire à `0`.** 
 
 #### 1. Prototype
 
@@ -7,7 +7,7 @@ Son rôle est de demander un bloc de **mémoire dynamique contiguë et d'initial
 void *calloc(size_t nmemb, size_t size);
 ```
 
-Par exemple : demander une mémoire contiguë pouvant stocker **5 `int`** et initialiser toute la mémoire à `0`
+Par exemple : allouer de la mémoire contiguë pouvant stocker **5 `int`** et initialiser toute la mémoire à `0`
 
 ```c
 int *array;
@@ -16,7 +16,7 @@ array = calloc(5, sizeof(int));
 
 ```
 
-Si `sizeof(int) == 4`, il s'agit de demander 5 x 4 = 20 octets, la mémoire peut être représentée ainsi :
+Si `sizeof(int) == 4`, cela alloue 5 x 4 = 20 octets, et la mémoire peut être visualisée comme suit :
 
 ```c
 array
@@ -33,7 +33,7 @@ array[3] == 0
 array[4] == 0
 ```
 
-La valeur de retour est un `void *`, c'est-à-dire l'adresse de début de la mémoire allouée. Si l'allocation échoue, elle retourne NULL. 
+La valeur de retour est `void *`, c'est-à-dire l'adresse de début de la mémoire allouée ; si l'allocation échoue, elle retourne NULL. 
 
 #### 2. Les 2 paramètres de calloc
 
@@ -45,21 +45,21 @@ La valeur de retour est un `void *`, c'est-à-dire l'adresse de début de la mé
 calloc(10, sizeof(int));
 ```
 
-`nmemb` = 10 signifie que l'on a besoin de 10 int 
+`nmemb` = 10 signifie que 10 int sont nécessaires 
 
-2 `size` : représente le nombre d'octets par élément
+2  `size` : indique le nombre d'octets par élément
 
 `calloc(10, sizeof(int))` représente 10 x 4 = 40 octets
 
-3 Les paramètres de `calloc` peuvent entraîner des problèmes de dépassement (overflow)
+3 Le paramètre `calloc` peut entraîner des problèmes de dépassement (overflow)
 
-Si `nmemb` et `size` sont tous les deux très grands, la valeur de `nmemb x size` peut dépasser la valeur maximale que `size_t` peut représenter. C'est un dépassement d'entier (integer overflow), ce qui peut faire en sorte que la mémoire réellement allouée soit plus petite que ce que l'appelant pensait.
+Si `nmemb` et `size` sont tous deux très grands, la valeur de `nmemb x size` peut dépasser la valeur maximale représentable par `size_t`, ce qui constitue un dépassement d'entier et peut amener la mémoire réellement allouée à être plus petite que ce que l'appelant imagine.
 
 4 `calloc(0, sizeof(int))` est un cas particulier
 
-Demander 0 x sizeof(int) = 0 octet. La norme C autorise cet appel à réussir et à retourner un pointeur, ou à retourner NULL. Si NULL est retourné, ce pointeur ne peut pas être utilisé pour accéder à un objet. Par conséquent, lors de l'implémentation de `ft_calloc`, `nmemb == 0` ne peut pas être traité simplement comme un cas d'échec ordinaire. 
+Demander 0 x sizeof(int) = 0 octet. La norme C autorise cet appel à réussir et à retourner un pointeur, ou à retourner NULL. Si NULL est retourné, ce pointeur ne peut pas être utilisé pour accéder à un objet. Par conséquent, lors de l'implémentation de `ft_calloc`, `nmemb == 0` ne peut pas être simplement traité comme un échec ordinaire. 
 
-5 Après avoir utilisé `calloc`, il est obligatoire d'appeler free. Si l'on oublie de `free()`, cela peut provoquer une fuite de mémoire (memory leak). 
+5 Après avoir utilisé `calloc`, il est obligatoire d'appeler free ; oublier de `free()` peut provoquer une fuite de mémoire. 
 
 #### 3. Différence entre calloc et malloc
 
@@ -75,7 +75,7 @@ array
 └────┴────┴────┴────┴────┘
 ```
 
-Le contenu de la mémoire obtenue par malloc ne peut pas être supposé égal à 0, ces valeurs sont indéterminées.
+Le contenu de la mémoire obtenue via malloc ne peut pas être supposé égal à 0, ces valeurs sont indéterminées.
 
 ```c
 int *array;
@@ -91,31 +91,34 @@ array
 
 calloc initialise chaque octet de la mémoire allouée à 0.
 
-La taille de la mémoire demandée par malloc et calloc peut être identique. La véritable différence importante est que malloc ne fait pas d'initialisation, tandis que calloc initialise tous les octets de la mémoire à 0.
+La taille de la mémoire allouée par malloc et calloc peut être identique, la véritable différence importante est que malloc n'effectue pas d'initialisation, tandis que calloc initialise tous les octets de la mémoire à 0.
 
 #### 4. Implémentation de ft_calloc
 
 Logique principale :
 
 1 Calculer le nombre d'octets nécessaires
-2 Prévenir 
+2 Prévenir le dépassement (overflow) de `nmemb * size`
+3 Initialiser toute la mémoire allouée à 0 
 
                 ft_calloc
                     │
                     ▼
           Calculer nmemb × size
                     │
-            Y a-t-il un dépassement ?
+            Y a-t-il dépassement ?
               /          \
             Oui           Non
             ↓              ↓
          return NULL    malloc(total)
                            │
-                    Allocation réussie ?
+                      Allocation réussie ?
                        /       \
                      Non        Oui
                      ↓           ↓
-                  return NULL   Mettre à zéro
+                  return NULL   Mise à zéro
                                   │
                                   ↓
                                return ptr
+
+**`calloc(nmemb, size)` alloue de la mémoire dynamique contiguë pour `nmemb` éléments de `size` octets chacun, et initialise tous les octets de cette mémoire à `0`**
