@@ -1,5 +1,5 @@
-strdup() a un rôle très direct : il duplique une chaîne de caractères et alloue dynamiquement de la mémoire pour la copie.
-On peut le comprendre comme `string duplicate`
+strdup() 的作用非常直接，复制一个字符串，并为复制出来的字符串动态分配内存
+可以理解为 `string duplicate`
 
 #### 1. Prototype
 
@@ -7,7 +7,7 @@ On peut le comprendre comme `string duplicate`
 char *strdup(const char *s);
 ```
 
-Par exemple :
+例如：
 
 ```c
 char *copy;
@@ -15,20 +15,20 @@ char *copy;
 copy = strdup("Hello");
 ```
 
-Après l'exécution des 2 lignes de code ci-dessus, on peut considérer qu'un nouveau "Hello" est créé.
+上面2行代码执行之后，可以理解为创建一个新的 "Hello",
 
-Chaîne de caractères d'origine :
+原来的字符串：
 
 "Hello\0"
    ↑
    s
 
 `strdup()`
-   ├── Calcule la longueur de la chaîne
-   ├── Alloue une nouvelle mémoire
-   └── Y copie "Hello\0"
+   ├── 计算字符串长度
+   ├── 申请新的内存
+   └── 把 "Hello\0" 复制进去
           ↓
-Nouvelle mémoire dynamique :
+新的动态内存：
 
 ┌────┬────┬────┬────┬────┬────┐
 │ H  │ e  │ l  │ l  │ o  │ \0 │
@@ -36,6 +36,20 @@ Nouvelle mémoire dynamique :
   ↑
  copy
 
-copy pointe vers un nouveau bloc mémoire
+copy 指向的是一块新的内存
 
-**strdup renvoie finalement l'adresse de début de la chaîne nouvellement dupliquée.**
+**strdup 最终返回新复制出来的字符串的起始地址，不会修改原字符串**
+
+#### 2. `strdup` vs `strcpy`
+
+`strcpy`: 把 src 的字符串复制到已经存在的 dest 内存中
+
+`strdup`：是自己申请新的内存，然后把 src 复制进去
+
+|               | strcpy   | strdup  |
+| ------------- | -------- | ------- |
+| 是否复制字符串       | Yes      | Yes     |
+| 是否申请新内存       | No       | Yes     |
+| dest 是否需要提前存在 | Yes      | No      |
+| 返回值           | char \*  | char \* |
+| 使用后是否需要 free  | 取决于 dest | 需要      |

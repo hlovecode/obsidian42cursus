@@ -1,4 +1,4 @@
-The function of `strdup()` is very straightforward: it duplicates a string and dynamically allocates memory for the duplicated string.
+The function of `strdup()` is very straightforward: it duplicates a string and dynamically allocates memory for the copied string.
 It can be understood as `string duplicate`
 
 #### 1. Prototype
@@ -36,6 +36,20 @@ New dynamic memory:
   ↑
  copy
 
-`copy` points to a block of new memory.
+copy points to a piece of new memory
 
-**`strdup` ultimately returns the starting address of the newly duplicated string.**
+**`strdup` ultimately returns the starting address of the newly copied string and does not modify the original string.**
+
+#### 2. `strdup` vs `strcpy`
+
+`strcpy`: Copies the string from src into an already existing dest memory buffer.
+
+`strdup`: Allocates new memory by itself, and then copies src into it.
+
+|               | strcpy   | strdup  |
+| ------------- | -------- | ------- |
+| Copies string        | Yes      | Yes     |
+| Allocates new memory | No       | Yes     |
+| Does dest need to exist beforehand | Yes | No |
+| Return value  | char \*  | char \* |
+| Requires free after use | Depends on dest | Yes |
