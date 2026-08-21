@@ -38,4 +38,18 @@ copy = strdup("Hello");
 
 copy 指向的是一块新的内存
 
-**strdup 最终返回新复制出来的字符串的起始地址**
+**strdup 最终返回新复制出来的字符串的起始地址，不会修改原字符串**
+
+#### 2. `strdup` vs `strcpy`
+
+`strcpy`: 把 src 的字符串复制到已经存在的 dest 内存中
+
+`strdup`：是自己申请新的内存，然后把 src 复制进去
+
+|               | strcpy   | strdup  |
+| ------------- | -------- | ------- |
+| 是否复制字符串       | Yes      | Yes     |
+| 是否申请新内存       | No       | Yes     |
+| dest 是否需要提前存在 | Yes      | No      |
+| 返回值           | char \*  | char \* |
+| 使用后是否需要 free  | 取决于 dest | 需要      |
