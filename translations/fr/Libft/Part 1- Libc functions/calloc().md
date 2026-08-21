@@ -1,5 +1,5 @@
-calloc (**c**ontiguous **alloc**ation) est une **fonction d'allocation dynamique de mémoire** de la bibliothèque standard du C.
-Son rôle est d'allouer un bloc de mémoire dynamique contiguë et d'initialiser tous les octets de cette mémoire à `0`.
+calloc (**c**ontiguous **alloc**ation) 是 C 标准库中的**动态内存分配函数**.
+它的作用是申请一块连续的动态内存，并且把这块内存的所有字节初始化为 `0`.
 
 #### 1. Prototype
 
@@ -7,7 +7,7 @@ Son rôle est d'allouer un bloc de mémoire dynamique contiguë et d'initialiser
 void *calloc(size_t nmemb, size_t size);
 ```
 
-Par exemple : allouer de la mémoire contiguë pouvant stocker **5 `int`**, et initialiser toute la mémoire à `0`
+例如：申请能够存放 **5 个 `int`** 的连续内存，并且把所有内存初始化为 `0`
 
 ```c
 int *array;
@@ -16,7 +16,7 @@ array = calloc(5, sizeof(int));
 
 ```
 
-Si `sizeof(int) == 4`, c'est-à-dire une allocation de `5 x 4 = 20 bytes`, la mémoire peut être représentée comme :
+如果 `sizeof(int) == 4`, 就是申请  5 x 4 = 20 bytes , 内存可理解成：
 
 ```c
 array
@@ -33,14 +33,21 @@ array[3] == 0
 array[4] == 0
 ```
 
-#### 2. Les 2 paramètres de calloc
+#### 2. calloc 的2个参数
 
-1 `nmemb` (nombre d'éléments) : le nombre d'éléments à allouer
+**calloc(元素数量，每个元素大小)**
+
+1 `nmemb` (number of members) ：要分配多少个元素
 
 ```c
 calloc(10, sizeof(int));
 ```
 
-`nmemb` = 10 signifie que l'on a besoin de 10 int 
+`nmemb` = 10 表示需要 10 个 int 
 
-2  `size` : indique le nombre d'octets par élément
+2  `size` : 表示元素占多少字节
+
+`calloc(10, sizeof(int))` 就是 10 x 4 = 40 bytes
+
+
+``
