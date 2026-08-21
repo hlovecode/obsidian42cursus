@@ -1,5 +1,5 @@
 calloc (**c**ontiguous **alloc**ation) is a **dynamic memory allocation function** in the C standard library.
-Its purpose is to allocate a block of **contiguous dynamic memory and initialize all bytes of this memory to `0`.** 
+Its purpose is to request a block of **contiguous dynamic memory and initialize all bytes of this memory to `0`.** 
 
 #### 1. Prototype
 
@@ -7,7 +7,7 @@ Its purpose is to allocate a block of **contiguous dynamic memory and initialize
 void *calloc(size_t nmemb, size_t size);
 ```
 
-For example: allocating contiguous memory capable of holding **5 `int`**, and initializing all memory to `0`
+For example: request contiguous memory capable of storing **5 `int`**, and initialize all memory to `0`
 
 ```c
 int *array;
@@ -16,7 +16,7 @@ array = calloc(5, sizeof(int));
 
 ```
 
-If `sizeof(int) == 4`, it allocates 5 x 4 = 20 bytes, and the memory can be visualized as:
+If `sizeof(int) == 4`, it requests 5 x 4 = 20 bytes, and the memory can be visualized as:
 
 ```c
 array
@@ -33,9 +33,9 @@ array[3] == 0
 array[4] == 0
 ```
 
-The return value is `void *`, which returns the starting address of the allocated memory. If the allocation fails, it returns NULL. 
+The return value is `void *`, which is the starting address of the allocated memory. If allocation fails, it returns NULL. 
 
-#### 2. Two Parameters of calloc
+#### 2. Two parameters of calloc
 
 **calloc(number of elements, size of each element)**
 
@@ -51,13 +51,19 @@ calloc(10, sizeof(int));
 
 `calloc(10, sizeof(int))` is 10 x 4 = 40 bytes
 
-3 `calloc` the parameters can lead to overflow issues
+3 The `calloc` parameter can lead to overflow issues
 
-If `nmemb` and ''
+If `nmemb` and `size` are both very large, the value of `nmemb x size` may exceed the maximum value that `size_t` can represent. This is an integer overflow, which may cause the actually allocated memory to be smaller than the caller expects.
 
-#### 3. Differences Between calloc and malloc
+4 `calloc(0, sizeof(int))` is a special case
 
-`malloc(size_t size)`: Allocates memory of size bytes without initializing this memory
+Requesting 0 x sizeof(int) = 0 bytes. The C standard allows this call to succeed and return a pointer, or to return NULL. If NULL is returned, this pointer cannot be used to access objects. Therefore, when implementing `ft_calloc`, `nmemb == 0` cannot simply be treated as a normal failure case. 
+
+5 After using `calloc`, you must call free. Forgetting to `free()` may result in a memory leak. 
+
+#### 3. Differences between calloc and malloc
+
+`malloc(size_t size)`: Allocates size bytes of memory, without initializing this memory.
 
 ```c
 int *array = malloc(5 * sizeof(int));
@@ -69,7 +75,7 @@ array
 └────┴────┴────┴────┴────┘
 ```
 
-The contents of the memory obtained from malloc cannot be assumed to be 0; these values are indeterminate.
+The contents of memory obtained from malloc cannot be assumed to be 0; these values are indeterminate.
 
 ```c
 int *array;
@@ -83,6 +89,33 @@ array
 └────┴────┴────┴────┴────┘
 ```
 
-calloc initializes every byte of the allocated memory to 0 
+calloc initializes every byte of the allocated memory to 0.
 
-The memory sizes requested by malloc and calloc can be the same; the truly important difference is that malloc does not perform initialization, whereas calloc initializes all bytes of the memory to 0.
+The memory sizes requested by malloc and calloc can be the same. The truly important difference is that malloc does not perform initialization, whereas calloc initializes all bytes of the memory to 0.
+
+#### 4. Implementing ft_calloc
+
+Core logic:
+
+1 Calculate how many bytes are needed
+2 Prevent 
+
+                ft_calloc
+                    │
+                    ▼
+          Calculate nmemb × size
+                    │
+            Did an overflow occur?
+              /          \
+           Yes            No
+            ↓              ↓
+         return NULL    malloc(total)
+                           │
+                    Allocation successful?
+                       /       \
+                     No         Yes
+                     ↓           ↓
+                  return NULL   Zero out
+                                  │
+                                  ↓
+                               return ptr
