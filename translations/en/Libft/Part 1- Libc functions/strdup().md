@@ -1,7 +1,7 @@
-The role of `strdup()` is very straightforward: it duplicates a string and dynamically allocates memory for the duplicated string.
-It can be understood as `string duplicate`
+The role of `string duplicate` is very straightforward: it duplicates a string and dynamically allocates memory for the duplicated string.
+It can be understood as `string duplicate`.
 
-`strdup` is available on many Unix / POSIX systems, but it is not a function defined by the ISO C standard; it belongs to the common interfaces in Unix / POSIX environments.
+`strdup` is available on many Unix / POSIX systems, but it is not a function defined by the ISO C standard; it belongs to the common interfaces found in Unix / POSIX environments.
 
 #### 1. Prototype
 
@@ -17,20 +17,16 @@ char *copy;
 copy = strdup("Hello");
 ```
 
-After executing the above 2 lines of code, it can be understood as creating a new "Hello",
+After the above 2 lines of code are executed, it can be understood as creating a new "Hello",
 
-Original string:
-
-"Hello\0"
-
-   ↑
-   s
+Original string s: "Hello\0"
 
 `strdup()`
 
    ├── Calculate string length
    ├── Allocate new memory
    └── Copy "Hello\0" into it
+   
           ↓
 New dynamic memory:
 
@@ -42,17 +38,17 @@ New dynamic memory:
   ↑
  copy
 
-copy points to a new piece of memory
+copy points to a piece of new memory
 
-**`strdup` ultimately returns the starting address of the newly duplicated string and does not modify the original string.**
+**strdup ultimately returns the starting address of the newly duplicated string and does not modify the original string.**
 
 `strdup` = "Allocate space + Copy string"
 
 #### 2. `strdup` vs `strcpy`
 
-`strcpy`: Copies the string from `src` into an already existing `dest` memory block.
+`strcpy`: Copies the string from src into an already existing dest memory buffer.
 
-`strdup`: Allocates new memory by itself, and then copies `src` into it.
+`strdup`: Allocates new memory by itself, and then copies src into it.
 
 |               | strcpy   | strdup  |
 | ------------- | -------- | ------- |
@@ -60,4 +56,4 @@ copy points to a new piece of memory
 | Allocates new memory       | No       | Yes     |
 | Does dest need to exist in advance | Yes      | No      |
 | Return value           | char \*  | char \* |
-| Requires free after use  | Depends on dest | Yes     |
+| Requires free after use  | Depends on dest | Yes      |
