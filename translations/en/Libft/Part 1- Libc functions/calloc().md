@@ -7,7 +7,7 @@ Its purpose is to allocate a contiguous block of dynamic memory and initialize a
 void *calloc(size_t nmemb, size_t size);
 ```
 
-For example: allocating contiguous memory to store **5 `int`**, and initializing all memory to `0`
+For example: allocate contiguous memory capable of storing **5 `int`** and initialize all memory to `0`
 
 ```c
 int *array;
@@ -16,7 +16,7 @@ array = calloc(5, sizeof(int));
 
 ```
 
-If `sizeof(int) == 4`, it requests 5 x 4 = 20 bytes, and the memory can be visualized as:
+If `sizeof(int) == 4`, it allocates 5 x 4 = 20 bytes, and the memory can be visualized as:
 
 ```c
 array
@@ -37,7 +37,7 @@ array[4] == 0
 
 **calloc(number of elements, size of each element)**
 
-1 `nmemb` (number of members): how many elements to allocate
+1 `nmemb` (number of members): How many elements to allocate
 
 ```c
 calloc(10, sizeof(int));
@@ -45,8 +45,24 @@ calloc(10, sizeof(int));
 
 `nmemb` = 10 means 10 ints are needed
 
-2 `size`: indicates how many bytes each element occupies
+2 `size`: Represents how many bytes each element occupies
 
 `calloc(10, sizeof(int))` is 10 x 4 = 40 bytes
 
-``
+#### 3. Differences between calloc and malloc
+
+`malloc(size_t size)`: Allocates size bytes of memory, does not initialize this memory
+
+```c
+int *array = malloc(5 * sizeof(int));
+
+array
+  ↓
+┌────┬────┬────┬────┬────┐
+│ ?? │ ?? │ ?? │ ?? │ ?? │
+└────┴────┴────┴────┴────┘
+```
+
+The contents of the obtained memory cannot be assumed to be 0; these values are indeterminate.
+
+`calloc`
