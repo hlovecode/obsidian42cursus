@@ -1,5 +1,5 @@
 calloc (**c**ontiguous **alloc**ation) est une **fonction d'allocation dynamique de mémoire** de la bibliothèque standard C.
-Son rôle est d'allouer un bloc de **mémoire dynamique contiguë et d'initialiser tous les octets de cette mémoire à `0`.** 
+Son rôle est de demander un bloc de **mémoire dynamique contiguë et d'initialiser tous les octets de cette mémoire à `0`.** 
 
 #### 1. Prototype
 
@@ -7,7 +7,7 @@ Son rôle est d'allouer un bloc de **mémoire dynamique contiguë et d'initialis
 void *calloc(size_t nmemb, size_t size);
 ```
 
-Par exemple : allouer de la mémoire contiguë pouvant stocker **5 `int`** et initialiser toute la mémoire à `0`
+Par exemple : demander une mémoire contiguë pouvant stocker **5 `int`** et initialiser toute la mémoire à `0`
 
 ```c
 int *array;
@@ -16,7 +16,7 @@ array = calloc(5, sizeof(int));
 
 ```
 
-Si `sizeof(int) == 4`, cela alloue 5 x 4 = 20 octets, et la mémoire peut être visualisée comme suit :
+Si `sizeof(int) == 4`, cela demande 5 x 4 = 20 octets, et la mémoire peut être visualisée ainsi :
 
 ```c
 array
@@ -33,37 +33,37 @@ array[3] == 0
 array[4] == 0
 ```
 
-La valeur de retour est `void *`, c'est-à-dire l'adresse de début de la mémoire allouée ; si l'allocation échoue, elle retourne NULL. 
+La valeur de retour est `void *`, c'est-à-dire l'adresse de début de la mémoire allouée. En cas d'échec de l'allocation, elle retourne NULL. 
 
 #### 2. Les 2 paramètres de calloc
 
 **calloc(nombre d'éléments, taille de chaque élément)**
 
-1 `nmemb` (number of members) : le nombre d'éléments à allouer
+1 `nmemb` (nombre d'éléments) : combien d'éléments il faut allouer
 
 ```c
 calloc(10, sizeof(int));
 ```
 
-`nmemb` = 10 signifie que 10 int sont nécessaires 
+`nmemb` = 10 signifie qu'il faut 10 int 
 
-2  `size` : indique le nombre d'octets par élément
+2  `size` : indique combien d'octets occupe un élément
 
 `calloc(10, sizeof(int))` représente 10 x 4 = 40 octets
 
-3 Le paramètre `calloc` peut entraîner des problèmes de dépassement (overflow)
+3 Le paramètre `calloc` peut entraîner des problèmes de dépassement
 
-Si `nmemb` et `size` sont tous deux très grands, la valeur de `nmemb x size` peut dépasser la valeur maximale représentable par `size_t`, ce qui constitue un dépassement d'entier et peut amener la mémoire réellement allouée à être plus petite que ce que l'appelant imagine.
+Si `nmemb` et `size` sont tous deux très grands, la valeur de `nmemb x size` peut dépasser la valeur maximale que `size_t` peut représenter. C'est un dépassement d'entier, qui peut amener la mémoire réellement allouée à être plus petite que ce que l'appelant pensait.
 
 4 `calloc(0, sizeof(int))` est un cas particulier
 
-Demander 0 x sizeof(int) = 0 octet. La norme C autorise cet appel à réussir et à retourner un pointeur, ou à retourner NULL. Si NULL est retourné, ce pointeur ne peut pas être utilisé pour accéder à un objet. Par conséquent, lors de l'implémentation de `ft_calloc`, `nmemb == 0` ne peut pas être simplement traité comme un échec ordinaire. 
+Demander 0 x sizeof(int) = 0 octets. La norme C autorise cet appel à réussir et à retourner un pointeur, ou à retourner NULL. Si NULL est retourné, ce pointeur ne peut pas être utilisé pour accéder à un objet. Par conséquent, lors de l'implémentation de `ft_calloc`, `nmemb == 0` ne peut pas être considéré simplement comme un cas d'échec ordinaire. 
 
-5 Après avoir utilisé `calloc`, il est obligatoire d'appeler free ; oublier de `free()` peut provoquer une fuite de mémoire. 
+5 Après avoir utilisé `calloc`, il faut impérativement appeler free. Oublier de faire `free()` peut provoquer une fuite de mémoire. 
 
 #### 3. Différence entre calloc et malloc
 
-`malloc(size_t size)` : alloue size octets de mémoire, sans initialiser cette mémoire.
+`malloc(size_t size)` : alloue size octets de mémoire, sans initialiser cette mémoire
 
 ```c
 int *array = malloc(5 * sizeof(int));
@@ -75,7 +75,7 @@ array
 └────┴────┴────┴────┴────┘
 ```
 
-Le contenu de la mémoire obtenue via malloc ne peut pas être supposé égal à 0, ces valeurs sont indéterminées.
+Le contenu de la mémoire obtenue par malloc ne peut pas être supposé égal à 0 ; ces valeurs sont indéterminées.
 
 ```c
 int *array;
@@ -89,16 +89,16 @@ array
 └────┴────┴────┴────┴────┘
 ```
 
-calloc initialise chaque octet de la mémoire allouée à 0.
+calloc initialise chaque octet de la mémoire allouée à 0 
 
-La taille de la mémoire allouée par malloc et calloc peut être identique, la véritable différence importante est que malloc n'effectue pas d'initialisation, tandis que calloc initialise tous les octets de la mémoire à 0.
+La taille de la mémoire demandée par malloc et calloc peut être identique. La véritable différence importante est que malloc ne fait pas d'initialisation, tandis que calloc initialise tous les octets de la mémoire à 0.
 
 #### 4. Implémentation de ft_calloc
 
 Logique principale :
 
 1 Calculer le nombre d'octets nécessaires
-2 Prévenir le dépassement (overflow) de `nmemb * size`
+2 Empêcher le dépassement de `nmemb * size`
 3 Initialiser toute la mémoire allouée à 0 
 
                 ft_calloc
@@ -106,19 +106,20 @@ Logique principale :
                     ▼
           Calculer nmemb × size
                     │
-            Y a-t-il dépassement ?
+            Y a-t-il un dépassement ?
               /          \
-            Oui           Non
+            Oui          Non
             ↓              ↓
          return NULL    malloc(total)
                            │
-                      Allocation réussie ?
+                    Allocation réussie ?
                        /       \
-                     Non        Oui
+                     Non       Oui
                      ↓           ↓
-                  return NULL   Mise à zéro
+                  return NULL   Mettre à zéro
                                   │
                                   ↓
                                return ptr
 
-**`calloc(nmemb, size)` alloue de la mémoire dynamique contiguë pour `nmemb` éléments de `size` octets chacun, et initialise tous les octets de cette mémoire à `0`**
+
+**`calloc(nmemb, size)` alloue une mémoire dynamique contiguë de `nmemb` éléments de `size` octets chacun, et initialise tous les octets de cette mémoire à `0`**
