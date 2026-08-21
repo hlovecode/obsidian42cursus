@@ -1,6 +1,8 @@
 strdup() 的作用非常直接，复制一个字符串，并为复制出来的字符串动态分配内存
 可以理解为 `string duplicate`
 
+`strdup` 在很多 Unix / POSIX 系统上都有，但它不是 ISO C 标准定义的函数，它属于 Unix / POSIX 环境中常见的接口. 
+
 #### 1. Prototype
 
 ```c
@@ -39,6 +41,8 @@ copy = strdup("Hello");
 copy 指向的是一块新的内存
 
 **strdup 最终返回新复制出来的字符串的起始地址，不会修改原字符串**
+
+`strdup` = “申请空间 + 复制字符串”
 
 #### 2. `strdup` vs `strcpy`
 
