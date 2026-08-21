@@ -22,6 +22,7 @@ copy = strdup("Hello");
 原来的字符串：
 
 "Hello\0"
+
    ↑
    s
 
