@@ -16,7 +16,7 @@ array = calloc(5, sizeof(int));
 
 ```
 
-如果 `sizeof(int) == 4`, 就是申请 `5 x 4 = 20 bytes`, 内存可理解成：
+如果 `sizeof(int) == 4`, 就是申请  5 x 4 = 20 bytes , 内存可理解成：
 
 ```c
 array
@@ -35,6 +35,8 @@ array[4] == 0
 
 #### 2. calloc 的2个参数
 
+**calloc(元素数量，每个元素大小)**
+
 1 `nmemb` (number of members) ：要分配多少个元素
 
 ```c
@@ -45,3 +47,7 @@ calloc(10, sizeof(int));
 
 2  `size` : 表示元素占多少字节
 
+`calloc(10, sizeof(int))` 就是 10 x 4 = 40 bytes
+
+
+``
