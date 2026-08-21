@@ -22,5 +22,6 @@
   "Libft/Part 1- Libc functions/strnstr().md": "215d450719faaa40289257278f267cd92f72a610fabd2efeb169a7cdbffda965",
   "Libft/Part 2 - Additional functions/Additional functions.md": "5612578ea3fb8e4ae79a123393d05ca49462ebd8c6db19a50a9222c45fb23537",
   "Libft/ar vs Makefile.md": "a8245f09e1cc8f26743eadbd41e58c5f94a969799623f89a0d7d2c9719fbb010",
-  "Libft/Part 3- Linked list/Linked list.md": "ea8053e501a3af09b750c81e6876295d978f79c22f5ab618ab4badd78720e70c"
+  "Libft/Part 3- Linked list/Linked list.md": "ea8053e501a3af09b750c81e6876295d978f79c22f5ab618ab4badd78720e70c",
+  "Libft/Part 1- Libc functions/calloc().md": "f271fdc7f2c611a22fb0f9d377c45d20658f8f14019359da473c29e97844bbb8"
 }
