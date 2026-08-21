@@ -49,5 +49,20 @@ calloc(10, sizeof(int));
 
 `calloc(10, sizeof(int))` 就是 10 x 4 = 40 bytes
 
+#### 3. calloc 和 malloc 的区别
 
-``
+`malloc(size_t size)` :  分配 size 个字节的内存，不会初始化这块内存
+
+```c
+int *array = malloc(5 * sizeof(int));
+
+array
+  ↓
+┌────┬────┬────┬────┬────┐
+│ ?? │ ?? │ ?? │ ?? │ ?? │
+└────┴────┴────┴────┴────┘
+```
+
+得到的内存内容不能假定是 0, 这些值是不确定的.
+
+`calloc`
