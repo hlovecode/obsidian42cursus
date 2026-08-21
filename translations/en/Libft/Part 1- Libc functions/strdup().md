@@ -1,4 +1,5 @@
 The function of `strdup()` is very straightforward: it duplicates a string and dynamically allocates memory for the duplicated string.
+It can be understood as `string duplicate`
 
 #### 1. Prototype
 
@@ -14,7 +15,7 @@ char *copy;
 copy = strdup("Hello");
 ```
 
-After executing the 2 lines of code above, it can be understood as:
+After executing the above 2 lines of code, it can be understood as creating a new "Hello",
 
 Original string:
 
@@ -27,7 +28,6 @@ Original string:
    ├── Allocate new memory
    └── Copy "Hello\0" into it
           ↓
-
 New dynamic memory:
 
 ┌────┬────┬────┬────┬────┬────┐
@@ -35,3 +35,7 @@ New dynamic memory:
 └────┴────┴────┴────┴────┴────┘
   ↑
  copy
+
+`copy` points to a block of new memory.
+
+**`strdup` ultimately returns the starting address of the newly duplicated string.**
