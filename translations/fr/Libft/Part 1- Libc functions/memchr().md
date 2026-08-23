@@ -1,6 +1,6 @@
-`memchr` 在一块内存的前 `n` 个字节中查找某个字节，它根本不关心 `'\0'`.
-`memchr` 搜索的是字节 btye, 而不是字符，只是当搜索的是普通 ASCII 字符串时，一个字符通常刚好占一个 byte, 所以看起来好像是在搜索字符.
-该函数只读取内存，不修改内存. 
+`memchr` Recherche un octet dans les `n` premiers octets d'un bloc de mémoire, sans se soucier du tout de `'\0'`.
+`memchr` Recherche l'octet btye et non un caractère. C'est simplement que lorsqu'on recherche une chaîne ASCII normale, un caractère occupe généralement exactement un octet, ce qui donne l'impression de rechercher un caractère.
+Cette fonction lit uniquement la mémoire et ne la modifie pas.
 
 #### 1. Prototype
 
@@ -10,43 +10,48 @@
 void *memchr(const void *s, int c, size_t n);
 ```
 
-它的作用是从内存区域 `s` 开始，检查前 `n` 个字节，寻找第一个值等于 `(unsigned char)c` 的字节. 
+Son rôle est de commencer à partir de la zone mémoire `s`, de vérifier les `n` premiers octets et de chercher le premier octet dont la valeur est égale à `(unsigned char)c`. 
 
-返回值：
+Valeur de retour :
 
-- 如果找到，返回指向这个字节的指针
-- 如果没有找到，则返回 NULL
+- Si l'octet est trouvé, renvoie un pointeur vers celui-ci.
+- S'il n'est pas trouvé, renvoie NULL.
 
-#### 2. `memchir` 可以处理没有 '\0' 的数据
+#### 2. `memchir` peut traiter des données sans '\0'
 
-`memchr` 和其他字符串函数最大的区别之一就是它可以处理没有 '\0' 的数据，它不需 '\0' 来确定结束位置， 它只依赖 n. 
+L'une des plus grandes différences entre `memchr` et les autres fonctions de chaînes est qu'elle peut traiter des données sans '\0'. Elle n'a pas besoin de '\0' pour déterminer la fin, elle dépend uniquement de n. 
 
-`memchr` 本质上是逐字节检查，它可以处理任意内存.
+`memchr` vérifie essentiellement octet par octet et peut traiter n'importe quelle mémoire.
 
 #### 3.  `memchir`  vs  `strchr` 
 
-|特性|`strchr`|`memchr`|
+|Caractéristique|`strchr`|`memchr`|
 |---|---|---|
-|所属|`<string.h>`|`<string.h>`|
-|搜索对象|C 字符串|内存区域|
-|是否需要 `'\0'`|是|否|
-|是否遇到 `'\0'` 就停止|是|否|
-|搜索范围|到 `'\0'`|前 `n` 个 byte|
-|`n` 参数|没有|有|
-|可以搜索二进制数据|不适合|非常适合|
-|返回值|`char *`|`void *`|
-|找不到|`NULL`|`NULL`|
+|Appartenance|`<string.h>`|`<string.h>`|
+|Objet de la recherche|Chaîne C|Zone mémoire|
+|Nécessite `'\0'`|Oui|Non|
+|S'arrête-t-il dès `'\0'`|Oui|Non|
+|Portée de la recherche|Jusqu'à `'\0'`|Les `n` premiers octets|
+|Paramètre `n`|Non|Oui|
+|Peut rechercher des données binaires|Inadapté|Très adapté|
+|Valeur de retour|`char *`|`void *`|
+|Introuvable|`NULL`|`NULL`|
 
-- `strchr` : 搜索字符串中的字符
-- `memchr` : 搜索内存中的字节
+- `strchr` : Recherche un caractère dans une chaîne
+- `memchr` : Recherche un octet dans la mémoire
 
-#### 4. `memchr` 的实现思路
+#### 4. Idée d'implémentation de `memchr`
 
-1. 把 s 转换成 unsigned char *
-2. 从 i = 0 开始检查 i < n
-3. 检查 s\[i] 是否等于 (unsigned char)c:
-	- 相等，返回 `&s[i]`
-	- 不相等，i++
-	- 循环结束，如果还是不相等，返回NULL
+1. Convertir s en unsigned char *
+2. Commencer la vérification à partir de i = 0 tant que i < n
+3. Vérifier si s\[i] est égal à (unsigned char)c :
+	- S'ils sont égaux, renvoyer `&s[i]`
+	- S'ils ne sont pas égaux, i++
+	- Fin de la boucle : si c'est toujours pas égal, renvoyer NULL
 
-`memchr(s, c, n)` 从 `s` 开始，把内存看成一串 byte，严格检查前 `n` 个 byte，寻找第一个等于 `(unsigned char)c` 的 byte；找到就返回它的地址，找不到就返回 `NULL`.
+
+```c
+<string.h>
+
+void *memchr(const void *s, int c, size_t n);
+``` commence à partir de `s`, considère la mémoire comme une séquence d'octets, vérifie strictement les `n` premiers octets à la recherche du premier octet égal à `(unsigned char)c` ; s'il est trouvé, renvoie son adresse, sinon renvoie `NULL`.
