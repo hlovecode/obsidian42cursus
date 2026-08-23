@@ -1,5 +1,5 @@
 `memchr` Recherche un octet dans les `n` premiers octets d'un bloc de mémoire, sans se soucier du tout de `'\0'`.
-`memchr` Recherche l'octet btye et non un caractère. C'est simplement que lorsqu'on recherche une chaîne ASCII normale, un caractère occupe généralement exactement un octet, ce qui donne l'impression de rechercher un caractère.
+`memchr` Recherche l'octet byte et non un caractère. C'est simplement que lors de la recherche d'une chaîne ASCII classique, un caractère occupe généralement exactement un octet, ce qui donne l'impression de rechercher un caractère.
 Cette fonction lit uniquement la mémoire et ne la modifie pas.
 
 #### 1. Prototype
@@ -10,20 +10,20 @@ Cette fonction lit uniquement la mémoire et ne la modifie pas.
 void *memchr(const void *s, int c, size_t n);
 ```
 
-Son rôle est de commencer à partir de la zone mémoire `s`, de vérifier les `n` premiers octets et de chercher le premier octet dont la valeur est égale à `(unsigned char)c`. 
+Son rôle est de commencer à partir de la zone mémoire `s`, d'examiner les `n` premiers octets à la recherche du premier octet dont la valeur est égale à `(unsigned char)c`. 
 
 Valeur de retour :
 
-- Si l'octet est trouvé, renvoie un pointeur vers celui-ci.
-- S'il n'est pas trouvé, renvoie NULL.
+- Si trouvé, renvoie un pointeur vers cet octet
+- Si non trouvé, renvoie NULL
 
-#### 2. `memchir` peut traiter des données sans '\0'
+#### 2. `memchr` peut traiter des données sans '\0'
 
-L'une des plus grandes différences entre `memchr` et les autres fonctions de chaînes est qu'elle peut traiter des données sans '\0'. Elle n'a pas besoin de '\0' pour déterminer la fin, elle dépend uniquement de n. 
+L'une des plus grandes différences entre `memchr` et les autres fonctions de chaînes de caractères est qu'elle peut traiter des données sans '\0'. Elle n'a pas besoin de '\0' pour déterminer la fin, elle dépend uniquement de n. 
 
-`memchr` vérifie essentiellement octet par octet et peut traiter n'importe quelle mémoire.
+`memchr` effectue essentiellement une vérification octet par octet et peut traiter n'importe quelle mémoire.
 
-#### 3.  `memchir`  vs  `strchr` 
+#### 3.  `memchr`  vs  `strchr` 
 
 |Caractéristique|`strchr`|`memchr`|
 |---|---|---|
@@ -43,15 +43,11 @@ L'une des plus grandes différences entre `memchr` et les autres fonctions de ch
 #### 4. Idée d'implémentation de `memchr`
 
 1. Convertir s en unsigned char *
-2. Commencer la vérification à partir de i = 0 tant que i < n
+2. Commencer à vérifier à partir de i = 0 tant que i < n
 3. Vérifier si s\[i] est égal à (unsigned char)c :
 	- S'ils sont égaux, renvoyer `&s[i]`
 	- S'ils ne sont pas égaux, i++
-	- Fin de la boucle : si c'est toujours pas égal, renvoyer NULL
+	- Fin de la boucle, si toujours pas égaux, renvoyer NULL
 
 
-```c
-<string.h>
-
-void *memchr(const void *s, int c, size_t n);
-``` commence à partir de `s`, considère la mémoire comme une séquence d'octets, vérifie strictement les `n` premiers octets à la recherche du premier octet égal à `(unsigned char)c` ; s'il est trouvé, renvoie son adresse, sinon renvoie `NULL`.
+___PROTECTED_34___ `memchr(s, c, n)` commence à `s`, considère la mémoire comme une suite d'octets, examine strictement les `n` premiers octets à la recherche du premier octet égal à `(unsigned char)c` ; s'il le trouve, il renvoie son adresse, sinon il renvoie `NULL`.
