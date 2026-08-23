@@ -1,4 +1,4 @@
-The function of `strdup()` is very straightforward: it duplicates a string and dynamically allocates memory for the copied string.
+The function of `strdup()` is very straightforward: it duplicates a string and dynamically allocates memory for the duplicated string.
 It can be understood as `string duplicate`
 
 `strdup` is available on many Unix / POSIX systems, but it is not a function defined by the ISO C standard; it belongs to the common interfaces in Unix / POSIX environments.
@@ -17,7 +17,7 @@ char *copy;
 copy = strdup("Hello");
 ```
 
-After executing the above 2 lines of code, it can be understood as creating a new "Hello",
+After executing the above 2 lines of code, it can be understood as creating a new "Hello":
 
 Original string s: "Hello\0"
 
@@ -28,8 +28,7 @@ Original string s: "Hello\0"
    ├── Allocate new memory
    
    └── Copy "Hello\0" into it
-   
-          ↓
+		⬇
 New dynamic memory:
 
 ┌────┬────┬────┬────┬────┬────┐
@@ -40,22 +39,22 @@ New dynamic memory:
   ↑
  copy
 
-copy points to a piece of new memory
+`copy` points to a new block of memory
 
-**strdup ultimately returns the starting address of the newly duplicated string and does not modify the original string**
+**`strdup` ultimately returns the starting address of the newly duplicated string and does not modify the original string**
 
-`strdup` = “Allocate space + Copy string”
+`strdup` = "Allocate memory + Copy string"
 
 #### 2. `strdup` vs `strcpy`
 
-`strcpy`: Copies the string from src into an already existing dest memory.
+`strcpy`: Copies the string from `src` into a pre-existing `dest` memory buffer
 
-`strdup`: Allocates new memory by itself, and then copies src into it.
+`strdup`: Allocates new memory by itself, and then copies `src` into it
 
 |               | strcpy   | strdup  |
 | ------------- | -------- | ------- |
-| Whether to copy string       | Yes      | Yes     |
-| Whether to allocate new memory       | No       | Yes     |
-| Whether dest needs to exist in advance | Yes      | No      |
+| Copies string       | Yes      | Yes     |
+| Allocates new memory       | No       | Yes     |
+| Does dest need to pre-exist | Yes      | No      |
 | Return value           | char \*  | char \* |
-| Whether free is needed after use  | Depends on dest | Yes     |
+| Requires free after use  | Depends on dest | Yes      |
