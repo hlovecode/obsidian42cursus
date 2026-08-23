@@ -1,11 +1,11 @@
-import os
-import re
-import json
-import time
-import random
 import hashlib
-import urllib.request
+import json
+import os
+import random
+import re
+import time
 import urllib.error
+import urllib.request
 
 
 API_KEY = os.environ["GEMINI_API_KEY"]
@@ -19,7 +19,6 @@ HASH_FILE = os.path.join(
 
 MAX_TRANSLATION_ATTEMPTS = 3
 MAX_HTTP_RETRIES = 5
-
 BASE_RETRY_DELAY = 5
 REQUEST_DELAY = 5
 
@@ -31,14 +30,13 @@ def protect_markdown(text):
 
     def replace(match):
         index = len(protected)
-        value = match.group(0)
-        protected.append(value)
+        protected.append(match.group(0))
         return f"PROTECTEDTOKEN{index}END"
 
     pattern = (
         r"```[\s\S]*?```"
         r"|`[^`\n]+`"
-        r"|https?://[^\s<>\])]+"
+        r"|https?://[^\s<>]+"
     )
 
     protected_text = re.sub(
@@ -53,15 +51,12 @@ def protect_markdown(text):
 def extract_protected_tokens(text):
     pattern = r"PROTECTEDTOKEN(\d+)END"
 
-    tokens = re.findall(
+    matches = re.findall(
         pattern,
         text
     )
 
-    return [
-        int(index)
-        for index in tokens
-    ]
+    return [int(index) for index in matches]
 
 
 def validate_protected_tokens(
@@ -144,7 +139,7 @@ def extract_markdown_protected(text):
     pattern = (
         r"```[\s\S]*?```"
         r"|`[^`\n]+`"
-        r"|https?://[^\s<>\])]+"
+        r"|https?://[^\s<>]+"
     )
 
     re.sub(
@@ -204,7 +199,6 @@ def validate_restored_markdown(
                     f"    Translated: "
                     f"{translated_value!r}"
                 )
-
                 break
 
         return False
@@ -395,38 +389,50 @@ def build_prompt(
     protected_text,
     language
 ):
-    return f"""Translate the following Markdown text into {language}.
+    return f"""Translate the following Markdown document into {language}.
 
-This is a technical programming note about the C programming language.
+This document is a technical programming note about the C programming language.
+
+The source document is already valid Markdown.
 
 STRICT RULES:
 
-1. Return ONLY the translated Markdown.
-2. Do not add explanations before or after the translation.
-3. Preserve the Markdown structure exactly.
-4. Preserve headings.
-5. Preserve lists.
-6. Preserve tables.
-7. Preserve emphasis.
-8. Preserve Markdown links.
-9. Preserve URLs.
-10. Preserve inline code.
-11. Preserve fenced code blocks.
-12. Preserve C source code exactly.
-13. Do not translate code.
-14. Do not translate URLs.
-15. Do not translate protected tokens.
-16. Every PROTECTEDTOKEN<number>END token must appear exactly once.
-17. Do not create new PROTECTEDTOKEN tokens.
-18. Do not remove any PROTECTEDTOKEN tokens.
-19. Do not change the number of PROTECTEDTOKEN tokens.
-20. Preserve the order of all PROTECTEDTOKEN tokens.
-21. Preserve the original meaning accurately.
-22. Use correct technical terminology.
-23. Translate all natural-language Chinese text.
-24. Do not leave large portions of Chinese untranslated.
+1. Return ONLY the translated Markdown document.
+2. Do not add explanations before or after the document.
+3. Preserve the complete Markdown structure.
+4. Preserve the exact order of headings.
+5. Preserve the exact order of paragraphs.
+6. Preserve lists and list nesting.
+7. Preserve tables and table structure.
+8. Preserve blockquotes.
+9. Preserve Markdown emphasis and formatting.
+10. Preserve Markdown links.
+11. Preserve all URLs.
+12. Preserve inline code.
+13. Preserve fenced code blocks.
+14. Preserve every line of C source code exactly.
+15. Never translate source code.
+16. Never translate inline code.
+17. Never translate URLs.
+18. Never translate Markdown link destinations.
+19. Never translate protected tokens.
+20. Every protected token must appear exactly once.
+21. Never create a new protected token.
+22. Never remove a protected token.
+23. Never change a protected token.
+24. Preserve the exact order of protected tokens.
+25. Preserve the original meaning accurately.
+26. Use correct technical terminology for the C programming language.
+27. Translate all natural-language Chinese text.
+28. Do not leave large portions of Chinese untranslated.
+29. Do not summarize.
+30. Do not shorten the document.
+31. Do not add information that is not present in the source.
+32. Do not remove information that is present in the source.
+33. Do not change Markdown syntax merely for stylistic reasons.
+34. Do not wrap the answer in ```markdown fences.
 
-Protected tokens look like:
+Protected tokens have this exact format:
 
 PROTECTEDTOKEN0END
 PROTECTEDTOKEN1END
@@ -464,7 +470,9 @@ def request_gemini(prompt):
         data
     ).encode("utf-8")
 
-    for attempt in range(MAX_HTTP_RETRIES):
+    for attempt in range(
+        MAX_HTTP_RETRIES
+    ):
         try:
             request = urllib.request.Request(
                 url,
@@ -496,6 +504,11 @@ def request_gemini(prompt):
                     "code"
                 )
 
+                message = error.get(
+                    "message",
+                    "Gemini API error"
+                )
+
                 if code in (
                     408,
                     429,
@@ -507,10 +520,7 @@ def request_gemini(prompt):
                     raise urllib.error.HTTPError(
                         url,
                         code,
-                        error.get(
-                            "message",
-                            "Gemini API error"
-                        ),
+                        message,
                         None,
                         None
                     )
@@ -570,7 +580,9 @@ def request_gemini(prompt):
             ):
                 raise
 
-            if attempt == MAX_HTTP_RETRIES - 1:
+            if attempt == (
+                MAX_HTTP_RETRIES - 1
+            ):
                 raise
 
             delay = (
@@ -588,9 +600,12 @@ def request_gemini(prompt):
 
         except (
             urllib.error.URLError,
-            RuntimeError
+            RuntimeError,
+            json.JSONDecodeError
         ) as error:
-            if attempt == MAX_HTTP_RETRIES - 1:
+            if attempt == (
+                MAX_HTTP_RETRIES - 1
+            ):
                 raise
 
             delay = (
@@ -743,7 +758,9 @@ def cleanup_deleted_files(
             "."
         )
 
-        source_set.add(relative_path)
+        source_set.add(
+            relative_path
+        )
 
     deleted_paths = []
 
@@ -907,12 +924,14 @@ def translate_file(
 
         except Exception as error:
             print(
-                f"  ERROR: English translation "
-                f"failed."
+                "  ERROR: English translation "
+                "failed."
             )
+
             print(
                 f"  {error}"
             )
+
             success = False
 
         time.sleep(
@@ -956,12 +975,14 @@ def translate_file(
 
         except Exception as error:
             print(
-                f"  ERROR: French translation "
-                f"failed."
+                "  ERROR: French translation "
+                "failed."
             )
+
             print(
                 f"  {error}"
             )
+
             success = False
 
     if success:
@@ -1041,7 +1062,6 @@ def verify_all_translations(
 
 def main():
     hashes = load_hashes()
-
     files = find_markdown_files()
 
     print(
@@ -1080,7 +1100,9 @@ def main():
                 source_file
             )
 
-    save_hashes(hashes)
+    save_hashes(
+        hashes
+    )
 
     print(
         "\nVerifying all translations..."
