@@ -29,7 +29,7 @@ copy = strdup("Hello");
    
    └── 把 "Hello\0" 复制进去
    
-		⬇
+⬇`
 		
 新的动态内存：
 
