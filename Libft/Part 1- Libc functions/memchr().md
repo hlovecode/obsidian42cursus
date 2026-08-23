@@ -17,13 +17,13 @@ void *memchr(const void *s, int c, size_t n);
 - 如果找到，返回指向这个字节的指针
 - 如果没有找到，则返回 NULL
 
-#### 2. `memchir` 可以处理没有 '\0' 的数据
+#### 2. `memchr` 可以处理没有 '\0' 的数据
 
 `memchr` 和其他字符串函数最大的区别之一就是它可以处理没有 '\0' 的数据，它不需 '\0' 来确定结束位置， 它只依赖 n. 
 
 `memchr` 本质上是逐字节检查，它可以处理任意内存.
 
-#### 3.  `memchir`  vs  `strchr` 
+#### 3.  `memchr`  vs  `strchr` 
 
 |特性|`strchr`|`memchr`|
 |---|---|---|
