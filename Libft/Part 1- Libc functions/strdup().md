@@ -60,5 +60,3 @@ copy 指向的是一块新的内存
 | dest 是否需要提前存在 | Yes      | No      |
 | 返回值           | char \*  | char \* |
 | 使用后是否需要 free  | 取决于 dest | 需要      |
-
-translation in french is ok or not ? 
