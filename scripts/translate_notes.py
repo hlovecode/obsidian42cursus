@@ -20,6 +20,7 @@ HASH_FILE = os.path.join(
 MAX_RETRIES = 5
 BASE_DELAY = 2
 REQUEST_DELAY = 2
+TRANSLATION_ATTEMPTS = 3
 
 
 def protect_markdown(text):
@@ -27,7 +28,9 @@ def protect_markdown(text):
 
     def replace(match):
         protected.append(match.group(0))
-        return f"PROTECTEDTOKEN{len(protected) - 1}END"
+        return (
+            f"PROTECTEDTOKEN{len(protected) - 1}END"
+        )
 
     pattern = (
         r"```[\s\S]*?```"
@@ -35,26 +38,54 @@ def protect_markdown(text):
         r"|https?://[^\s)]+"
     )
 
-    text = re.sub(
+    protected_text = re.sub(
         pattern,
         replace,
         text
     )
 
-    return text, protected
+    return protected_text, protected
 
 
-def restore_markdown(text, protected):
+def validate_protected_tokens(
+    translation,
+    protected
+):
+    for i in range(len(protected)):
+        token = (
+            f"PROTECTEDTOKEN{i}END"
+        )
+
+        count = translation.count(token)
+
+        if count != 1:
+            print(
+                f"  Invalid protected token: "
+                f"{token} "
+                f"(found {count} times)"
+            )
+            return False
+
+    return True
+
+
+def restore_markdown(
+    text,
+    protected
+):
+    if not validate_protected_tokens(
+        text,
+        protected
+    ):
+        raise RuntimeError(
+            "Protected tokens are missing "
+            "or duplicated."
+        )
+
     for i, value in enumerate(protected):
         placeholder = (
             f"PROTECTEDTOKEN{i}END"
         )
-
-        if placeholder not in text:
-            raise RuntimeError(
-                f"Protected token missing: "
-                f"{placeholder}"
-            )
 
         text = text.replace(
             placeholder,
@@ -62,6 +93,32 @@ def restore_markdown(text, protected):
         )
 
     return text
+
+
+def validate_restored_markdown(
+    original,
+    translation,
+    protected
+):
+    if not translation.strip():
+        return False
+
+    if len(original.strip()) > 0:
+        if len(translation.strip()) == 0:
+            return False
+
+    for value in protected:
+        if translation.count(value) != 1:
+            print(
+                "  Protected Markdown content "
+                "was changed or lost."
+            )
+            print(
+                f"  Protected content: {value[:80]!r}"
+            )
+            return False
+
+    return True
 
 
 def find_markdown_files():
@@ -234,18 +291,37 @@ def non_space_character_count(text):
     )
 
 
-def translation_is_valid(
-    source,
-    translation,
-    language
+def remove_protected_tokens(
+    text,
+    protected_count
 ):
-    if not translation:
+    result = text
+
+    for i in range(protected_count):
+        token = (
+            f"PROTECTEDTOKEN{i}END"
+        )
+
+        result = result.replace(
+            token,
+            ""
+        )
+
+    return result
+
+
+def validate_translation_language(
+    source,
+    translated_protected_text,
+    protected
+):
+    if not translated_protected_text.strip():
         return False
 
-    if not translation.strip():
-        return False
-
-    if source.strip() == translation.strip():
+    if not validate_protected_tokens(
+        translated_protected_text,
+        protected
+    ):
         return False
 
     source_has_chinese = contains_chinese(
@@ -255,115 +331,119 @@ def translation_is_valid(
     if not source_has_chinese:
         return True
 
+    explanatory_text = (
+        remove_protected_tokens(
+            translated_protected_text,
+            len(protected)
+        )
+    )
+
     chinese_count = chinese_character_count(
-        translation
+        explanatory_text
     )
 
     total_count = non_space_character_count(
-        translation
+        explanatory_text
     )
 
     if total_count == 0:
-        return False
+        return True
 
     chinese_ratio = (
         chinese_count / total_count
     )
 
-    if language == "English":
-        if chinese_ratio > 0.15:
-            return False
-
-    if language == "French":
-        if chinese_ratio > 0.15:
-            return False
-
-    return True
-
-
-def is_valid_translation(path):
-    if not os.path.exists(path):
-        return False
-
-    try:
-        if os.path.getsize(path) == 0:
-            return False
-
-        with open(
-            path,
-            "r",
-            encoding="utf-8"
-        ) as file:
-            content = file.read()
-
-        return bool(content.strip())
-
-    except OSError:
-        return False
-
-
-def validate_translation_file(
-    source,
-    translation,
-    language
-):
-    if not translation_is_valid(
-        source,
-        translation,
-        language
-    ):
-        return False
-
-    if "PROTECTEDTOKEN" in translation:
+    if chinese_ratio > 0.15:
+        print(
+            "  Translation still contains "
+            f"too much Chinese "
+            f"({chinese_ratio:.1%})."
+        )
         return False
 
     return True
 
 
-def translate(
+def clean_gemini_output(text):
+    text = text.strip()
+
+    markdown_wrapper = re.match(
+        r"^```(?:markdown|md)\s*\n"
+        r"([\s\S]*?)"
+        r"\n```\s*$",
+        text,
+        re.IGNORECASE
+    )
+
+    if markdown_wrapper:
+        text = markdown_wrapper.group(1)
+
+    return text.strip()
+
+
+def build_translation_prompt(
     text,
     language
 ):
-    prompt = f"""Translate the following Markdown text into {language}.
+    return f"""Translate the following Markdown text into {language}.
 
-Important rules:
+This is a technical programming note.
 
-- Return only the translated Markdown.
-- Do not add explanations.
-- Preserve the Markdown structure exactly.
-- Preserve headings.
-- Preserve lists.
-- Preserve tables.
-- Preserve emphasis.
-- Preserve links.
-- Preserve Markdown formatting.
-- Preserve all numbers exactly.
-- Preserve all punctuation that is part of Markdown structure.
-- Do not translate URLs.
-- Do not translate inline code.
-- Do not translate fenced code blocks.
-- Do not translate C source code.
-- Do not translate C function names.
-- Do not translate variable names.
-- Do not translate programming keywords.
-- Do not translate filenames.
-- Do not translate technical identifiers.
-- Keep all PROTECTEDTOKEN placeholders EXACTLY unchanged.
-- Do not add, remove, rename, split or modify any PROTECTEDTOKEN.
-- Every PROTECTEDTOKEN must appear exactly as provided.
-- Do not interpret PROTECTEDTOKEN as Markdown.
-- This is a technical programming note.
-- Use accurate C programming terminology.
-- Translate Chinese explanatory text completely.
-- Do not leave Chinese explanatory sentences untranslated.
+IMPORTANT RULES:
 
-Text:
+1. Return ONLY the translated Markdown.
+2. Do not add explanations before or after the Markdown.
+3. Preserve the Markdown structure exactly.
+4. Preserve headings.
+5. Preserve lists.
+6. Preserve tables.
+7. Preserve bold and italic formatting.
+8. Preserve Markdown links.
+9. Preserve all numbers.
+10. Preserve punctuation that belongs to Markdown structure.
+11. Keep URLs unchanged.
+12. Keep inline code unchanged.
+13. Keep fenced code blocks unchanged.
+14. Keep C source code unchanged.
+15. Keep C function names unchanged.
+16. Keep variable names unchanged.
+17. Keep filenames unchanged.
+18. Keep programming keywords unchanged.
+19. Keep technical identifiers unchanged.
+20. Translate all Chinese explanatory text completely.
+21. Use accurate C programming terminology.
+22. Do not leave Chinese explanatory sentences untranslated.
+23. The strings PROTECTEDTOKEN0END, PROTECTEDTOKEN1END,
+    PROTECTEDTOKEN2END, etc. are protected placeholders.
+24. NEVER translate a PROTECTEDTOKEN.
+25. NEVER modify a PROTECTEDTOKEN.
+26. NEVER remove a PROTECTEDTOKEN.
+27. NEVER add a PROTECTEDTOKEN.
+28. NEVER split a PROTECTEDTOKEN.
+29. Every existing PROTECTEDTOKEN must appear exactly once
+    in your response.
+30. Treat PROTECTEDTOKEN strings as opaque identifiers,
+    not as Markdown.
+31. Do not wrap the entire response in a Markdown code block.
+
+Text to translate:
 
 {text}
 """
 
+
+def request_gemini(
+    text,
+    language
+):
+    prompt = build_translation_prompt(
+        text,
+        language
+    )
+
     url = (
-        "https://generativelanguage.googleapis.com/v1beta/models/"
+        "https://generativelanguage.googleapis.com/"
+        "v1beta/models/"
         f"{MODEL}:generateContent?key={API_KEY}"
     )
 
@@ -458,14 +538,9 @@ Text:
                     "Gemini response contains no text."
                 )
 
-            translation = translation.strip()
-
-            if not translation:
-                raise RuntimeError(
-                    "Gemini returned an empty translation."
-                )
-
-            return translation
+            return clean_gemini_output(
+                translation
+            )
 
         except urllib.error.HTTPError as error:
             if error.code not in (
@@ -513,6 +588,159 @@ Text:
             )
 
             time.sleep(delay)
+
+
+def translate_with_validation(
+    original,
+    protected_text,
+    protected,
+    language
+):
+    for attempt in range(
+        1,
+        TRANSLATION_ATTEMPTS + 1
+    ):
+        print(
+            f"  Translation attempt "
+            f"{attempt}/{TRANSLATION_ATTEMPTS}"
+        )
+
+        try:
+            translation = request_gemini(
+                protected_text,
+                language
+            )
+
+            if not validate_translation_language(
+                original,
+                translation,
+                protected
+            ):
+                print(
+                    "  Translation validation failed."
+                )
+
+                if attempt < TRANSLATION_ATTEMPTS:
+                    print(
+                        "  Requesting a new "
+                        "translation..."
+                    )
+                    time.sleep(
+                        REQUEST_DELAY
+                    )
+                    continue
+
+                raise RuntimeError(
+                    f"{language} translation "
+                    "failed validation."
+                )
+
+            restored = restore_markdown(
+                translation,
+                protected
+            )
+
+            if not validate_restored_markdown(
+                original,
+                restored,
+                protected
+            ):
+                print(
+                    "  Restored Markdown "
+                    "validation failed."
+                )
+
+                if attempt < TRANSLATION_ATTEMPTS:
+                    print(
+                        "  Requesting a new "
+                        "translation..."
+                    )
+                    time.sleep(
+                        REQUEST_DELAY
+                    )
+                    continue
+
+                raise RuntimeError(
+                    f"{language} translation "
+                    "failed Markdown validation."
+                )
+
+            return restored
+
+        except RuntimeError as error:
+            if attempt >= TRANSLATION_ATTEMPTS:
+                raise
+
+            print(
+                f"  {error}"
+            )
+            print(
+                "  Retrying translation..."
+            )
+
+            time.sleep(
+                REQUEST_DELAY
+            )
+
+    raise RuntimeError(
+        f"{language} translation failed."
+    )
+
+
+def is_valid_translation_file(
+    source,
+    translation_file,
+    language
+):
+    if not os.path.exists(
+        translation_file
+    ):
+        return False
+
+    try:
+        with open(
+            translation_file,
+            "r",
+            encoding="utf-8"
+        ) as file:
+            translation = file.read()
+
+    except OSError:
+        return False
+
+    if not translation.strip():
+        return False
+
+    if source.strip() == translation.strip():
+        if contains_chinese(source):
+            return False
+
+    source_protected_text, protected = (
+        protect_markdown(source)
+    )
+
+    translated_protected_text, _ = (
+        protect_markdown(translation)
+    )
+
+    if not validate_protected_tokens(
+        translated_protected_text,
+        protected
+    ):
+        return False
+
+    for value in protected:
+        if translation.count(value) != 1:
+            return False
+
+    if not validate_translation_language(
+        source,
+        translated_protected_text,
+        protected
+    ):
+        return False
+
+    return True
 
 
 def cleanup_deleted_files(
@@ -624,40 +852,26 @@ def translate_file(
 
     if (
         old_hash == current_hash
-        and is_valid_translation(
-            english_file
-        )
+        and os.path.exists(english_file)
     ):
-        with open(
-            english_file,
-            "r",
-            encoding="utf-8"
-        ) as file:
-            english_content = file.read()
-
-        english_valid = translation_is_valid(
-            original,
-            english_content,
-            "English"
+        english_valid = (
+            is_valid_translation_file(
+                original,
+                english_file,
+                "English"
+            )
         )
 
     if (
         old_hash == current_hash
-        and is_valid_translation(
-            french_file
-        )
+        and os.path.exists(french_file)
     ):
-        with open(
-            french_file,
-            "r",
-            encoding="utf-8"
-        ) as file:
-            french_content = file.read()
-
-        french_valid = translation_is_valid(
-            original,
-            french_content,
-            "French"
+        french_valid = (
+            is_valid_translation_file(
+                original,
+                french_file,
+                "French"
+            )
         )
 
     if (
@@ -681,40 +895,17 @@ def translate_file(
     success = True
 
     if not english_valid:
+        print(
+            "  Translating -> English"
+        )
+
         try:
-            print(
-                "  Translating -> English"
-            )
-
-            english = translate(
+            english = translate_with_validation(
+                original,
                 protected_text,
+                protected,
                 "English"
             )
-
-            if not validate_translation_file(
-                original,
-                english,
-                "English"
-            ):
-                raise RuntimeError(
-                    "English translation "
-                    "failed validation."
-                )
-
-            english = restore_markdown(
-                english,
-                protected
-            )
-
-            if not translation_is_valid(
-                original,
-                english,
-                "English"
-            ):
-                raise RuntimeError(
-                    "English translation "
-                    "failed final validation."
-                )
 
             os.makedirs(
                 os.path.dirname(
@@ -734,10 +925,6 @@ def translate_file(
                 f"  Saved: {english_file}"
             )
 
-            time.sleep(
-                REQUEST_DELAY
-            )
-
         except Exception as error:
             print(
                 "  ERROR: English "
@@ -748,46 +935,27 @@ def translate_file(
             )
             success = False
 
+        time.sleep(
+            REQUEST_DELAY
+        )
+
     else:
         print(
             "  English already valid"
         )
 
     if not french_valid:
+        print(
+            "  Translating -> French"
+        )
+
         try:
-            print(
-                "  Translating -> French"
-            )
-
-            french = translate(
+            french = translate_with_validation(
+                original,
                 protected_text,
+                protected,
                 "French"
             )
-
-            if not validate_translation_file(
-                original,
-                french,
-                "French"
-            ):
-                raise RuntimeError(
-                    "French translation "
-                    "failed validation."
-                )
-
-            french = restore_markdown(
-                french,
-                protected
-            )
-
-            if not translation_is_valid(
-                original,
-                french,
-                "French"
-            ):
-                raise RuntimeError(
-                    "French translation "
-                    "failed final validation."
-                )
 
             os.makedirs(
                 os.path.dirname(
@@ -817,60 +985,34 @@ def translate_file(
             )
             success = False
 
-    english_final = (
-        is_valid_translation(
-            english_file
+    if success:
+        english_valid = (
+            is_valid_translation_file(
+                original,
+                english_file,
+                "English"
+            )
         )
-        and translation_file_matches_language(
-            original,
-            english_file,
-            "English"
-        )
-    )
 
-    french_final = (
-        is_valid_translation(
-            french_file
+        french_valid = (
+            is_valid_translation_file(
+                original,
+                french_file,
+                "French"
+            )
         )
-        and translation_file_matches_language(
-            original,
-            french_file,
-            "French"
-        )
-    )
 
-    if (
-        english_final
-        and french_final
-    ):
-        hashes[relative_path] = current_hash
-    else:
-        success = False
+        if (
+            english_valid
+            and french_valid
+        ):
+            hashes[relative_path] = (
+                current_hash
+            )
+        else:
+            success = False
 
     return success
-
-
-def translation_file_matches_language(
-    source,
-    path,
-    language
-):
-    try:
-        with open(
-            path,
-            "r",
-            encoding="utf-8"
-        ) as file:
-            content = file.read()
-
-    except OSError:
-        return False
-
-    return translation_is_valid(
-        source,
-        content,
-        language
-    )
 
 
 def verify_all_translations(
@@ -905,13 +1047,14 @@ def verify_all_translations(
             "French"
         )
 
-        if not is_valid_translation(
+        if not os.path.exists(
             english_file
         ):
             missing_english.append(
                 english_file
             )
-        elif not translation_file_matches_language(
+
+        elif not is_valid_translation_file(
             original,
             english_file,
             "English"
@@ -920,13 +1063,14 @@ def verify_all_translations(
                 english_file
             )
 
-        if not is_valid_translation(
+        if not os.path.exists(
             french_file
         ):
             missing_french.append(
                 french_file
             )
-        elif not translation_file_matches_language(
+
+        elif not is_valid_translation_file(
             original,
             french_file,
             "French"
@@ -1034,10 +1178,10 @@ def main():
                 source_file
             )
 
-    save_hashes(hashes)
-
     verification_passed = (
-        verify_all_translations(files)
+        verify_all_translations(
+            files
+        )
     )
 
     if failed_files:
@@ -1057,7 +1201,12 @@ def main():
         print(
             "\nTranslation process FAILED."
         )
+
+        save_hashes(hashes)
+
         raise SystemExit(1)
+
+    save_hashes(hashes)
 
     print(
         "\nTranslation process completed "
