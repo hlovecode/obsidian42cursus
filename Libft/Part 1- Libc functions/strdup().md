@@ -24,7 +24,9 @@ copy = strdup("Hello");
 `strdup()`
 
    ├── 计算字符串长度
+   
    ├── 申请新的内存
+   
    └── 把 "Hello\0" 复制进去
    
           ↓
