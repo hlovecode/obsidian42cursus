@@ -1,11 +1,11 @@
-import os
-import re
-import json
-import time
-import random
 import hashlib
-import urllib.request
+import json
+import os
+import random
+import re
+import time
 import urllib.error
+import urllib.request
 
 
 API_KEY = os.environ["GEMINI_API_KEY"]
@@ -47,7 +47,6 @@ def protect_markdown(text):
 def restore_markdown(text, protected):
     for i, value in enumerate(protected):
         placeholder = f"___PROTECTED_{i}___"
-
         text = text.replace(
             placeholder,
             value
@@ -196,6 +195,27 @@ def has_real_content(text):
     return False
 
 
+def is_valid_translation(path):
+    if not os.path.exists(path):
+        return False
+
+    try:
+        if os.path.getsize(path) == 0:
+            return False
+
+        with open(
+            path,
+            "r",
+            encoding="utf-8"
+        ) as file:
+            content = file.read()
+
+        return bool(content.strip())
+
+    except OSError:
+        return False
+
+
 def translate(text, language):
     prompt = f"""Translate the following Markdown text into {language}.
 
@@ -215,6 +235,12 @@ Important rules:
 - Preserve the original meaning accurately.
 - This is a technical programming note.
 - Use accurate C programming terminology.
+- Do not translate C function names.
+- Do not translate variable names.
+- Do not translate programming keywords.
+- Do not translate filenames.
+- Preserve all numbers exactly.
+- Do not remove or add Markdown elements.
 
 Text:
 
@@ -271,7 +297,6 @@ Text:
                 print(
                     "  Gemini API error:"
                 )
-
                 print(
                     json.dumps(
                         result["error"],
@@ -279,7 +304,6 @@ Text:
                         indent=2
                     )
                 )
-
                 raise RuntimeError(
                     "Gemini API returned an error."
                 )
@@ -316,6 +340,13 @@ Text:
             if not translation:
                 raise RuntimeError(
                     "Gemini response contains no text."
+                )
+
+            translation = translation.strip()
+
+            if not translation:
+                raise RuntimeError(
+                    "Gemini returned an empty translation."
                 )
 
             return translation
@@ -361,7 +392,6 @@ Text:
             print(
                 f"  API response error: {error}"
             )
-
             print(
                 f"  Retrying in {delay:.1f}s..."
             )
@@ -380,7 +410,6 @@ def cleanup_deleted_files(
             source_file,
             "."
         )
-
         source_set.add(relative_path)
 
     deleted_paths = []
@@ -446,7 +475,7 @@ def translate_file(
         print(
             f"SKIP EMPTY: {source_file}"
         )
-        return
+        return True
 
     relative_path = os.path.relpath(
         source_file,
@@ -461,11 +490,11 @@ def translate_file(
         relative_path
     )
 
-    english_exists = os.path.exists(
+    english_exists = is_valid_translation(
         english_file
     )
 
-    french_exists = os.path.exists(
+    french_exists = is_valid_translation(
         french_file
     )
 
@@ -477,7 +506,7 @@ def translate_file(
         print(
             f"SKIP: {source_file}"
         )
-        return
+        return True
 
     print(
         f"\nPROCESS: {source_file}"
@@ -487,41 +516,58 @@ def translate_file(
         protect_markdown(original)
     )
 
+    success = True
+
     if (
         old_hash != current_hash
         or not english_exists
     ):
-        print(
-            "  Translating -> English"
-        )
+        try:
+            print(
+                "  Translating -> English"
+            )
 
-        english = translate(
-            protected_text,
-            "English"
-        )
+            english = translate(
+                protected_text,
+                "English"
+            )
 
-        english = restore_markdown(
-            english,
-            protected
-        )
+            english = restore_markdown(
+                english,
+                protected
+            )
 
-        os.makedirs(
-            os.path.dirname(english_file),
-            exist_ok=True
-        )
+            if not english.strip():
+                raise RuntimeError(
+                    "English translation is empty."
+                )
 
-        with open(
-            english_file,
-            "w",
-            encoding="utf-8"
-        ) as file:
-            file.write(english)
+            os.makedirs(
+                os.path.dirname(english_file),
+                exist_ok=True
+            )
 
-        print(
-            f"  Saved: {english_file}"
-        )
+            with open(
+                english_file,
+                "w",
+                encoding="utf-8"
+            ) as file:
+                file.write(english)
 
-        time.sleep(REQUEST_DELAY)
+            print(
+                f"  Saved: {english_file}"
+            )
+
+            time.sleep(REQUEST_DELAY)
+
+        except Exception as error:
+            print(
+                "  ERROR: English translation failed."
+            )
+            print(
+                f"  {error}"
+            )
+            success = False
 
     else:
         print(
@@ -532,42 +578,125 @@ def translate_file(
         old_hash != current_hash
         or not french_exists
     ):
-        print(
-            "  Translating -> French"
+        try:
+            print(
+                "  Translating -> French"
+            )
+
+            french = translate(
+                protected_text,
+                "French"
+            )
+
+            french = restore_markdown(
+                french,
+                protected
+            )
+
+            if not french.strip():
+                raise RuntimeError(
+                    "French translation is empty."
+                )
+
+            os.makedirs(
+                os.path.dirname(french_file),
+                exist_ok=True
+            )
+
+            with open(
+                french_file,
+                "w",
+                encoding="utf-8"
+            ) as file:
+                file.write(french)
+
+            print(
+                f"  Saved: {french_file}"
+            )
+
+        except Exception as error:
+            print(
+                "  ERROR: French translation failed."
+            )
+            print(
+                f"  {error}"
+            )
+            success = False
+
+    if (
+        is_valid_translation(english_file)
+        and is_valid_translation(french_file)
+    ):
+        hashes[relative_path] = current_hash
+    else:
+        success = False
+
+    return success
+
+
+def verify_all_translations(
+    source_files
+):
+    missing_english = []
+    missing_french = []
+
+    for source_file in source_files:
+        english_file = get_translation_path(
+            source_file,
+            "English"
         )
 
-        french = translate(
-            protected_text,
+        french_file = get_translation_path(
+            source_file,
             "French"
         )
 
-        french = restore_markdown(
-            french,
-            protected
-        )
+        if not is_valid_translation(
+            english_file
+        ):
+            missing_english.append(
+                english_file
+            )
 
-        os.makedirs(
-            os.path.dirname(french_file),
-            exist_ok=True
-        )
+        if not is_valid_translation(
+            french_file
+        ):
+            missing_french.append(
+                french_file
+            )
 
-        with open(
-            french_file,
-            "w",
-            encoding="utf-8"
-        ) as file:
-            file.write(french)
-
+    if not missing_english and not missing_french:
         print(
-            f"  Saved: {french_file}"
+            "\nPASS: All English and French "
+            "translations exist."
         )
+        return True
 
-    else:
+    print(
+        "\nERROR: Translation verification failed."
+    )
+
+    if missing_english:
         print(
-            "  French already exists"
+            "\nMissing English translations:"
         )
 
-    hashes[relative_path] = current_hash
+        for path in missing_english:
+            print(
+                f"  {path}"
+            )
+
+    if missing_french:
+        print(
+            "\nMissing French translations:"
+        )
+
+        for path in missing_french:
+            print(
+                f"  {path}"
+            )
+
+    return False
 
 
 def main():
@@ -584,28 +713,60 @@ def main():
         hashes
     )
 
+    failed_files = []
+
     for source_file in files:
         try:
-            translate_file(
+            success = translate_file(
                 source_file,
                 hashes
             )
+
+            if not success:
+                failed_files.append(
+                    source_file
+                )
 
         except Exception as error:
             print(
                 f"\nERROR: {source_file}"
             )
-
             print(
                 f"  {error}"
             )
 
-            continue
+            failed_files.append(
+                source_file
+            )
 
     save_hashes(hashes)
 
+    verification_passed = (
+        verify_all_translations(files)
+    )
+
+    if failed_files:
+        print(
+            "\nTranslation failures:"
+        )
+
+        for source_file in failed_files:
+            print(
+                f"  {source_file}"
+            )
+
+    if (
+        failed_files
+        or not verification_passed
+    ):
+        print(
+            "\nTranslation process FAILED."
+        )
+        raise SystemExit(1)
+
     print(
-        "\nTranslation process completed."
+        "\nTranslation process completed "
+        "successfully."
     )
 
 
