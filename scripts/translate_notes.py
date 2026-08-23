@@ -1,11 +1,11 @@
-import hashlib
-import json
 import os
-import random
 import re
+import json
 import time
-import urllib.error
+import random
+import hashlib
 import urllib.request
+import urllib.error
 
 
 API_KEY = os.environ["GEMINI_API_KEY"]
@@ -17,25 +17,28 @@ HASH_FILE = os.path.join(
     ".translation_hashes.json"
 )
 
-MAX_RETRIES = 5
-BASE_DELAY = 2
-REQUEST_DELAY = 2
-TRANSLATION_ATTEMPTS = 3
+MAX_TRANSLATION_ATTEMPTS = 3
+MAX_HTTP_RETRIES = 5
+
+BASE_RETRY_DELAY = 5
+REQUEST_DELAY = 5
+
+CHINESE_RATIO_LIMIT = 0.15
 
 
 def protect_markdown(text):
     protected = []
 
     def replace(match):
-        protected.append(match.group(0))
-        return (
-            f"PROTECTEDTOKEN{len(protected) - 1}END"
-        )
+        index = len(protected)
+        value = match.group(0)
+        protected.append(value)
+        return f"PROTECTEDTOKEN{index}END"
 
     pattern = (
         r"```[\s\S]*?```"
         r"|`[^`\n]+`"
-        r"|https?://[^\s)]+"
+        r"|https?://[^\s<>\])]+"
     )
 
     protected_text = re.sub(
@@ -47,22 +50,67 @@ def protect_markdown(text):
     return protected_text, protected
 
 
+def extract_protected_tokens(text):
+    pattern = r"PROTECTEDTOKEN(\d+)END"
+
+    tokens = re.findall(
+        pattern,
+        text
+    )
+
+    return [
+        int(index)
+        for index in tokens
+    ]
+
+
 def validate_protected_tokens(
-    translation,
+    translated,
     protected
 ):
-    for i in range(len(protected)):
-        token = (
-            f"PROTECTEDTOKEN{i}END"
-        )
+    expected_indexes = list(
+        range(len(protected))
+    )
 
-        count = translation.count(token)
+    actual_indexes = extract_protected_tokens(
+        translated
+    )
 
-        if count != 1:
+    if actual_indexes != expected_indexes:
+        if len(actual_indexes) != len(
+            expected_indexes
+        ):
             print(
-                f"  Invalid protected token: "
-                f"{token} "
-                f"(found {count} times)"
+                "  Protected token count mismatch."
+            )
+            print(
+                f"  Expected: {len(expected_indexes)}"
+            )
+            print(
+                f"  Found: {len(actual_indexes)}"
+            )
+        else:
+            print(
+                "  Protected token order changed."
+            )
+            print(
+                f"  Expected: {expected_indexes}"
+            )
+            print(
+                f"  Found: {actual_indexes}"
+            )
+
+        return False
+
+    for index in expected_indexes:
+        token = f"PROTECTEDTOKEN{index}END"
+
+        if translated.count(token) != 1:
+            print(
+                f"  Invalid protected token: {token}"
+            )
+            print(
+                f"  Found {translated.count(token)} times"
             )
             return False
 
@@ -73,18 +121,9 @@ def restore_markdown(
     text,
     protected
 ):
-    if not validate_protected_tokens(
-        text,
-        protected
-    ):
-        raise RuntimeError(
-            "Protected tokens are missing "
-            "or duplicated."
-        )
-
-    for i, value in enumerate(protected):
+    for index, value in enumerate(protected):
         placeholder = (
-            f"PROTECTEDTOKEN{i}END"
+            f"PROTECTEDTOKEN{index}END"
         )
 
         text = text.replace(
@@ -95,28 +134,116 @@ def restore_markdown(
     return text
 
 
+def extract_markdown_protected(text):
+    protected = []
+
+    def replace(match):
+        protected.append(match.group(0))
+        return ""
+
+    pattern = (
+        r"```[\s\S]*?```"
+        r"|`[^`\n]+`"
+        r"|https?://[^\s<>\])]+"
+    )
+
+    re.sub(
+        pattern,
+        replace,
+        text
+    )
+
+    return protected
+
+
 def validate_restored_markdown(
     original,
-    translation,
-    protected
+    translated
 ):
-    if not translation.strip():
+    original_protected = (
+        extract_markdown_protected(original)
+    )
+
+    translated_protected = (
+        extract_markdown_protected(translated)
+    )
+
+    if original_protected != translated_protected:
+        print(
+            "  Protected Markdown content was "
+            "changed or lost."
+        )
+
+        max_items = max(
+            len(original_protected),
+            len(translated_protected)
+        )
+
+        for index in range(max_items):
+            original_value = (
+                original_protected[index]
+                if index < len(original_protected)
+                else "<MISSING>"
+            )
+
+            translated_value = (
+                translated_protected[index]
+                if index < len(translated_protected)
+                else "<MISSING>"
+            )
+
+            if original_value != translated_value:
+                print(
+                    f"  Protected content mismatch "
+                    f"at index {index}:"
+                )
+                print(
+                    f"    Original: {original_value!r}"
+                )
+                print(
+                    f"    Translated: "
+                    f"{translated_value!r}"
+                )
+
+                break
+
         return False
 
-    if len(original.strip()) > 0:
-        if len(translation.strip()) == 0:
-            return False
+    return True
 
-    for value in protected:
-        if translation.count(value) != 1:
-            print(
-                "  Protected Markdown content "
-                "was changed or lost."
-            )
-            print(
-                f"  Protected content: {value[:80]!r}"
-            )
-            return False
+
+def calculate_chinese_ratio(text):
+    chinese_characters = re.findall(
+        r"[\u4e00-\u9fff]",
+        text
+    )
+
+    meaningful_characters = re.findall(
+        r"[A-Za-z\u4e00-\u9fff]",
+        text
+    )
+
+    if not meaningful_characters:
+        return 0.0
+
+    return (
+        len(chinese_characters)
+        / len(meaningful_characters)
+    )
+
+
+def validate_language(
+    text,
+    language
+):
+    ratio = calculate_chinese_ratio(text)
+
+    if ratio > CHINESE_RATIO_LIMIT:
+        print(
+            f"  Translation still contains too "
+            f"much Chinese ({ratio * 100:.1f}%)."
+        )
+        return False
 
     return True
 
@@ -264,187 +391,61 @@ def has_real_content(text):
     return False
 
 
-def contains_chinese(text):
-    return bool(
-        re.search(
-            r"[\u4e00-\u9fff]",
-            text
-        )
-    )
-
-
-def chinese_character_count(text):
-    return len(
-        re.findall(
-            r"[\u4e00-\u9fff]",
-            text
-        )
-    )
-
-
-def non_space_character_count(text):
-    return len(
-        re.findall(
-            r"\S",
-            text
-        )
-    )
-
-
-def remove_protected_tokens(
-    text,
-    protected_count
-):
-    result = text
-
-    for i in range(protected_count):
-        token = (
-            f"PROTECTEDTOKEN{i}END"
-        )
-
-        result = result.replace(
-            token,
-            ""
-        )
-
-    return result
-
-
-def validate_translation_language(
-    source,
-    translated_protected_text,
-    protected
-):
-    if not translated_protected_text.strip():
-        return False
-
-    if not validate_protected_tokens(
-        translated_protected_text,
-        protected
-    ):
-        return False
-
-    source_has_chinese = contains_chinese(
-        source
-    )
-
-    if not source_has_chinese:
-        return True
-
-    explanatory_text = (
-        remove_protected_tokens(
-            translated_protected_text,
-            len(protected)
-        )
-    )
-
-    chinese_count = chinese_character_count(
-        explanatory_text
-    )
-
-    total_count = non_space_character_count(
-        explanatory_text
-    )
-
-    if total_count == 0:
-        return True
-
-    chinese_ratio = (
-        chinese_count / total_count
-    )
-
-    if chinese_ratio > 0.15:
-        print(
-            "  Translation still contains "
-            f"too much Chinese "
-            f"({chinese_ratio:.1%})."
-        )
-        return False
-
-    return True
-
-
-def clean_gemini_output(text):
-    text = text.strip()
-
-    markdown_wrapper = re.match(
-        r"^```(?:markdown|md)\s*\n"
-        r"([\s\S]*?)"
-        r"\n```\s*$",
-        text,
-        re.IGNORECASE
-    )
-
-    if markdown_wrapper:
-        text = markdown_wrapper.group(1)
-
-    return text.strip()
-
-
-def build_translation_prompt(
-    text,
+def build_prompt(
+    protected_text,
     language
 ):
     return f"""Translate the following Markdown text into {language}.
 
-This is a technical programming note.
+This is a technical programming note about the C programming language.
 
-IMPORTANT RULES:
+STRICT RULES:
 
 1. Return ONLY the translated Markdown.
-2. Do not add explanations before or after the Markdown.
+2. Do not add explanations before or after the translation.
 3. Preserve the Markdown structure exactly.
 4. Preserve headings.
 5. Preserve lists.
 6. Preserve tables.
-7. Preserve bold and italic formatting.
+7. Preserve emphasis.
 8. Preserve Markdown links.
-9. Preserve all numbers.
-10. Preserve punctuation that belongs to Markdown structure.
-11. Keep URLs unchanged.
-12. Keep inline code unchanged.
-13. Keep fenced code blocks unchanged.
-14. Keep C source code unchanged.
-15. Keep C function names unchanged.
-16. Keep variable names unchanged.
-17. Keep filenames unchanged.
-18. Keep programming keywords unchanged.
-19. Keep technical identifiers unchanged.
-20. Translate all Chinese explanatory text completely.
-21. Use accurate C programming terminology.
-22. Do not leave Chinese explanatory sentences untranslated.
-23. The strings PROTECTEDTOKEN0END, PROTECTEDTOKEN1END,
-    PROTECTEDTOKEN2END, etc. are protected placeholders.
-24. NEVER translate a PROTECTEDTOKEN.
-25. NEVER modify a PROTECTEDTOKEN.
-26. NEVER remove a PROTECTEDTOKEN.
-27. NEVER add a PROTECTEDTOKEN.
-28. NEVER split a PROTECTEDTOKEN.
-29. Every existing PROTECTEDTOKEN must appear exactly once
-    in your response.
-30. Treat PROTECTEDTOKEN strings as opaque identifiers,
-    not as Markdown.
-31. Do not wrap the entire response in a Markdown code block.
+9. Preserve URLs.
+10. Preserve inline code.
+11. Preserve fenced code blocks.
+12. Preserve C source code exactly.
+13. Do not translate code.
+14. Do not translate URLs.
+15. Do not translate protected tokens.
+16. Every PROTECTEDTOKEN<number>END token must appear exactly once.
+17. Do not create new PROTECTEDTOKEN tokens.
+18. Do not remove any PROTECTEDTOKEN tokens.
+19. Do not change the number of PROTECTEDTOKEN tokens.
+20. Preserve the order of all PROTECTEDTOKEN tokens.
+21. Preserve the original meaning accurately.
+22. Use correct technical terminology.
+23. Translate all natural-language Chinese text.
+24. Do not leave large portions of Chinese untranslated.
+
+Protected tokens look like:
+
+PROTECTEDTOKEN0END
+PROTECTEDTOKEN1END
+PROTECTEDTOKEN2END
+
+They are placeholders and MUST remain exactly unchanged.
 
 Text to translate:
 
-{text}
+{protected_text}
 """
 
 
-def request_gemini(
-    text,
-    language
-):
-    prompt = build_translation_prompt(
-        text,
-        language
-    )
-
+def request_gemini(prompt):
     url = (
         "https://generativelanguage.googleapis.com/"
         "v1beta/models/"
-        f"{MODEL}:generateContent?key={API_KEY}"
+        f"{MODEL}:generateContent"
+        f"?key={API_KEY}"
     )
 
     data = {
@@ -463,7 +464,7 @@ def request_gemini(
         data
     ).encode("utf-8")
 
-    for attempt in range(MAX_RETRIES):
+    for attempt in range(MAX_HTTP_RETRIES):
         try:
             request = urllib.request.Request(
                 url,
@@ -489,19 +490,37 @@ def request_gemini(
             )
 
             if "error" in result:
-                print(
-                    "  Gemini API error:"
-                )
-                print(
-                    json.dumps(
-                        result["error"],
-                        ensure_ascii=False,
-                        indent=2
-                    )
+                error = result["error"]
+
+                code = error.get(
+                    "code"
                 )
 
+                if code in (
+                    408,
+                    429,
+                    500,
+                    502,
+                    503,
+                    504
+                ):
+                    raise urllib.error.HTTPError(
+                        url,
+                        code,
+                        error.get(
+                            "message",
+                            "Gemini API error"
+                        ),
+                        None,
+                        None
+                    )
+
                 raise RuntimeError(
-                    "Gemini API returned an error."
+                    "Gemini API returned an error: "
+                    + json.dumps(
+                        error,
+                        ensure_ascii=False
+                    )
                 )
 
             candidates = result.get(
@@ -538,9 +557,7 @@ def request_gemini(
                     "Gemini response contains no text."
                 )
 
-            return clean_gemini_output(
-                translation
-            )
+            return translation.strip()
 
         except urllib.error.HTTPError as error:
             if error.code not in (
@@ -553,12 +570,13 @@ def request_gemini(
             ):
                 raise
 
-            if attempt == MAX_RETRIES - 1:
+            if attempt == MAX_HTTP_RETRIES - 1:
                 raise
 
             delay = (
-                BASE_DELAY * (2 ** attempt)
-                + random.uniform(0, 1)
+                BASE_RETRY_DELAY
+                * (2 ** attempt)
+                + random.uniform(0, 2)
             )
 
             print(
@@ -572,17 +590,19 @@ def request_gemini(
             urllib.error.URLError,
             RuntimeError
         ) as error:
-            if attempt == MAX_RETRIES - 1:
+            if attempt == MAX_HTTP_RETRIES - 1:
                 raise
 
             delay = (
-                BASE_DELAY * (2 ** attempt)
-                + random.uniform(0, 1)
+                BASE_RETRY_DELAY
+                * (2 ** attempt)
+                + random.uniform(0, 2)
             )
 
             print(
                 f"  API response error: {error}"
             )
+
             print(
                 f"  Retrying in {delay:.1f}s..."
             )
@@ -590,50 +610,41 @@ def request_gemini(
             time.sleep(delay)
 
 
-def translate_with_validation(
-    original,
+def translate(
     protected_text,
     protected,
     language
 ):
+    prompt = build_prompt(
+        protected_text,
+        language
+    )
+
     for attempt in range(
-        1,
-        TRANSLATION_ATTEMPTS + 1
+        MAX_TRANSLATION_ATTEMPTS
     ):
         print(
             f"  Translation attempt "
-            f"{attempt}/{TRANSLATION_ATTEMPTS}"
+            f"{attempt + 1}/"
+            f"{MAX_TRANSLATION_ATTEMPTS}"
         )
 
         try:
             translation = request_gemini(
-                protected_text,
-                language
+                prompt
             )
 
-            if not validate_translation_language(
-                original,
+            if not validate_protected_tokens(
                 translation,
                 protected
             ):
                 print(
                     "  Translation validation failed."
                 )
-
-                if attempt < TRANSLATION_ATTEMPTS:
-                    print(
-                        "  Requesting a new "
-                        "translation..."
-                    )
-                    time.sleep(
-                        REQUEST_DELAY
-                    )
-                    continue
-
-                raise RuntimeError(
-                    f"{language} translation "
-                    "failed validation."
+                print(
+                    "  Requesting a new translation..."
                 )
+                continue
 
             restored = restore_markdown(
                 translation,
@@ -641,102 +652,79 @@ def translate_with_validation(
             )
 
             if not validate_restored_markdown(
-                original,
-                restored,
-                protected
+                protected_text,
+                translation
             ):
                 print(
-                    "  Restored Markdown "
-                    "validation failed."
+                    "  Restored Markdown validation "
+                    "failed."
                 )
-
-                if attempt < TRANSLATION_ATTEMPTS:
-                    print(
-                        "  Requesting a new "
-                        "translation..."
-                    )
-                    time.sleep(
-                        REQUEST_DELAY
-                    )
-                    continue
-
-                raise RuntimeError(
-                    f"{language} translation "
-                    "failed Markdown validation."
+                print(
+                    "  Requesting a new translation..."
                 )
+                continue
+
+            if not validate_language(
+                restored,
+                language
+            ):
+                print(
+                    "  Translation validation failed."
+                )
+                print(
+                    "  Requesting a new translation..."
+                )
+                continue
 
             return restored
 
-        except RuntimeError as error:
-            if attempt >= TRANSLATION_ATTEMPTS:
+        except Exception as error:
+            print(
+                f"  Translation error: {error}"
+            )
+
+            if attempt == (
+                MAX_TRANSLATION_ATTEMPTS - 1
+            ):
                 raise
 
             print(
-                f"  {error}"
-            )
-            print(
-                "  Retrying translation..."
-            )
-
-            time.sleep(
-                REQUEST_DELAY
+                "  Requesting a new translation..."
             )
 
     raise RuntimeError(
-        f"{language} translation failed."
+        f"{language} translation failed "
+        "validation."
     )
 
 
-def is_valid_translation_file(
-    source,
-    translation_file,
-    language
+def validate_existing_translation(
+    original,
+    translated
 ):
-    if not os.path.exists(
-        translation_file
-    ):
+    if not os.path.exists(translated):
         return False
 
     try:
         with open(
-            translation_file,
+            translated,
             "r",
             encoding="utf-8"
         ) as file:
-            translation = file.read()
+            translated_text = file.read()
 
     except OSError:
         return False
 
-    if not translation.strip():
-        return False
-
-    if source.strip() == translation.strip():
-        if contains_chinese(source):
-            return False
-
-    source_protected_text, protected = (
-        protect_markdown(source)
-    )
-
-    translated_protected_text, _ = (
-        protect_markdown(translation)
-    )
-
-    if not validate_protected_tokens(
-        translated_protected_text,
-        protected
+    if not validate_restored_markdown(
+        original,
+        translated_text
     ):
         return False
 
-    for value in protected:
-        if translation.count(value) != 1:
-            return False
-
-    if not validate_translation_language(
-        source,
-        translated_protected_text,
-        protected
+    if not validate_language(
+        translated_text,
+        "English"
     ):
         return False
 
@@ -755,9 +743,7 @@ def cleanup_deleted_files(
             "."
         )
 
-        source_set.add(
-            relative_path
-        )
+        source_set.add(relative_path)
 
     deleted_paths = []
 
@@ -780,23 +766,15 @@ def cleanup_deleted_files(
             relative_path
         )
 
-        if os.path.exists(
-            english_file
-        ):
-            os.remove(
-                english_file
-            )
+        if os.path.exists(english_file):
+            os.remove(english_file)
 
             print(
                 f"DELETE: {english_file}"
             )
 
-        if os.path.exists(
-            french_file
-        ):
-            os.remove(
-                french_file
-            )
+        if os.path.exists(french_file):
+            os.remove(french_file)
 
             print(
                 f"DELETE: {french_file}"
@@ -826,9 +804,7 @@ def translate_file(
     ) as file:
         original = file.read()
 
-    if not has_real_content(
-        original
-    ):
+    if not has_real_content(original):
         print(
             f"SKIP EMPTY: {source_file}"
         )
@@ -847,30 +823,30 @@ def translate_file(
         relative_path
     )
 
+    english_exists = os.path.exists(
+        english_file
+    )
+
+    french_exists = os.path.exists(
+        french_file
+    )
+
     english_valid = False
     french_valid = False
 
-    if (
-        old_hash == current_hash
-        and os.path.exists(english_file)
-    ):
+    if english_exists:
         english_valid = (
-            is_valid_translation_file(
+            validate_existing_translation(
                 original,
-                english_file,
-                "English"
+                english_file
             )
         )
 
-    if (
-        old_hash == current_hash
-        and os.path.exists(french_file)
-    ):
+    if french_exists:
         french_valid = (
-            is_valid_translation_file(
+            validate_existing_translation(
                 original,
-                french_file,
-                "French"
+                french_file
             )
         )
 
@@ -885,7 +861,7 @@ def translate_file(
         return True
 
     print(
-        f"\nPROCESS: {source_file}"
+        f"PROCESS: {source_file}"
     )
 
     protected_text, protected = (
@@ -894,14 +870,18 @@ def translate_file(
 
     success = True
 
-    if not english_valid:
+    if english_valid:
+        print(
+            "  English already valid"
+        )
+
+    else:
         print(
             "  Translating -> English"
         )
 
         try:
-            english = translate_with_validation(
-                original,
+            english = translate(
                 protected_text,
                 protected,
                 "English"
@@ -927,8 +907,8 @@ def translate_file(
 
         except Exception as error:
             print(
-                "  ERROR: English "
-                "translation failed."
+                f"  ERROR: English translation "
+                f"failed."
             )
             print(
                 f"  {error}"
@@ -939,19 +919,18 @@ def translate_file(
             REQUEST_DELAY
         )
 
-    else:
+    if french_valid:
         print(
-            "  English already valid"
+            "  French already valid"
         )
 
-    if not french_valid:
+    else:
         print(
             "  Translating -> French"
         )
 
         try:
-            french = translate_with_validation(
-                original,
+            french = translate(
                 protected_text,
                 protected,
                 "French"
@@ -977,8 +956,8 @@ def translate_file(
 
         except Exception as error:
             print(
-                "  ERROR: French "
-                "translation failed."
+                f"  ERROR: French translation "
+                f"failed."
             )
             print(
                 f"  {error}"
@@ -986,31 +965,7 @@ def translate_file(
             success = False
 
     if success:
-        english_valid = (
-            is_valid_translation_file(
-                original,
-                english_file,
-                "English"
-            )
-        )
-
-        french_valid = (
-            is_valid_translation_file(
-                original,
-                french_file,
-                "French"
-            )
-        )
-
-        if (
-            english_valid
-            and french_valid
-        ):
-            hashes[relative_path] = (
-                current_hash
-            )
-        else:
-            success = False
+        hashes[relative_path] = current_hash
 
     return success
 
@@ -1018,9 +973,6 @@ def translate_file(
 def verify_all_translations(
     source_files
 ):
-    missing_english = []
-    missing_french = []
-
     invalid_english = []
     invalid_french = []
 
@@ -1032,9 +984,7 @@ def verify_all_translations(
         ) as file:
             original = file.read()
 
-        if not has_real_content(
-            original
-        ):
+        if not has_real_content(original):
             continue
 
         english_file = get_translation_path(
@@ -1047,62 +997,20 @@ def verify_all_translations(
             "French"
         )
 
-        if not os.path.exists(
-            english_file
-        ):
-            missing_english.append(
-                english_file
-            )
-
-        elif not is_valid_translation_file(
+        if not validate_existing_translation(
             original,
-            english_file,
-            "English"
+            english_file
         ):
             invalid_english.append(
                 english_file
             )
 
-        if not os.path.exists(
-            french_file
-        ):
-            missing_french.append(
-                french_file
-            )
-
-        elif not is_valid_translation_file(
+        if not validate_existing_translation(
             original,
-            french_file,
-            "French"
+            french_file
         ):
             invalid_french.append(
                 french_file
-            )
-
-    if (
-        not missing_english
-        and not missing_french
-        and not invalid_english
-        and not invalid_french
-    ):
-        print(
-            "\nPASS: All English and French "
-            "translations are valid."
-        )
-        return True
-
-    print(
-        "\nERROR: Translation verification failed."
-    )
-
-    if missing_english:
-        print(
-            "\nMissing English translations:"
-        )
-
-        for path in missing_english:
-            print(
-                f"  {path}"
             )
 
     if invalid_english:
@@ -1111,16 +1019,6 @@ def verify_all_translations(
         )
 
         for path in invalid_english:
-            print(
-                f"  {path}"
-            )
-
-    if missing_french:
-        print(
-            "\nMissing French translations:"
-        )
-
-        for path in missing_french:
             print(
                 f"  {path}"
             )
@@ -1135,7 +1033,10 @@ def verify_all_translations(
                 f"  {path}"
             )
 
-    return False
+    return (
+        not invalid_english
+        and not invalid_french
+    )
 
 
 def main():
@@ -1152,7 +1053,7 @@ def main():
         hashes
     )
 
-    failed_files = []
+    failures = []
 
     for source_file in files:
         try:
@@ -1162,7 +1063,7 @@ def main():
             )
 
             if not success:
-                failed_files.append(
+                failures.append(
                     source_file
                 )
 
@@ -1170,43 +1071,53 @@ def main():
             print(
                 f"\nERROR: {source_file}"
             )
+
             print(
                 f"  {error}"
             )
 
-            failed_files.append(
+            failures.append(
                 source_file
             )
 
-    verification_passed = (
-        verify_all_translations(
-            files
-        )
+    save_hashes(hashes)
+
+    print(
+        "\nVerifying all translations..."
     )
 
-    if failed_files:
+    translations_valid = (
+        verify_all_translations(files)
+    )
+
+    if failures:
         print(
             "\nTranslation failures:"
         )
 
-        for source_file in failed_files:
+        for source_file in failures:
             print(
                 f"  {source_file}"
             )
 
-    if (
-        failed_files
-        or not verification_passed
-    ):
+    if not translations_valid:
+        print(
+            "\nERROR: Translation verification "
+            "failed."
+        )
+
         print(
             "\nTranslation process FAILED."
         )
 
-        save_hashes(hashes)
-
         raise SystemExit(1)
 
-    save_hashes(hashes)
+    if failures:
+        print(
+            "\nTranslation process FAILED."
+        )
+
+        raise SystemExit(1)
 
     print(
         "\nTranslation process completed "
