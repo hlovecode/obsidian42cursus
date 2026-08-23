@@ -1,6 +1,6 @@
-`memchr` 在一块内存的前 `n` 个字节中查找某个字节，它根本不关心 `'\0'`.
-`memchr` 搜索的是字节 btye, 而不是字符，只是当搜索的是普通 ASCII 字符串时，一个字符通常刚好占一个 byte, 所以看起来好像是在搜索字符.
-该函数只读取内存，不修改内存. 
+`memchr` Searches for a specific byte within the first `n` bytes of a block of memory; it does not care about `'\0'`.
+`memchr` Searches for the byte `btye`, not a character. It just happens that when searching for a regular ASCII string, a character typically occupies exactly one byte, making it look like it is searching for a character.
+This function only reads memory and does not modify it. 
 
 #### 1. Prototype
 
@@ -10,44 +10,43 @@
 void *memchr(const void *s, int c, size_t n);
 ```
 
-它的作用是从内存区域 `s` 开始，检查前 `n` 个字节，寻找第一个值等于 `(unsigned char)c` 的字节. 
+Its function is to start from the memory area `s`, check the first `n` bytes, and look for the first byte whose value is equal to `(unsigned char)c`. 
 
-返回值：
+Return value:
 
-- 如果找到，返回指向这个字节的指针
-- 如果没有找到，则返回 NULL
+- If found, returns a pointer to this byte
+- If not found, returns NULL
 
-#### 2. `memchr` 可以处理没有 '\0' 的数据
+#### 2. `memchr` Can handle data without '\0'
 
-`memchr` 和其他字符串函数最大的区别之一就是它可以处理没有 '\0' 的数据，它不需 '\0' 来确定结束位置， 它只依赖 n. 
+One of the biggest differences between `memchr` and other string functions is that it can handle data without '\0'. It does not need '\0' to determine the end position; it relies solely on `n`. 
 
-`memchr` 本质上是逐字节检查，它可以处理任意内存.
+`memchr` essentially checks byte by byte, and it can handle arbitrary memory.
 
 #### 3.  `memchr`  vs  `strchr` 
 
-|特性|`strchr`|`memchr`|
+|Feature|`strchr`|`memchr`|
 |---|---|---|
-|所属|`<string.h>`|`<string.h>`|
-|搜索对象|C 字符串|内存区域|
-|是否需要 `'\0'`|是|否|
-|是否遇到 `'\0'` 就停止|是|否|
-|搜索范围|到 `'\0'`|前 `n` 个 byte|
-|`n` 参数|没有|有|
-|可以搜索二进制数据|不适合|非常适合|
-|返回值|`char *`|`void *`|
-|找不到|`NULL`|`NULL`|
+|Library|`<string.h>`|`<string.h>`|
+|Search Target|C string|Memory area|
+|Requires `'\0'`|Yes|No|
+|Stops when encountering `'\0'`|Yes|No|
+|Search Range|Up to `'\0'`|First `n` bytes|
+|`n` Parameter|None|Yes|
+|Can search binary data|Unsuitable|Very suitable|
+|Return Value|`char *`|`void *`|
+|Not found|`NULL`|`NULL`|
 
-- `strchr` : 搜索字符串中的字符
-- `memchr` : 搜索内存中的字节
+- `strchr` : Searches for a character in a string
+- `memchr` : Searches for a byte in memory
 
-#### 4. `memchr` 的实现思路
+#### 4. Implementation concept of `memchr`
 
-1. 把 s 转换成 unsigned char *
-2. 从 i = 0 开始检查 i < n
-3. 检查 s\[i] 是否等于 (unsigned char)c:
-	- 相等，返回 `&s[i]`
-	- 不相等，i++
-	- 循环结束，如果还是不相等，返回NULL
+1. Cast `s` to `unsigned char *`
+2. Start checking from `i = 0` while `i < n`
+3. Check if `s[i]` is equal to `(unsigned char)c`:
+	- If equal, return `&s[i]`
+	- If not equal, `i++`
+	- If the loop finishes and it is still not equal, return `NULL`
 
-
-`memchr(s, c, n)` 从 `s` 开始，把内存看成一串 byte，严格检查前 `n` 个 byte，寻找第一个等于 `(unsigned char)c` 的 byte；找到就返回它的地址，找不到就返回 `NULL`.
+`memchr(s, c, n)` starts from `s`, treats the memory as a sequence of bytes, strictly checks the first `n` bytes, and looks for the first byte equal to `(unsigned char)c`. If found, it returns its address; if not found, it returns `NULL`.
