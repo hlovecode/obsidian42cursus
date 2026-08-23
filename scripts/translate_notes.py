@@ -641,6 +641,16 @@ def verify_all_translations(
     missing_french = []
 
     for source_file in source_files:
+        with open(
+            source_file,
+            "r",
+            encoding="utf-8"
+        ) as file:
+            original = file.read()
+
+        if not has_real_content(original):
+            continue
+
         english_file = get_translation_path(
             source_file,
             "English"
