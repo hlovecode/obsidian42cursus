@@ -1,9 +1,9 @@
-Le rôle de `string duplicate` est très direct : il duplique une chaîne de caractères et alloue dynamiquement de la mémoire pour la chaîne copiée.
+Le rôle de `string duplicate` est très direct : il copie une chaîne de caractères et alloue dynamiquement de la mémoire pour la chaîne copiée.
 On peut le voir comme `strdup`.
 
 ```c
 char *strdup(const char *s);
-``` est présent sur de nombreux systèmes Unix / POSIX, mais ce n'est pas une fonction définie par la norme ISO C ; elle fait partie des interfaces courantes de l'environnement Unix / POSIX. 
+``` est présent sur de nombreux systèmes Unix / POSIX, mais ce n'est pas une fonction définie par la norme ISO C ; elle appartient aux interfaces courantes des environnements Unix / POSIX.
 
 #### 1. Prototype
 
@@ -17,15 +17,17 @@ Par exemple :
 
 `strdup()`
 
-Après l'exécution de ces 2 lignes de code, on peut considérer qu'un nouveau "Hello" est créé,
+Après l'exécution de ces 2 lignes de code, on peut considérer qu'un nouveau "Hello" est créé.
 
-La chaîne d'origine s : "Hello\0"
+Chaîne originale s : "Hello\0"
 
 `strdup`
 
-   ├── Calculer la longueur de la chaîne
-   ├── Allouer de la nouvelle mémoire
-   └── Y copier "Hello\0"
+   ├── Calcule la longueur de la chaîne
+   
+   ├── Alloue une nouvelle mémoire
+   
+   └── Y copie "Hello\0"
    
           ↓
 Nouvelle mémoire dynamique :
@@ -34,26 +36,26 @@ Nouvelle mémoire dynamique :
   
   │ H  │ e  │ l  │ l  │ o  │ \0 │
   
-└────┴────┴────┴────┴────┴────┘
+└────┴────┬────┬────┬────┬────┘
   ↑
  copy
 
-copy pointe vers un nouveau bloc mémoire
+copy pointe vers un nouveau bloc mémoire.
 
-**strdup retourne finalement l'adresse de début de la nouvelle chaîne dupliquée et ne modifie pas la chaîne d'origine**
+**`strdup` renvoie finalement l'adresse de début de la nouvelle chaîne copiée et ne modifie pas la chaîne d'origine.**
 
-`strdup` = « Allocation d'espace + Copie de chaîne »
+`strcpy` = « Allocation d'espace + Copie de chaîne »
 
-#### 2. `strcpy` vs `strcpy`
+#### 2. `strcpy` vs `strdup`
 
-`strdup` : Copie la chaîne de src dans la mémoire de dest qui existe déjà.
+___PROTECTED_10___ : Copie la chaîne de src dans la mémoire de dest qui existe déjà.
 
-___PROTECTED_10___ : Alloue lui-même une nouvelle mémoire, puis y copie src.
+___PROTECTED_11___ : Alloue elle-même une nouvelle mémoire, puis y copie src.
 
 |               | strcpy   | strdup  |
 | ------------- | -------- | ------- |
 | Copie la chaîne       | Oui      | Oui     |
 | Alloue une nouvelle mémoire       | Non      | Oui     |
-| dest doit-il exister à l'avance | Oui      | Non     |
+| dest doit-il exister au préalable | Oui      | Non     |
 | Valeur de retour           | char \*  | char \* |
 | Nécessite un free après utilisation  | Dépend de dest | Oui      |
