@@ -49,5 +49,4 @@ void *memchr(const void *s, int c, size_t n);
 	- 不相等，i++
 	- 循环结束，如果还是不相等，返回NULL
 
-
-`memchr(s, c, n)` 从 `s` 开始，把内存看成一串 byte，严格检查前 `n` 个 byte，寻找第一个等于 `(unsigned char)c` 的 byte；找到就返回它的地址，找不到就返回 `NULL`. 
+memchr(s, c, n) 从 `s` 开始，把内存看成一串 byte，严格检查前 `n` 个 byte，寻找第一个等于 `(unsigned char)c` 的 byte；找到就返回它的地址，找不到就返回 `NULL`. 
