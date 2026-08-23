@@ -1,7 +1,7 @@
-strdup() 的作用非常直接，复制一个字符串，并为复制出来的字符串动态分配内存
-可以理解为 `string duplicate`
+Le rôle de `strdup()` est très direct : il duplique une chaîne de caractères et alloue dynamiquement de la mémoire pour la chaîne dupliquée.
+On peut le résumer ainsi : `string duplicate`
 
-`strdup` 在很多 Unix / POSIX 系统上都有，但它不是 ISO C 标准定义的函数，它属于 Unix / POSIX 环境中常见的接口. 
+`strdup` est présent sur de nombreux systèmes Unix / POSIX, mais ce n'est pas une fonction définie par la norme ISO C ; elle fait partie des interfaces courantes de l'environnement Unix / POSIX.
 
 #### 1. Prototype
 
@@ -9,7 +9,7 @@ strdup() 的作用非常直接，复制一个字符串，并为复制出来的�
 char *strdup(const char *s);
 ```
 
-例如：
+Par exemple :
 
 ```c
 char *copy;
@@ -17,21 +17,21 @@ char *copy;
 copy = strdup("Hello");
 ```
 
-上面2行代码执行之后，可以理解为创建一个新的 "Hello",
+Après l'exécution de ces 2 lignes de code, on peut considérer qu'un nouveau "Hello" est créé,
 
-原来的字符串 s："Hello\0"
+La chaîne d'origine s : "Hello\0"
 
 `strdup()`
 
-   ├── 计算字符串长度
+   ├── Calcule la longueur de la chaîne
    
-   ├── 申请新的内存
+   ├── Alloue de la nouvelle mémoire
    
-   └── 把 "Hello\0" 复制进去
+   └── Y copie "Hello\0"
    
-		⬇
+⬇`
 		
-新的动态内存：
+Nouvelle mémoire dynamique :
 
 ┌────┬────┬────┬────┬────┬────┐
   
@@ -41,22 +41,22 @@ copy = strdup("Hello");
   ↑
  copy
 
-copy 指向的是一块新的内存
+copy pointe vers un nouveau bloc mémoire
 
-**strdup 最终返回新复制出来的字符串的起始地址，不会修改原字符串**
+**strdup renvoie finalement l'adresse de début de la chaîne nouvellement dupliquée et ne modifie pas la chaîne d'origine.**
 
-`strdup` = “申请空间 + 复制字符串”
+`strdup` = « Allocation d'espace + Copie de chaîne »
 
 #### 2. `strdup` vs `strcpy`
 
-`strcpy`: 把 src 的字符串复制到已经存在的 dest 内存中
+`strcpy` : Copie la chaîne src dans la mémoire dest qui existe déjà.
 
-`strdup`：是自己申请新的内存，然后把 src 复制进去
+`strdup` : Alloue lui-même une nouvelle mémoire, puis y copie src.
 
 |               | strcpy   | strdup  |
 | ------------- | -------- | ------- |
-| 是否复制字符串       | Yes      | Yes     |
-| 是否申请新内存       | No       | Yes     |
-| dest 是否需要提前存在 | Yes      | No      |
-| 返回值           | char \*  | char \* |
-| 使用后是否需要 free  | 取决于 dest | 需要      |
+| Copie la chaîne      | Oui      | Oui     |
+| Alloue de la nouvelle mémoire | Non  | Oui     |
+| dest doit-il exister au préalable | Oui | Non   |
+| Valeur de retour  | char \*  | char \* |
+| Nécessite un free après utilisation | Dépend de dest | Oui |
