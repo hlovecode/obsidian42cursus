@@ -27,7 +27,7 @@ def protect_markdown(text):
 
     def replace(match):
         protected.append(match.group(0))
-        return f"___PROTECTED_{len(protected) - 1}___"
+        return f"PROTECTEDTOKEN{len(protected) - 1}END"
 
     pattern = (
         r"```[\s\S]*?```"
@@ -46,7 +46,16 @@ def protect_markdown(text):
 
 def restore_markdown(text, protected):
     for i, value in enumerate(protected):
-        placeholder = f"___PROTECTED_{i}___"
+        placeholder = (
+            f"PROTECTEDTOKEN{i}END"
+        )
+
+        if placeholder not in text:
+            raise RuntimeError(
+                f"Protected token missing: "
+                f"{placeholder}"
+            )
+
         text = text.replace(
             placeholder,
             value
@@ -101,7 +110,10 @@ def find_markdown_files():
     return sorted(files)
 
 
-def get_translation_path(source_file, language):
+def get_translation_path(
+    source_file,
+    language
+):
     relative_path = os.path.relpath(
         source_file,
         "."
@@ -195,6 +207,80 @@ def has_real_content(text):
     return False
 
 
+def contains_chinese(text):
+    return bool(
+        re.search(
+            r"[\u4e00-\u9fff]",
+            text
+        )
+    )
+
+
+def chinese_character_count(text):
+    return len(
+        re.findall(
+            r"[\u4e00-\u9fff]",
+            text
+        )
+    )
+
+
+def non_space_character_count(text):
+    return len(
+        re.findall(
+            r"\S",
+            text
+        )
+    )
+
+
+def translation_is_valid(
+    source,
+    translation,
+    language
+):
+    if not translation:
+        return False
+
+    if not translation.strip():
+        return False
+
+    if source.strip() == translation.strip():
+        return False
+
+    source_has_chinese = contains_chinese(
+        source
+    )
+
+    if not source_has_chinese:
+        return True
+
+    chinese_count = chinese_character_count(
+        translation
+    )
+
+    total_count = non_space_character_count(
+        translation
+    )
+
+    if total_count == 0:
+        return False
+
+    chinese_ratio = (
+        chinese_count / total_count
+    )
+
+    if language == "English":
+        if chinese_ratio > 0.15:
+            return False
+
+    if language == "French":
+        if chinese_ratio > 0.15:
+            return False
+
+    return True
+
+
 def is_valid_translation(path):
     if not os.path.exists(path):
         return False
@@ -216,31 +302,60 @@ def is_valid_translation(path):
         return False
 
 
-def translate(text, language):
+def validate_translation_file(
+    source,
+    translation,
+    language
+):
+    if not translation_is_valid(
+        source,
+        translation,
+        language
+    ):
+        return False
+
+    if "PROTECTEDTOKEN" in translation:
+        return False
+
+    return True
+
+
+def translate(
+    text,
+    language
+):
     prompt = f"""Translate the following Markdown text into {language}.
 
 Important rules:
 
 - Return only the translated Markdown.
-- Preserve all Markdown structure exactly.
 - Do not add explanations.
-- Do not translate placeholders such as ___PROTECTED_0___.
-- Keep all placeholders unchanged.
-- Keep URLs unchanged.
-- Keep inline code unchanged.
-- Keep fenced code blocks unchanged.
-- Keep C source code unchanged.
-- Keep Markdown links unchanged.
-- Keep headings, lists, tables and emphasis.
-- Preserve the original meaning accurately.
-- This is a technical programming note.
-- Use accurate C programming terminology.
+- Preserve the Markdown structure exactly.
+- Preserve headings.
+- Preserve lists.
+- Preserve tables.
+- Preserve emphasis.
+- Preserve links.
+- Preserve Markdown formatting.
+- Preserve all numbers exactly.
+- Preserve all punctuation that is part of Markdown structure.
+- Do not translate URLs.
+- Do not translate inline code.
+- Do not translate fenced code blocks.
+- Do not translate C source code.
 - Do not translate C function names.
 - Do not translate variable names.
 - Do not translate programming keywords.
 - Do not translate filenames.
-- Preserve all numbers exactly.
-- Do not remove or add Markdown elements.
+- Do not translate technical identifiers.
+- Keep all PROTECTEDTOKEN placeholders EXACTLY unchanged.
+- Do not add, remove, rename, split or modify any PROTECTEDTOKEN.
+- Every PROTECTEDTOKEN must appear exactly as provided.
+- Do not interpret PROTECTEDTOKEN as Markdown.
+- This is a technical programming note.
+- Use accurate C programming terminology.
+- Translate Chinese explanatory text completely.
+- Do not leave Chinese explanatory sentences untranslated.
 
 Text:
 
@@ -304,6 +419,7 @@ Text:
                         indent=2
                     )
                 )
+
                 raise RuntimeError(
                     "Gemini API returned an error."
                 )
@@ -410,7 +526,10 @@ def cleanup_deleted_files(
             source_file,
             "."
         )
-        source_set.add(relative_path)
+
+        source_set.add(
+            relative_path
+        )
 
     deleted_paths = []
 
@@ -433,15 +552,23 @@ def cleanup_deleted_files(
             relative_path
         )
 
-        if os.path.exists(english_file):
-            os.remove(english_file)
+        if os.path.exists(
+            english_file
+        ):
+            os.remove(
+                english_file
+            )
 
             print(
                 f"DELETE: {english_file}"
             )
 
-        if os.path.exists(french_file):
-            os.remove(french_file)
+        if os.path.exists(
+            french_file
+        ):
+            os.remove(
+                french_file
+            )
 
             print(
                 f"DELETE: {french_file}"
@@ -471,7 +598,9 @@ def translate_file(
     ) as file:
         original = file.read()
 
-    if not has_real_content(original):
+    if not has_real_content(
+        original
+    ):
         print(
             f"SKIP EMPTY: {source_file}"
         )
@@ -490,18 +619,51 @@ def translate_file(
         relative_path
     )
 
-    english_exists = is_valid_translation(
-        english_file
-    )
-
-    french_exists = is_valid_translation(
-        french_file
-    )
+    english_valid = False
+    french_valid = False
 
     if (
         old_hash == current_hash
-        and english_exists
-        and french_exists
+        and is_valid_translation(
+            english_file
+        )
+    ):
+        with open(
+            english_file,
+            "r",
+            encoding="utf-8"
+        ) as file:
+            english_content = file.read()
+
+        english_valid = translation_is_valid(
+            original,
+            english_content,
+            "English"
+        )
+
+    if (
+        old_hash == current_hash
+        and is_valid_translation(
+            french_file
+        )
+    ):
+        with open(
+            french_file,
+            "r",
+            encoding="utf-8"
+        ) as file:
+            french_content = file.read()
+
+        french_valid = translation_is_valid(
+            original,
+            french_content,
+            "French"
+        )
+
+    if (
+        old_hash == current_hash
+        and english_valid
+        and french_valid
     ):
         print(
             f"SKIP: {source_file}"
@@ -518,10 +680,7 @@ def translate_file(
 
     success = True
 
-    if (
-        old_hash != current_hash
-        or not english_exists
-    ):
+    if not english_valid:
         try:
             print(
                 "  Translating -> English"
@@ -532,18 +691,35 @@ def translate_file(
                 "English"
             )
 
+            if not validate_translation_file(
+                original,
+                english,
+                "English"
+            ):
+                raise RuntimeError(
+                    "English translation "
+                    "failed validation."
+                )
+
             english = restore_markdown(
                 english,
                 protected
             )
 
-            if not english.strip():
+            if not translation_is_valid(
+                original,
+                english,
+                "English"
+            ):
                 raise RuntimeError(
-                    "English translation is empty."
+                    "English translation "
+                    "failed final validation."
                 )
 
             os.makedirs(
-                os.path.dirname(english_file),
+                os.path.dirname(
+                    english_file
+                ),
                 exist_ok=True
             )
 
@@ -558,11 +734,14 @@ def translate_file(
                 f"  Saved: {english_file}"
             )
 
-            time.sleep(REQUEST_DELAY)
+            time.sleep(
+                REQUEST_DELAY
+            )
 
         except Exception as error:
             print(
-                "  ERROR: English translation failed."
+                "  ERROR: English "
+                "translation failed."
             )
             print(
                 f"  {error}"
@@ -571,13 +750,10 @@ def translate_file(
 
     else:
         print(
-            "  English already exists"
+            "  English already valid"
         )
 
-    if (
-        old_hash != current_hash
-        or not french_exists
-    ):
+    if not french_valid:
         try:
             print(
                 "  Translating -> French"
@@ -588,18 +764,35 @@ def translate_file(
                 "French"
             )
 
+            if not validate_translation_file(
+                original,
+                french,
+                "French"
+            ):
+                raise RuntimeError(
+                    "French translation "
+                    "failed validation."
+                )
+
             french = restore_markdown(
                 french,
                 protected
             )
 
-            if not french.strip():
+            if not translation_is_valid(
+                original,
+                french,
+                "French"
+            ):
                 raise RuntimeError(
-                    "French translation is empty."
+                    "French translation "
+                    "failed final validation."
                 )
 
             os.makedirs(
-                os.path.dirname(french_file),
+                os.path.dirname(
+                    french_file
+                ),
                 exist_ok=True
             )
 
@@ -616,16 +809,39 @@ def translate_file(
 
         except Exception as error:
             print(
-                "  ERROR: French translation failed."
+                "  ERROR: French "
+                "translation failed."
             )
             print(
                 f"  {error}"
             )
             success = False
 
+    english_final = (
+        is_valid_translation(
+            english_file
+        )
+        and translation_file_matches_language(
+            original,
+            english_file,
+            "English"
+        )
+    )
+
+    french_final = (
+        is_valid_translation(
+            french_file
+        )
+        and translation_file_matches_language(
+            original,
+            french_file,
+            "French"
+        )
+    )
+
     if (
-        is_valid_translation(english_file)
-        and is_valid_translation(french_file)
+        english_final
+        and french_final
     ):
         hashes[relative_path] = current_hash
     else:
@@ -634,11 +850,37 @@ def translate_file(
     return success
 
 
+def translation_file_matches_language(
+    source,
+    path,
+    language
+):
+    try:
+        with open(
+            path,
+            "r",
+            encoding="utf-8"
+        ) as file:
+            content = file.read()
+
+    except OSError:
+        return False
+
+    return translation_is_valid(
+        source,
+        content,
+        language
+    )
+
+
 def verify_all_translations(
     source_files
 ):
     missing_english = []
     missing_french = []
+
+    invalid_english = []
+    invalid_french = []
 
     for source_file in source_files:
         with open(
@@ -648,7 +890,9 @@ def verify_all_translations(
         ) as file:
             original = file.read()
 
-        if not has_real_content(original):
+        if not has_real_content(
+            original
+        ):
             continue
 
         english_file = get_translation_path(
@@ -667,6 +911,14 @@ def verify_all_translations(
             missing_english.append(
                 english_file
             )
+        elif not translation_file_matches_language(
+            original,
+            english_file,
+            "English"
+        ):
+            invalid_english.append(
+                english_file
+            )
 
         if not is_valid_translation(
             french_file
@@ -674,11 +926,24 @@ def verify_all_translations(
             missing_french.append(
                 french_file
             )
+        elif not translation_file_matches_language(
+            original,
+            french_file,
+            "French"
+        ):
+            invalid_french.append(
+                french_file
+            )
 
-    if not missing_english and not missing_french:
+    if (
+        not missing_english
+        and not missing_french
+        and not invalid_english
+        and not invalid_french
+    ):
         print(
             "\nPASS: All English and French "
-            "translations exist."
+            "translations are valid."
         )
         return True
 
@@ -696,12 +961,32 @@ def verify_all_translations(
                 f"  {path}"
             )
 
+    if invalid_english:
+        print(
+            "\nInvalid English translations:"
+        )
+
+        for path in invalid_english:
+            print(
+                f"  {path}"
+            )
+
     if missing_french:
         print(
             "\nMissing French translations:"
         )
 
         for path in missing_french:
+            print(
+                f"  {path}"
+            )
+
+    if invalid_french:
+        print(
+            "\nInvalid French translations:"
+        )
+
+        for path in invalid_french:
             print(
                 f"  {path}"
             )
