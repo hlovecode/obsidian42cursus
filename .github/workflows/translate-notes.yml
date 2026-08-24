@@ -20,17 +20,32 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
           python-version: '3.x'
 
+      - name: Find changed source notes
+        if: github.event_name == 'push'
+        run: |
+          if [ "${{ github.event.before }}" = "0000000000000000000000000000000000000000" ]; then
+            git ls-files '*.md' > /tmp/translate-files.txt
+          else
+            git diff --name-only "${{ github.event.before }}" "${{ github.sha }}" -- '*.md' > /tmp/translate-files.txt
+          fi
+
       - name: Run translation
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
-          python3 scripts/translate_notes.py
+          if [ "${{ github.event_name }}" = "push" ]; then
+            python3 scripts/translate_notes.py --files-from /tmp/translate-files.txt
+          else
+            python3 scripts/translate_notes.py
+          fi
 
       - name: Check for changes
         id: changes

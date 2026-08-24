@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 import json
 import os
 import random
@@ -26,21 +24,24 @@ API_KEY = os.environ.get("GEMINI_API_KEY")
 
 MODEL = os.environ.get(
     "GEMINI_MODEL",
-    "gemini-2.5-flash",
+    "gemini-3.6-flash",
 )
 
-API_URL = (
-    "https://generativelanguage.googleapis.com/"
-    f"v1beta/models/{MODEL}:generateContent"
-)
+FALLBACK_MODEL = "gemini-3.6-flash"
 
-MAX_RETRIES = 3
+MODEL_CANDIDATES = []
+
+for model in (MODEL, FALLBACK_MODEL):
+    if model not in MODEL_CANDIDATES:
+        MODEL_CANDIDATES.append(model)
+
+MAX_RETRIES = 6
 
 # Number of natural-language fragments sent in one request.
-BATCH_SIZE = 20
+BATCH_SIZE = 40
 
 # Gemini API can temporarily return 429.
-INITIAL_RETRY_DELAY = 5.0
+INITIAL_RETRY_DELAY = 10.0
 
 # Maximum size of one translation request.
 MAX_REQUEST_CHARS = 18000
@@ -80,75 +81,87 @@ def error(message):
 # File discovery
 # ============================================================
 
+def is_source_markdown_file(path):
+    if path.suffix != ".md":
+        return False
+
+    try:
+        relative = path.relative_to(ROOT_DIR)
+    except ValueError:
+        return False
+
+    if not relative.parts:
+        return False
+
+    # Only source notes should be translated. Generated docs,
+    # translations, workflows, scripts, and hidden directories
+    # must not become translation sources.
+    if any(
+        part in SOURCE_EXCLUDED_DIRS
+        for part in relative.parts
+    ):
+        return False
+
+    # Never process .git or other hidden directories.
+    if any(part.startswith(".") for part in relative.parts):
+        return False
+
+    if len(relative.parts) == 1:
+        return False
+
+    return path.exists()
+
+
 def find_markdown_files():
     files = []
 
     for path in ROOT_DIR.rglob("*.md"):
-        relative = path.relative_to(ROOT_DIR)
-
-        if not relative.parts:
-            continue
-
-        # Only source notes should be translated. Generated docs,
-        # translations, workflows, scripts, and hidden directories
-        # must not become translation sources.
-        if any(
-            part in SOURCE_EXCLUDED_DIRS
-            for part in relative.parts
-        ):
-            continue
-
-        # Never process .git or other hidden directories.
-        if any(part.startswith(".") for part in relative.parts):
-            continue
-
-        if len(relative.parts) == 1:
-            continue
-
-        files.append(path)
+        if is_source_markdown_file(path):
+            files.append(path)
 
     files.sort()
 
     return files
 
 
+def markdown_files_from_list(list_path):
+    files = []
+
+    for line in read_text(list_path).splitlines():
+        value = line.strip()
+
+        if not value:
+            continue
+
+        path = (ROOT_DIR / value).resolve()
+
+        if is_source_markdown_file(path):
+            files.append(path)
+
+    files = sorted(set(files))
+
+    return files
+
+
+def selected_markdown_files():
+    args = sys.argv[1:]
+
+    if not args:
+        return find_markdown_files()
+
+    if len(args) == 2 and args[0] == "--files-from":
+        return markdown_files_from_list(
+            (ROOT_DIR / args[1]).resolve()
+        )
+
+    raise RuntimeError(
+        "Usage: translate_notes.py [--files-from PATH]"
+    )
+
+
 # ============================================================
 # Markdown protection
 # ============================================================
-#
-# IMPORTANT:
-#
-# The previous implementation protected Markdown by replacing
-# pieces such as:
-#
-#     `src`
-#     `dst`
-#     ```c ... ```
-#
-# with artificial tokens and then asking Gemini to return them.
-#
-# That is exactly what caused errors such as:
-#
-#     Original: `src`
-#     Translated: `n`
-#
-# and:
-#
-#     Protected token order changed.
-#
-# This implementation does NOT do that.
-#
-# Protected content is never sent to Gemini at all.
-#
-# We split each line into:
-#
-#     translatable text
-#     protected Markdown/code
-#     translatable text
-#
-# and translate only the natural-language fragments.
-# ============================================================
-
 
 INLINE_CODE_RE = re.compile(
     r"`+[^`\n]*`+"
@@ -186,17 +199,6 @@ MARKDOWN_LINK_RE = re.compile(
 
 
 def protect_inline_markdown(text):
-    """
-    Return a list of fragments.
-
-    Each fragment is:
-
-        ("text", content)
-        ("protected", content)
-
-    Protected content is never sent to Gemini.
-    """
-
     patterns = [
         INLINE_CODE_RE,
         OBSIDIAN_LINK_RE,
@@ -215,7 +217,6 @@ def protect_inline_markdown(text):
     )
 
     fragments = []
-
     position = 0
 
     for match in combined.finditer(text):
@@ -240,10 +241,6 @@ def protect_inline_markdown(text):
 
     return fragments
 
-
-# ============================================================
-# Markdown line handling
-# ============================================================
 
 FENCE_RE = re.compile(
     r"^\s*(```+|~~~+)"
@@ -281,12 +278,6 @@ TABLE_SEPARATOR_RE = re.compile(
 
 
 def split_markdown_line(line):
-    """
-    Separate Markdown syntax from natural language.
-
-    Markdown syntax itself is never translated.
-    """
-
     newline = ""
 
     if line.endswith("\n"):
@@ -296,21 +287,13 @@ def split_markdown_line(line):
         content = line
 
     if not content.strip():
-        return [
-            ("protected", content + newline)
-        ]
+        return [("protected", content + newline)]
 
-    # Markdown table separator must remain untouched.
     if TABLE_SEPARATOR_RE.match(content):
-        return [
-            ("protected", content + newline)
-        ]
+        return [("protected", content + newline)]
 
-    # Fenced code is handled by the whole-document parser.
     if FENCE_RE.match(content):
-        return [
-            ("protected", content + newline)
-        ]
+        return [("protected", content + newline)]
 
     match = HEADING_RE.match(content)
 
@@ -318,13 +301,8 @@ def split_markdown_line(line):
         prefix = match.group(1)
         body = match.group(2)
 
-        result = [
-            ("protected", prefix)
-        ]
-
-        result.extend(
-            protect_inline_markdown(body)
-        )
+        result = [("protected", prefix)]
+        result.extend(protect_inline_markdown(body))
 
         if newline:
             result.append(("protected", newline))
@@ -337,13 +315,8 @@ def split_markdown_line(line):
         prefix = match.group(1)
         body = match.group(2)
 
-        result = [
-            ("protected", prefix)
-        ]
-
-        result.extend(
-            protect_inline_markdown(body)
-        )
+        result = [("protected", prefix)]
+        result.extend(protect_inline_markdown(body))
 
         if newline:
             result.append(("protected", newline))
@@ -356,13 +329,8 @@ def split_markdown_line(line):
         prefix = match.group(1)
         body = match.group(2)
 
-        result = [
-            ("protected", prefix)
-        ]
-
-        result.extend(
-            protect_inline_markdown(body)
-        )
+        result = [("protected", prefix)]
+        result.extend(protect_inline_markdown(body))
 
         if newline:
             result.append(("protected", newline))
@@ -378,27 +346,11 @@ def split_markdown_line(line):
 
 
 def parse_markdown(text):
-    """
-    Parse Markdown while keeping fenced code blocks completely
-    untouched.
-
-    Returns a list of blocks.
-
-    Each block is:
-
-        {
-            "type": "code" or "text",
-            "content": ...
-        }
-    """
-
     lines = text.splitlines(keepends=True)
 
     blocks = []
-
     in_fence = False
     fence_marker = None
-
     current_text = []
 
     def flush_text():
@@ -460,26 +412,7 @@ def parse_markdown(text):
     return blocks
 
 
-# ============================================================
-# Translatable fragment extraction
-# ============================================================
-
 def extract_translatable_fragments(text):
-    """
-    Convert Markdown text into fragments.
-
-    Returns:
-
-        [
-            ("protected", "..."),
-            ("text", "..."),
-            ("protected", "..."),
-            ...
-        ]
-
-    No placeholder tokens are generated.
-    """
-
     fragments = []
 
     lines = text.splitlines(keepends=True)
@@ -493,13 +426,6 @@ def extract_translatable_fragments(text):
 
 
 def merge_fragments(fragments, translations):
-    """
-    Reconstruct Markdown from translated fragments.
-
-    `translations` maps the index of a text fragment to its
-    translated value.
-    """
-
     output = []
 
     for index, fragment in enumerate(fragments):
@@ -515,33 +441,16 @@ def merge_fragments(fragments, translations):
     return "".join(output)
 
 
-# ============================================================
-# Language / translation helpers
-# ============================================================
-
 def contains_translatable_text(text):
-    """
-    Return True if the fragment contains enough natural language
-    to justify an API request.
-    """
-
     if not text.strip():
         return False
 
-    # Ignore fragments consisting almost entirely of punctuation.
     letters = re.findall(r"[A-Za-zÀ-ÖØ-öø-ÿ\u4e00-\u9fff]", text)
 
     return len(letters) >= 2
 
 
 def clean_model_output(text):
-    """
-    Remove accidental Markdown code fences around a response.
-
-    The model is instructed not to produce them, but this makes
-    the script more robust.
-    """
-
     text = text.strip()
 
     if text.startswith("```") and text.endswith("```"):
@@ -554,20 +463,7 @@ def clean_model_output(text):
     return text
 
 
-# ============================================================
-# Gemini API
-# ============================================================
-
 def build_translation_prompt(target_language, items):
-    """
-    Build a structured JSON translation request.
-
-    Each item has an ID that exists only inside the API request.
-    It is NOT inserted into the Markdown.
-
-    Therefore token order is irrelevant.
-    """
-
     language_name = {
         "en": "English",
         "fr": "French",
@@ -638,12 +534,14 @@ JSON input:
 """.strip()
 
 
-def api_request(prompt):
-    """
-    Send one request to Gemini using the official REST
-    generateContent endpoint.
-    """
+def gemini_api_url(model):
+    return (
+        "https://generativelanguage.googleapis.com/"
+        f"v1beta/models/{model}:generateContent"
+    )
 
+
+def api_request(prompt, model):
     if not API_KEY:
         raise RuntimeError(
             "GEMINI_API_KEY is not set."
@@ -670,7 +568,7 @@ def api_request(prompt):
     ).encode("utf-8")
 
     request = urllib.request.Request(
-        API_URL,
+        gemini_api_url(model),
         data=data,
         method="POST",
         headers={
@@ -712,14 +610,6 @@ def api_request(prompt):
 
 
 def translate_batch(target_language, items):
-    """
-    Translate one batch.
-
-    Retry only API failures or malformed responses.
-
-    There is deliberately NO Protected Token validation here.
-    """
-
     prompt = build_translation_prompt(
         target_language,
         items,
@@ -727,154 +617,160 @@ def translate_batch(target_language, items):
 
     last_error = None
 
-    for attempt in range(1, MAX_RETRIES + 1):
-        try:
-            info(
-                f"  Translation request "
-                f"{attempt}/{MAX_RETRIES} "
-                f"({len(items)} fragments)"
-            )
-
-            raw = api_request(prompt)
-
-            raw = clean_model_output(raw)
-
-            data = json.loads(raw)
-
-            if not isinstance(data, list):
-                raise RuntimeError(
-                    "Gemini response is not a JSON array."
+    for model in MODEL_CANDIDATES:
+        for attempt in range(1, MAX_RETRIES + 1):
+            try:
+                info(
+                    f"  Translation request "
+                    f"{attempt}/{MAX_RETRIES} "
+                    f"with {model} "
+                    f"({len(items)} fragments)"
                 )
 
-            translations = {}
+                raw = api_request(prompt, model)
+                raw = clean_model_output(raw)
+                data = json.loads(raw)
 
-            for item in data:
-                if not isinstance(item, dict):
+                if not isinstance(data, list):
                     raise RuntimeError(
-                        "Invalid translation item."
+                        "Gemini response is not a JSON array."
                     )
 
-                if "id" not in item:
-                    raise RuntimeError(
-                        "Translation item has no id."
+                translations = {}
+
+                for item in data:
+                    if not isinstance(item, dict):
+                        raise RuntimeError(
+                            "Invalid translation item."
+                        )
+
+                    if "id" not in item:
+                        raise RuntimeError(
+                            "Translation item has no id."
+                        )
+
+                    if "translation" not in item:
+                        raise RuntimeError(
+                            "Translation item has no translation."
+                        )
+
+                    item_id = item["id"]
+                    translation = item["translation"]
+
+                    if not isinstance(item_id, int):
+                        raise RuntimeError(
+                            "Translation id is not an integer."
+                        )
+
+                    if not isinstance(translation, str):
+                        raise RuntimeError(
+                            "Translation value is not a string."
+                        )
+
+                    translations[item_id] = translation
+
+                expected_ids = {
+                    item_id
+                    for item_id, _ in items
+                }
+
+                returned_ids = set(translations.keys())
+
+                if expected_ids != returned_ids:
+                    missing = sorted(
+                        expected_ids - returned_ids
                     )
 
-                if "translation" not in item:
-                    raise RuntimeError(
-                        "Translation item has no translation."
+                    extra = sorted(
+                        returned_ids - expected_ids
                     )
 
-                item_id = item["id"]
-                translation = item["translation"]
-
-                if not isinstance(item_id, int):
                     raise RuntimeError(
-                        "Translation id is not an integer."
+                        "Translation item mismatch. "
+                        f"Missing={missing}, Extra={extra}"
                     )
 
-                if not isinstance(translation, str):
-                    raise RuntimeError(
-                        "Translation value is not a string."
+                return translations
+
+            except urllib.error.HTTPError as exc:
+                last_error = exc
+
+                try:
+                    response_body = exc.read().decode(
+                        "utf-8",
+                        errors="replace",
                     )
+                except Exception:
+                    response_body = ""
 
-                translations[item_id] = translation
-
-            expected_ids = {
-                item_id
-                for item_id, _ in items
-            }
-
-            returned_ids = set(translations.keys())
-
-            if expected_ids != returned_ids:
-                missing = sorted(
-                    expected_ids - returned_ids
-                )
-
-                extra = sorted(
-                    returned_ids - expected_ids
-                )
-
-                raise RuntimeError(
-                    "Translation item mismatch. "
-                    f"Missing={missing}, Extra={extra}"
-                )
-
-            return translations
-
-        except urllib.error.HTTPError as exc:
-            last_error = exc
-
-            if exc.code == 429:
-                if attempt >= MAX_RETRIES:
+                if exc.code == 404 and model != MODEL_CANDIDATES[-1]:
+                    warning(
+                        f"Model {model} is unavailable. "
+                        f"Trying {MODEL_CANDIDATES[-1]}..."
+                    )
                     break
 
-                retry_after = exc.headers.get(
-                    "Retry-After"
-                )
+                if exc.code == 429:
+                    if attempt >= MAX_RETRIES:
+                        break
 
-                if retry_after:
-                    try:
-                        delay = float(retry_after)
-                    except ValueError:
+                    retry_after = exc.headers.get(
+                        "Retry-After"
+                    )
+
+                    if retry_after:
+                        try:
+                            delay = float(retry_after)
+                        except ValueError:
+                            delay = (
+                                INITIAL_RETRY_DELAY
+                                * (2 ** (attempt - 1))
+                            )
+                    else:
                         delay = (
                             INITIAL_RETRY_DELAY
                             * (2 ** (attempt - 1))
                         )
-                else:
-                    delay = (
-                        INITIAL_RETRY_DELAY
-                        * (2 ** (attempt - 1))
+
+                    delay += random.uniform(0.0, 1.5)
+
+                    warning(
+                        f"HTTP 429. "
+                        f"Retrying in {delay:.1f}s..."
                     )
 
-                # Small random jitter avoids synchronized retries.
-                delay += random.uniform(0.0, 1.5)
+                    time.sleep(delay)
+                    continue
+
+                raise RuntimeError(
+                    f"Gemini HTTP {exc.code}: "
+                    f"{response_body[:500]}"
+                ) from exc
+
+            except (
+                urllib.error.URLError,
+                TimeoutError,
+                json.JSONDecodeError,
+                RuntimeError,
+            ) as exc:
+                last_error = exc
+
+                if attempt >= MAX_RETRIES:
+                    break
+
+                delay = (
+                    INITIAL_RETRY_DELAY
+                    * (2 ** (attempt - 1))
+                )
+
+                delay += random.uniform(0.0, 1.0)
 
                 warning(
-                    f"HTTP 429. "
+                    f"{exc}. "
                     f"Retrying in {delay:.1f}s..."
                 )
 
                 time.sleep(delay)
-                continue
-
-            try:
-                response_body = exc.read().decode(
-                    "utf-8",
-                    errors="replace",
-                )
-            except Exception:
-                response_body = ""
-
-            raise RuntimeError(
-                f"Gemini HTTP {exc.code}: "
-                f"{response_body[:500]}"
-            ) from exc
-
-        except (
-            urllib.error.URLError,
-            TimeoutError,
-            json.JSONDecodeError,
-            RuntimeError,
-        ) as exc:
-            last_error = exc
-
-            if attempt >= MAX_RETRIES:
-                break
-
-            delay = (
-                INITIAL_RETRY_DELAY
-                * (2 ** (attempt - 1))
-            )
-
-            delay += random.uniform(0.0, 1.0)
-
-            warning(
-                f"{exc}. "
-                f"Retrying in {delay:.1f}s..."
-            )
-
-            time.sleep(delay)
 
     raise RuntimeError(
         f"Translation request failed after "
@@ -882,22 +778,13 @@ def translate_batch(target_language, items):
     )
 
 
-# ============================================================
-# Translation engine
-# ============================================================
-
 def build_batches(items):
-    """
-    Group fragments into reasonably sized API requests.
-    """
-
     batches = []
     current = []
     current_size = 0
 
     for item in items:
         item_id, text = item
-
         item_size = len(text)
 
         if current and (
@@ -918,16 +805,10 @@ def build_batches(items):
 
 
 def translate_markdown(text, target_language):
-    """
-    Translate natural-language fragments while preserving all
-    Markdown/code content exactly.
-    """
-
     blocks = parse_markdown(text)
 
     all_fragments = []
     fragment_locations = []
-
     global_id = 0
 
     for block_index, block in enumerate(blocks):
@@ -979,7 +860,6 @@ def translate_markdown(text, target_language):
         return text
 
     translated = {}
-
     batches = build_batches(all_fragments)
 
     info(
@@ -995,12 +875,9 @@ def translate_markdown(text, target_language):
 
         translated.update(result)
 
-        # Small pause between successful requests.
-        # This helps reduce accidental rate-limit bursts.
         if len(batches) > 1:
             time.sleep(0.5)
 
-    # Replace translated fragments.
     for block_index, block in enumerate(blocks):
         if block["type"] != "text":
             continue
@@ -1016,7 +893,6 @@ def translate_markdown(text, target_language):
             if not contains_translatable_text(content):
                 continue
 
-            # Find global ID.
             global_id = None
 
             for (
@@ -1067,21 +943,7 @@ def translate_markdown(text, target_language):
     return "".join(output)
 
 
-# ============================================================
-# Translation validity
-# ============================================================
-
 def extract_protected_content(text):
-    """
-    Extract content that must remain byte-for-byte identical.
-
-    This is ONLY used for final verification.
-
-    Unlike the previous implementation, we do not ask Gemini
-    to preserve these values. They never enter the translation
-    request.
-    """
-
     protected = []
 
     blocks = parse_markdown(text)
@@ -1105,14 +967,6 @@ def extract_protected_content(text):
 
 
 def validate_protected_content(original, translated):
-    """
-    Verify that protected Markdown/code content has not changed.
-
-    We intentionally compare exact content in sequence here because
-    Python itself preserved it. This is NOT a Gemini token-order
-    validation mechanism.
-    """
-
     original_protected = extract_protected_content(
         original
     )
@@ -1128,13 +982,6 @@ def validate_protected_content(original, translated):
 
 
 def cjk_ratio(text):
-    """
-    Calculate the ratio of Chinese/Japanese/Korean characters
-    in natural-language text.
-
-    Used only as a sanity check for French/English output.
-    """
-
     if not text:
         return 0.0
 
@@ -1159,10 +1006,6 @@ def cjk_ratio(text):
 
 
 def natural_language_content(text):
-    """
-    Remove code and protected Markdown before language checks.
-    """
-
     blocks = parse_markdown(text)
 
     output = []
@@ -1183,20 +1026,13 @@ def natural_language_content(text):
 
 
 def translation_body(text):
-    """
-    Return only the translated part of a generated translation page.
-
-    The Chinese source is appended for readers, but it must not
-    participate in translation validation.
-    """
-
     if ORIGINAL_SECTION_MARKER not in text:
         return text
 
     return text.split(
         ORIGINAL_SECTION_MARKER,
         1,
-    )[0].rstrip() + "\n"
+    )[0]
 
 
 def has_original_section(text):
@@ -1207,13 +1043,16 @@ def compose_translation_page(
     translated,
     original,
 ):
-    translated = translated.strip()
-    original = original.strip()
+    if not translated.endswith("\n"):
+        translated += "\n"
+
+    if not original.endswith("\n"):
+        original += "\n"
 
     return (
         f"{translated}"
         f"{ORIGINAL_SECTION_MARKER}"
-        f"{original}\n"
+        f"{original}"
     )
 
 
@@ -1222,18 +1061,6 @@ def validate_translation(
     translated,
     target_language,
 ):
-    """
-    Validate the resulting Markdown.
-
-    We check:
-      - output is not empty
-      - protected content is unchanged
-      - fenced code is unchanged
-      - basic language sanity
-
-    We do NOT check token order generated by Gemini.
-    """
-
     if not translated.strip():
         warning("Translation is empty.")
         return False
@@ -1277,11 +1104,6 @@ def validate_translation(
     if target_language in ("en", "fr"):
         ratio = cjk_ratio(language_text)
 
-        # A tiny amount of Chinese can legitimately remain in
-        # technical documentation, names, or quoted material.
-        #
-        # We use a deliberately conservative threshold so that
-        # this check does not reject otherwise correct translations.
         if ratio > 0.40:
             warning(
                 "Translation still contains too much "
@@ -1291,10 +1113,6 @@ def validate_translation(
 
     return True
 
-
-# ============================================================
-# Existing translation handling
-# ============================================================
 
 def read_text(path):
     return path.read_text(
@@ -1353,9 +1171,41 @@ def existing_translation_is_valid(
     )
 
 
-# ============================================================
-# Single file processing
-# ============================================================
+def upgrade_existing_translation_if_possible(
+    source,
+    translation_path_value,
+    language,
+):
+    if not translation_path_value.exists():
+        return False
+
+    try:
+        translated = read_text(
+            translation_path_value
+        )
+    except OSError:
+        return False
+
+    if has_original_section(translated):
+        return False
+
+    if not validate_translation(
+        source,
+        translated,
+        language,
+    ):
+        return False
+
+    write_text(
+        translation_path_value,
+        compose_translation_page(
+            translated,
+            source,
+        ),
+    )
+
+    return True
+
 
 def translate_file(source_path):
     relative = source_path.relative_to(ROOT_DIR)
@@ -1384,6 +1234,16 @@ def translate_file(source_path):
         ):
             info(
                 f"  {language.upper()} already valid"
+            )
+            continue
+
+        if upgrade_existing_translation_if_possible(
+            source,
+            output_path,
+            language,
+        ):
+            info(
+                f"  {language.upper()} added Chinese original"
             )
             continue
 
@@ -1447,10 +1307,6 @@ def translate_file(source_path):
 
     return success
 
-
-# ============================================================
-# Final verification
-# ============================================================
 
 def verify_all_translations(markdown_files):
     info("")
@@ -1547,10 +1403,6 @@ def verify_all_translations(markdown_files):
     return True
 
 
-# ============================================================
-# Main
-# ============================================================
-
 def main():
     if not API_KEY:
         error(
@@ -1558,7 +1410,11 @@ def main():
         )
         return 1
 
-    markdown_files = find_markdown_files()
+    try:
+        markdown_files = selected_markdown_files()
+    except Exception as exc:
+        error(str(exc))
+        return 1
 
     info(
         f"Found {len(markdown_files)} Markdown files."
