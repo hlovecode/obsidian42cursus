@@ -45,6 +45,20 @@ INITIAL_RETRY_DELAY = 5.0
 # Maximum size of one translation request.
 MAX_REQUEST_CHARS = 18000
 
+SOURCE_EXCLUDED_DIRS = {
+    ".git",
+    ".github",
+    ".obsidian",
+    ".venv-pages",
+    "docs",
+    "site",
+    "scripts",
+    "translations",
+}
+
+ORIGINAL_SECTION_HEADING = "## 中文原文"
+ORIGINAL_SECTION_MARKER = f"\n---\n\n{ORIGINAL_SECTION_HEADING}\n\n"
+
 
 # ============================================================
 # Console helpers
@@ -72,12 +86,23 @@ def find_markdown_files():
     for path in ROOT_DIR.rglob("*.md"):
         relative = path.relative_to(ROOT_DIR)
 
-        # Never translate generated translations again.
-        if relative.parts and relative.parts[0] == "translations":
+        if not relative.parts:
+            continue
+
+        # Only source notes should be translated. Generated docs,
+        # translations, workflows, scripts, and hidden directories
+        # must not become translation sources.
+        if any(
+            part in SOURCE_EXCLUDED_DIRS
+            for part in relative.parts
+        ):
             continue
 
         # Never process .git or other hidden directories.
         if any(part.startswith(".") for part in relative.parts):
+            continue
+
+        if len(relative.parts) == 1:
             continue
 
         files.append(path)
@@ -151,19 +176,12 @@ AUTOLINK_RE = re.compile(
     re.IGNORECASE,
 )
 
+OBSIDIAN_LINK_RE = re.compile(
+    r"!\[\[[^\]\n]+\]\]|\[\[[^\]\n]+\]\]"
+)
+
 MARKDOWN_LINK_RE = re.compile(
-    r"""
-    !
-    |
-    \[
-    |
-    \]
-    |
-    \(
-    |
-    \)
-    """,
-    re.VERBOSE,
+    r"!?\[[^\]\n]*\]\([^) \n]+(?:\s+\"[^\"]*\")?\)"
 )
 
 
@@ -181,6 +199,8 @@ def protect_inline_markdown(text):
 
     patterns = [
         INLINE_CODE_RE,
+        OBSIDIAN_LINK_RE,
+        MARKDOWN_LINK_RE,
         AUTOLINK_RE,
         URL_RE,
         HTML_TAG_RE,
@@ -981,7 +1001,7 @@ def translate_markdown(text, target_language):
             time.sleep(0.5)
 
     # Replace translated fragments.
-    for block in blocks:
+    for block_index, block in enumerate(blocks):
         if block["type"] != "text":
             continue
 
@@ -1005,7 +1025,7 @@ def translate_markdown(text, target_language):
                 location_id,
             ) in fragment_locations:
                 if (
-                    location_block == blocks.index(block)
+                    location_block == block_index
                     and location_fragment == index
                 ):
                     global_id = location_id
@@ -1162,6 +1182,41 @@ def natural_language_content(text):
     return "\n".join(output)
 
 
+def translation_body(text):
+    """
+    Return only the translated part of a generated translation page.
+
+    The Chinese source is appended for readers, but it must not
+    participate in translation validation.
+    """
+
+    if ORIGINAL_SECTION_MARKER not in text:
+        return text
+
+    return text.split(
+        ORIGINAL_SECTION_MARKER,
+        1,
+    )[0].rstrip() + "\n"
+
+
+def has_original_section(text):
+    return ORIGINAL_SECTION_MARKER in text
+
+
+def compose_translation_page(
+    translated,
+    original,
+):
+    translated = translated.strip()
+    original = original.strip()
+
+    return (
+        f"{translated}"
+        f"{ORIGINAL_SECTION_MARKER}"
+        f"{original}\n"
+    )
+
+
 def validate_translation(
     original,
     translated,
@@ -1182,6 +1237,8 @@ def validate_translation(
     if not translated.strip():
         warning("Translation is empty.")
         return False
+
+    translated = translation_body(translated)
 
     if not validate_protected_content(
         original,
@@ -1286,6 +1343,9 @@ def existing_translation_is_valid(
     except OSError:
         return False
 
+    if not has_original_section(translated):
+        return False
+
     return validate_translation(
         source,
         translated,
@@ -1351,9 +1411,27 @@ def translate_file(source_path):
                 success = False
                 continue
 
+            page = compose_translation_page(
+                translated,
+                source,
+            )
+
+            if not validate_translation(
+                source,
+                page,
+                language,
+            ):
+                error(
+                    f"{language.upper()} generated page "
+                    f"failed validation."
+                )
+
+                success = False
+                continue
+
             write_text(
                 output_path,
-                translated,
+                page,
             )
 
             info(
@@ -1405,10 +1483,13 @@ def verify_all_translations(markdown_files):
             try:
                 english = read_text(en_path)
 
-                if not validate_translation(
-                    source,
-                    english,
-                    "en",
+                if (
+                    not has_original_section(english)
+                    or not validate_translation(
+                        source,
+                        english,
+                        "en",
+                    )
                 ):
                     invalid_en.append(
                         str(en_path.relative_to(ROOT_DIR))
@@ -1427,10 +1508,13 @@ def verify_all_translations(markdown_files):
             try:
                 french = read_text(fr_path)
 
-                if not validate_translation(
-                    source,
-                    french,
-                    "fr",
+                if (
+                    not has_original_section(french)
+                    or not validate_translation(
+                        source,
+                        french,
+                        "fr",
+                    )
                 ):
                     invalid_fr.append(
                         str(fr_path.relative_to(ROOT_DIR))
