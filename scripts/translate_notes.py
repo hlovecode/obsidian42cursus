@@ -4,7 +4,7 @@ import random
 import re
 import sys
 import time
-import hashlib # 新增：用于计算文件差异
+import hashlib
 import urllib.error
 import urllib.request
 from pathlib import Path
@@ -13,7 +13,7 @@ ROOT_DIR = Path(__file__).resolve().parent.parent
 TRANSLATIONS_DIR = ROOT_DIR / "translations"
 EN_DIR = TRANSLATIONS_DIR / "en"
 FR_DIR = TRANSLATIONS_DIR / "fr"
-CACHE_FILE = TRANSLATIONS_DIR / "translation_cache.json" # 新增：缓存文件路径
+CACHE_FILE = TRANSLATIONS_DIR / "translation_cache.json"
 
 API_KEY = os.environ.get("GEMINI_API_KEY")
 MODEL = os.environ.get("GEMINI_MODEL", "gemini-3.6-flash")
@@ -60,10 +60,9 @@ def write_text(path, content):
     path.write_text(content, encoding="utf-8")
 
 
-# --- 新增：哈希增量缓存功能 ---
 def get_file_md5(text_content):
-    """计算文本的 MD5，用于检测文件内容是否发生改变"""
     return hashlib.md5(text_content.encode("utf-8")).hexdigest()
+
 
 def load_cache():
     if CACHE_FILE.exists():
@@ -73,9 +72,9 @@ def load_cache():
             warning(f"Failed to load cache: {e}. Starting fresh.")
     return {}
 
+
 def save_cache(cache_dict):
     write_text(CACHE_FILE, json.dumps(cache_dict, indent=2))
-# -----------------------------
 
 
 def is_source_markdown_file(path):
@@ -403,7 +402,8 @@ def translate_batch(target, items):
             except Exception:
                 body = ""
 
-            if exc.code == 429 and attempt < MAX_RETRIES:
+            # 处理 429 和 5xx 服务端错误进行退避重试
+            if exc.code in (429, 500, 502, 503, 504) and attempt < MAX_RETRIES:
                 retry_after = exc.headers.get("Retry-After")
                 try:
                     delay = float(retry_after) if retry_after else 0.0
@@ -412,7 +412,7 @@ def translate_batch(target, items):
                 if delay <= 0:
                     delay = INITIAL_RETRY_DELAY * (2 ** (attempt - 1))
                 delay += random.uniform(0.0, 1.5)
-                warning(f"HTTP 429. Retrying in {delay:.1f}s...")
+                warning(f"HTTP {exc.code}. Retrying in {delay:.1f}s...")
                 time.sleep(delay)
                 continue
 
@@ -452,7 +452,7 @@ def translate_markdown(source, target):
     for number, batch in enumerate(batches, 1):
         translated.update(translate_batch(target, batch))
         if number < len(batches):
-            time.sleep(1.0) # 轻微增加批次间延迟，防止触发短期高并发限制
+            time.sleep(1.0)
 
     for line_index, part_index, item_id in locations:
         parts = parsed[line_index][1]
@@ -556,9 +556,7 @@ def translate_file(source_path, file_cache):
 
     current_md5 = get_file_md5(source)
 
-    # --- 增量检查：判断是否需要发起 API 请求 ---
     if file_cache.get(relative) == current_md5:
-        # 还要确保磁盘上文件依然有效，防止被意外删除
         en_path = translation_path(source_path, "en")
         fr_path = translation_path(source_path, "fr")
 
@@ -566,7 +564,6 @@ def translate_file(source_path, file_cache):
            existing_translation_is_valid(source, fr_path, "fr"):
             info(f"  UNCHANGED (Cached): Skipping API call.")
             return True, file_cache
-    # ----------------------------------------
 
     success = True
     translation_passed = {"en": False, "fr": False}
@@ -603,7 +600,6 @@ def translate_file(source_path, file_cache):
             error(f"{target.upper()} translation failed: {exc}")
             success = False
 
-    # 若两种语言最终都处于合法状态（可能新翻译，也可能复用本地），更新缓存
     if translation_passed["en"] and translation_passed["fr"]:
         file_cache[relative] = current_md5
         info(f"  Cache updated for {relative}")
@@ -672,7 +668,6 @@ def main():
         if not file_success:
             success = False
 
-    # 无论成功多少，保存当前已成功的缓存进度
     save_cache(file_cache)
 
     if not verify_all_translations(files):
@@ -680,7 +675,6 @@ def main():
 
     if not success:
         error("Translation process FAILED.")
-        # 返回 1 会导致 Actions 报错，但因为缓存已经保存，下次执行会跳过已成功的部分。
         return 1
 
     info("")
