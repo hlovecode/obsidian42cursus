@@ -28,29 +28,20 @@ jobs:
         with:
           python-version: '3.x'
 
-      - name: Find changed source notes
-        if: github.event_name == 'push'
-        run: |
-          if [ "${{ github.event.before }}" = "0000000000000000000000000000000000000000" ]; then
-            git ls-files '*.md' > /tmp/translate-files.txt
-          else
-            git diff --name-only "${{ github.event.before }}" "${{ github.sha }}" -- '*.md' > /tmp/translate-files.txt
-          fi
-
       - name: Run translation
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
-          if [ "${{ github.event_name }}" = "push" ]; then
-            python3 scripts/translate_notes.py --files-from /tmp/translate-files.txt
-          else
-            python3 scripts/translate_notes.py
-          fi
+          # 移除 git diff，直接全量运行，依靠 Python 内部的 MD5 缓存来识别需要翻译的文件
+          # 这样可以确保上次因 API 报错而失败的文件，在下一次 actions 运行时会被重新处理
+          python3 scripts/translate_notes.py
 
       - name: Check for changes
         id: changes
         run: |
-          if git diff --quiet; then
+          # 必须先 add, 因为 translation_cache.json 可能是新建的未追踪文件
+          git add translations
+          if git diff --staged --quiet; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
           else
             echo "changed=true" >> "$GITHUB_OUTPUT"
@@ -61,6 +52,5 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add translations
-          git commit -m "chore: update translations"
+          git commit -m "chore: update translations and cache"
           git push

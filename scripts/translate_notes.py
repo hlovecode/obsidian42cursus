@@ -4,6 +4,7 @@ import random
 import re
 import sys
 import time
+import hashlib # 新增：用于计算文件差异
 import urllib.error
 import urllib.request
 from pathlib import Path
@@ -12,6 +13,7 @@ ROOT_DIR = Path(__file__).resolve().parent.parent
 TRANSLATIONS_DIR = ROOT_DIR / "translations"
 EN_DIR = TRANSLATIONS_DIR / "en"
 FR_DIR = TRANSLATIONS_DIR / "fr"
+CACHE_FILE = TRANSLATIONS_DIR / "translation_cache.json" # 新增：缓存文件路径
 
 API_KEY = os.environ.get("GEMINI_API_KEY")
 MODEL = os.environ.get("GEMINI_MODEL", "gemini-3.6-flash")
@@ -58,6 +60,24 @@ def write_text(path, content):
     path.write_text(content, encoding="utf-8")
 
 
+# --- 新增：哈希增量缓存功能 ---
+def get_file_md5(text_content):
+    """计算文本的 MD5，用于检测文件内容是否发生改变"""
+    return hashlib.md5(text_content.encode("utf-8")).hexdigest()
+
+def load_cache():
+    if CACHE_FILE.exists():
+        try:
+            return json.loads(read_text(CACHE_FILE))
+        except Exception as e:
+            warning(f"Failed to load cache: {e}. Starting fresh.")
+    return {}
+
+def save_cache(cache_dict):
+    write_text(CACHE_FILE, json.dumps(cache_dict, indent=2))
+# -----------------------------
+
+
 def is_source_markdown_file(path):
     if path.suffix.lower() != ".md" or not path.is_file():
         return False
@@ -101,21 +121,12 @@ def selected_markdown_files():
 
 
 def split_protected_text(line):
-    """
-    Split one ordinary Markdown line into:
-      ("text", translatable text)
-      ("protected", exact Markdown/code/URL text)
-
-    Gemini receives only the text pieces. It never receives Markdown
-    structure, so it cannot reorder or replace Markdown tokens.
-    """
     newline = "\n" if line.endswith("\n") else ""
     content = line[:-1] if newline else line
 
     if not content.strip():
         return [("protected", line)]
 
-    # Markdown heading/list/blockquote syntax remains local to Python.
     prefix = ""
     body = content
 
@@ -164,10 +175,6 @@ def split_protected_text(line):
 
 
 def parse_markdown(text):
-    """
-    Return exact Markdown lines. Fenced code blocks are marked protected.
-    No code-block content is ever sent to Gemini.
-    """
     lines = text.splitlines(keepends=True)
     result = []
     in_fence = False
@@ -374,9 +381,6 @@ def translate_batch(target, items):
                     f"Translation item mismatch. Missing={missing}, Extra={extra}"
                 )
 
-            # A response containing Chinese natural-language text is not
-            # accepted. Technical identifiers are handled by a separate
-            # protected layer and therefore do not affect this check.
             if target in ("en", "fr"):
                 bad = [
                     (i, result[i])
@@ -448,7 +452,7 @@ def translate_markdown(source, target):
     for number, batch in enumerate(batches, 1):
         translated.update(translate_batch(target, batch))
         if number < len(batches):
-            time.sleep(0.7)
+            time.sleep(1.0) # 轻微增加批次间延迟，防止触发短期高并发限制
 
     for line_index, part_index, item_id in locations:
         parts = parsed[line_index][1]
@@ -497,8 +501,6 @@ def validate_translation(source, translated, target):
     if not body.strip():
         return False
 
-    # The translation must preserve the number and exact content of all
-    # fenced code blocks because Python owns those blocks completely.
     src_parsed = parse_markdown(source)
     out_parsed = parse_markdown(body)
 
@@ -508,9 +510,6 @@ def validate_translation(source, translated, target):
         warning("Fenced code blocks were changed.")
         return False
 
-    # Inline code, URLs, wiki links and HTML tags are also owned by Python.
-    # Compare them in source order, but never compare the order of text
-    # fragments themselves.
     def protected_values(parsed):
         values = []
         for kind, value in parsed:
@@ -526,7 +525,6 @@ def validate_translation(source, translated, target):
         warning("Protected Markdown syntax was changed.")
         return False
 
-    # No Chinese natural-language prose is allowed to remain.
     if has_chinese(natural_text_without_code(body)):
         warning("Chinese natural-language text remains untranslated.")
         return False
@@ -546,23 +544,39 @@ def existing_translation_is_valid(source, path, target):
     return validate_translation(source, text, target)
 
 
-def translate_file(source_path):
-    relative = source_path.relative_to(ROOT_DIR)
+def translate_file(source_path, file_cache):
+    relative = str(source_path.relative_to(ROOT_DIR))
     info("")
     info(f"PROCESS: {relative}")
 
     source = read_text(source_path)
     if not source.strip():
         info(f"SKIP EMPTY: {relative}")
-        return True
+        return True, file_cache
+
+    current_md5 = get_file_md5(source)
+
+    # --- 增量检查：判断是否需要发起 API 请求 ---
+    if file_cache.get(relative) == current_md5:
+        # 还要确保磁盘上文件依然有效，防止被意外删除
+        en_path = translation_path(source_path, "en")
+        fr_path = translation_path(source_path, "fr")
+
+        if existing_translation_is_valid(source, en_path, "en") and \
+           existing_translation_is_valid(source, fr_path, "fr"):
+            info(f"  UNCHANGED (Cached): Skipping API call.")
+            return True, file_cache
+    # ----------------------------------------
 
     success = True
+    translation_passed = {"en": False, "fr": False}
 
     for target in ("en", "fr"):
         output_path = translation_path(source_path, target)
 
         if existing_translation_is_valid(source, output_path, target):
-            info(f"  {target.upper()} already valid")
+            info(f"  {target.upper()} already valid (will reuse local copy)")
+            translation_passed[target] = True
             continue
 
         language = "English" if target == "en" else "French"
@@ -583,12 +597,18 @@ def translate_file(source_path):
 
             write_text(output_path, page)
             info(f"  Saved: {output_path.relative_to(ROOT_DIR)}")
+            translation_passed[target] = True
 
         except Exception as exc:
             error(f"{target.upper()} translation failed: {exc}")
             success = False
 
-    return success
+    # 若两种语言最终都处于合法状态（可能新翻译，也可能复用本地），更新缓存
+    if translation_passed["en"] and translation_passed["fr"]:
+        file_cache[relative] = current_md5
+        info(f"  Cache updated for {relative}")
+
+    return success, file_cache
 
 
 def verify_all_translations(files):
@@ -645,16 +665,22 @@ def main():
         return 0
 
     success = True
+    file_cache = load_cache()
 
     for path in files:
-        if not translate_file(path):
+        file_success, file_cache = translate_file(path, file_cache)
+        if not file_success:
             success = False
+
+    # 无论成功多少，保存当前已成功的缓存进度
+    save_cache(file_cache)
 
     if not verify_all_translations(files):
         success = False
 
     if not success:
         error("Translation process FAILED.")
+        # 返回 1 会导致 Actions 报错，但因为缓存已经保存，下次执行会跳过已成功的部分。
         return 1
 
     info("")
