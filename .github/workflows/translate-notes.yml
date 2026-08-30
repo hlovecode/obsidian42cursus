@@ -33,13 +33,13 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
           python3 scripts/translate_notes.py
-        # 允许脚本因少数文件翻译失败而退出，保障后续的 commit 步骤能正常保存已成功的进度
+        # 【关键保底机制】：允许脚本因为 API 报错而退出，但不中断整个 workflow，保障后续的 commit 步骤能正常保存已成功的进度！
         continue-on-error: true
 
       - name: Check for changes
         id: changes
         run: |
-          # add translations 文件夹（包含新建的缓存和翻译文件），再进行 diff 判断
+          # 必须先 add translations 文件夹（包含新建的 cache 缓存和翻译文件），再进行 diff 判断
           git add translations
           if git diff --staged --quiet; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
