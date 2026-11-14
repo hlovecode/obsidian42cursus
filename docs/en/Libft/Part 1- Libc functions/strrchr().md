@@ -1,1 +1,0 @@
-This is a SHA-256 incremental translation test.

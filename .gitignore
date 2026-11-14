@@ -26,3 +26,25 @@ Thumbs.db
 #Github Pages相关
 site/
 .venv-pages/
+
+# ==========================================
+# MkDocs build output
+# ==========================================
+# Generated documentation files
+docs/
+
+# ==========================================
+# Old translation output
+# ==========================================
+
+# Translation output is no longer maintained
+translations/
+
+# ==========================================
+# Local Python environment and cache
+# ==========================================
+.venv/
+__pycache__/
+*.pyc
+
+
