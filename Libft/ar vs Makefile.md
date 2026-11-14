@@ -248,3 +248,6 @@ Make 会针对每个需要更新的 `.o` 文件分别执行命令
 `all` 依赖 `libft.a` -->  `libft.a` 依赖全部 .o 文件 -->  `%.o: %.c libft.h` 按需编译每个 .c 文件 -->  `ar rcs` 将所有 .o 文件打包成 libft.a
 
 - **执行 make re**
+
+`re` --> `fclean` 先执行 `clean`, 再删除 'libft.a' --> `all` 重新编译并创建静态库
+
