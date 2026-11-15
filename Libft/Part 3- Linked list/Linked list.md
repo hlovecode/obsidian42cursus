@@ -71,7 +71,7 @@ void ft_lstadd_back(t_list **lst, t_list *new)
 
 **函数的任务：**
 
-- 如果链表为空，让 `new` 成为第一个节点
+- 如果链表为空，让  `new` 成为第一个节点
 
 - 如果链表不为空，找到最后一个节点
 
@@ -97,6 +97,12 @@ void ft_lstdelone(t_list *lst, void (*del)(void *))
 ```c
 void ft_lstclear(t_list **lst, void (*del)(void *))
 ```
+
+作用：释放当前节点之前，必须先保存下一个节点的地址
+
+|     |     |     |
+| --- | --- | --- |
+|     |     |     |
 
 #### 8. ft_lstiter
 
