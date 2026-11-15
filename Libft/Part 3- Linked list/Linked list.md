@@ -17,6 +17,7 @@ void ft_lstadd_front(t_list **lst, t_list *new)
 int ft_lstsize(t_list *lst)
 ```
 
+
 #### 4. ft_lstlast
 
 ```c
@@ -38,8 +39,11 @@ void ft_lstadd_back(t_list **lst, t_list *new)
 该函数没有返回值
 
 **函数的任务：**
+
 - 如果链表为空，让 `new` 成为第一个节点
+
 - 如果链表不为空，找到最后一个节点
+
 - 将最后一个节点的 `next` 指向 `new`
 #### 6. ft_lstdelone
 
