@@ -39,5 +39,5 @@ source .venv-pages/bin/activate
 python -m pip install mkdocs-material
 python scripts/build_site.py
 python -m mkdocs serve
-
 ```
+
