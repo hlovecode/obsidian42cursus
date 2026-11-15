@@ -17,12 +17,21 @@ void ft_lstadd_front(t_list **lst, t_list *new)
 int ft_lstsize(t_list *lst)
 ```
 
+作用：使用指针遍历整个链表，并统计节点数量
+
+| 参数  | 类型        | 含义           |
+| --- | --------- | ------------ |
+| lst | t_list \* | 指向链表第1个节点的指针 |
+返回值：返回链表中节点的总数量
+
+注意：该函数只负责统计节点数量，不会修改链表，也不会修改节点里面的数据
 
 #### 4. ft_lstlast
 
 ```c
 t_list *ft_lstlast(t_list *lst)
 ```
+
 
 #### 5. ft_lstadd_back
 
