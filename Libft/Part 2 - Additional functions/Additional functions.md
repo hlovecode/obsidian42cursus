@@ -1,4 +1,14 @@
 
+### 阶段一：字符串的动态内存操作
+
+###### 学习 malloc、字符串复制、指针偏移、二维指针和内存释放
+
+- `ft_substr`
+- `ft_strjoin`
+- `ft_strtrim`
+- `ft_split`
+
+
 #### 1.  ft_substr
 
 ```c
