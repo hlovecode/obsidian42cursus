@@ -114,6 +114,24 @@ void ft_lstclear(t_list **lst, void (*del)(void *))
 void ft_lstiter(t_list *lst, void(*f)(void *))
 ```
 
+作用：访问每个节点的 content，并对它执行调用者指定的操作，但不释放节点，也不改变链表结构
+
+| 参数       | 类型                 | 含义         |
+| -------- | ------------------ | ---------- |
+| lst      | t_list \*          | 指向链表的第1个节点 |
+| f        | void (\*)(void \*) | 调用者传入的操作函数 |
+| 该函数没有返回值 |                    |            |
+
+ `void(*f)(void *)` 表示：
+
+- f 是一个函数指针
+
+- 这个函数接收一个 `void *` 参数
+
+- 这个函数没有返回值（`void`）
+
+也就是说，`ft_lstiter` 不需要知道具体要对 content 做什么，它只负责遍历链表，然后把每个节点的 content 交给 `f` 处理
+
 #### 9. ft_lstmap
 
 ```c
