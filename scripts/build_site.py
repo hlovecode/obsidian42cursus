@@ -304,7 +304,7 @@ def create_homepage(markdown_files):
     homepage = [
         "# 42 Common Core 中文学习笔记",
         "",
-        "这里是我的 42 Common Core 中文学习笔记 -- Hua",
+        "这里是我的 42 Common Core 中文学习笔记 -- Hua LEI",
         "",
         "## 学习项目",
         "",
