@@ -25,7 +25,10 @@
 
 #### 学习 write、文件描述符和整数输出
 
-- 
+- ft_putchar_fd
+- ft_putstr_fd
+- ft_putendl_fd
+- ft_putnbr_fd
 
 #### 1.  ft_substr
 
