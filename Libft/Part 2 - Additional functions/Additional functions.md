@@ -89,9 +89,26 @@ char **ft_split(char const *s, char c);
 作用：根据指定的分隔字符，将原始字符串分割成多个独立的字符串，并将这些字符串放进一个以 NULL 结尾的指针数组中
 
 例如：
-char \**result = 
+```c
+char **result;
 
-注意：ft_split 不会修改原始字符串，而是通过 `malloc` 创建新的字符串
+result = ft_split("Hello 42 Libft", ' ');
+
+```
+
+最终逻辑上得到：
+```c
+result[0] = "Hello"
+result[1] = "42"
+result[2] = "Libft"
+result[3] = NULL
+
+```
+
+注意：
+- ft_split 不会修改原始字符串，而是通过 `malloc` 创建新的字符串
+- 还有一个细节，连续出现的分隔字符会被忽略，不会产生空字符串
+- 没有单词不代表函数返回 `NULL`. 如果内存申请成功，函数应该返回一个只有 `NULL` 指针元素的数组
 
 #### 5. ft_itoa
 
