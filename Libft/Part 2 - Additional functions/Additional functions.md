@@ -86,6 +86,13 @@ char *ft_strtrim(char const *s1, char const *set);
 char **ft_split(char const *s, char c);
 ```
 
+作用：根据指定的分隔字符，将原始字符串分割成多个独立的字符串，并将这些字符串放进一个以 NULL 结尾的指针数组中
+
+例如：
+char \**result = 
+
+注意：ft_split 不会修改原始字符串，而是通过 `malloc` 创建新的字符串
+
 #### 5. ft_itoa
 
 ```c
