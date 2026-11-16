@@ -124,6 +124,9 @@ result[3] = NULL
 char *ft_itoa(int n);
 ```
 
+作用：把一个整数转换成对应的字符串
+
+
 #### 6. ft_strmapi
 
 ```c
