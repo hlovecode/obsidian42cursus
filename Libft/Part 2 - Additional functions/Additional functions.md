@@ -76,7 +76,10 @@ char *ft_strjoin(char const *s1, char const *s2);
 char *ft_strtrim(char const *s1, char const *set);
 ```
 
-作用：
+作用：表示从字符串的两端删除字符
+
+注意：第2个参数 set 是一个字符集合, ft_strtrim 只删除字符串两端的指定字符，不删除字符串中间的指定字符, 是要求删除所有位于两端、且属于 set 这个字符集合的字符
+
 #### 4.  ft_split
 
 ```c
