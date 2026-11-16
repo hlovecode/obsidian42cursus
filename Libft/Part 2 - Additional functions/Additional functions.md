@@ -68,7 +68,7 @@ char *ft_strjoin(char const *s1, char const *s2);
 
 作用：将 s1 和 s2 两个字符串连接起来，创建一个新的字符串，并返回新字符串的首地址
 
-注意：不是直接修改 `s1`，而是创建一个全新的字符串
+注意：不是直接修改 s1，而是创建一个全新的字符串
 
 #### 3.  ft_strtrim
 
@@ -76,6 +76,7 @@ char *ft_strjoin(char const *s1, char const *s2);
 char *ft_strtrim(char const *s1, char const *set);
 ```
 
+作用：
 #### 4.  ft_split
 
 ```c
