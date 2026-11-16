@@ -140,6 +140,13 @@ char *ft_itoa(int n);
 char *ft_strmapi(char const *s, char (*f)(unsigned int, char));
 ```
 
+作用：使用函数 `f` 对字符串 s 中的每一个字符进行处理，并将处理后的字符放入一个新分配的字符串中
+
+有两个重要要求：
+
+- 原始字符串 `s` 不能被修改
+- 返回一个新的字符串，必须通过 `malloc` 分配
+
 #### 7.  ft_striteri
 
 ```c
