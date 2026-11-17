@@ -260,7 +260,7 @@ ft_putendl_fd 在输出字符串之后，会自动追加一个换行符 '\n', �
 
 返回类型是 `void`，不返回任何值
 
-ft_putendl_fd 不需要 malloc()或 free()
+**ft_putendl_fd 不需要 malloc()或 free()**
 
 原因：
 
@@ -312,3 +312,15 @@ void ft_putnbr_fd(int n, int fd);
 - fd：指定写入目标的文件描述符
 
 返回类型是 void，表示不返回任何值
+
+**ft_putnbr_fd 不需要 malloc()，也不需要 free()**
+
+原因：
+
+- `num` 是局部变量，存储在函数调用使用的栈空间中
+
+- 递归调用使用函数调用栈保存各层的局部状态
+    
+- ft_putchar_fd() 直接输出字符
+    
+- 整个过程不需要动态分配内存
