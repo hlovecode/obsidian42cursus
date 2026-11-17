@@ -148,6 +148,8 @@ char *ft_strmapi(char const *s, char (*f)(unsigned int, char));
 - 原始字符串 `s` 不能被修改
 - 返回一个新的字符串，必须通过 malloc 分配
 
+注意：ft_strmapi 本身并不规定必须转换成大写。具体怎么转换，完全由调用者传入的函数 `f` 决定
+
 #### 7.  ft_striteri
 
 ```c
