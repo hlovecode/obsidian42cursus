@@ -145,7 +145,7 @@ char *ft_strmapi(char const *s, char (*f)(unsigned int, char));
 
 有两个重要要求：
 
-- 原始字符串 `s` 不能被修改
+- 原始字符串 s 不能被修改
 - 返回一个新的字符串，必须通过 malloc 分配
 
 注意：ft_strmapi 本身并不规定必须转换成大写。具体怎么转换，完全由调用者传入的函数 f 决定
@@ -170,7 +170,7 @@ void ft_striteri(char *s, void (*f)(unsigned int, char *));
 
 - 调用者不需要因为调用 ft_striteri 而额外释放内存
 
-这也是它和 `ft_strmapi` 在内存管理方面的一个重要区别
+这也是它和 ft_strmapi 在内存管理方面的一个重要区别
 
 #### 8.  ft_putchar_fd
 
@@ -178,11 +178,69 @@ void ft_striteri(char *s, void (*f)(unsigned int, char *));
 void ft_putchar_fd(char c, int fd);
 ```
 
+作用：将一个字符写入指定的文件描述符（file descriptor，缩写成fd)
+
+注意：传入的是字符，而不是字符串
+
+函数的第1个参数是需要输出的字符，第2个参数是文件描述符 fd, 文件描述符是操作系统用来标识打开文件或输入输出资源的整数
+
+在 Unix/Linux/macOS 系统中，最常见的三个文件描述符是：
+
+| 文件描述符 | 名称              | 用途         |
+| ----- | --------------- | ---------- |
+| 0     | `STDIN_FILENO`  | 标准输入，通常是键盘 |
+| 1     | `STDOUT_FILENO` | 标准输出，通常是终端 |
+| 2     | `STDERR_FILENO` | 标准错误，通常是终端 |
+
+ft_putchar_fd 不需要使用 malloc() 或  free()
+
+原因是：
+
+- c 是函数的局部参数变量
+
+- &c 是这个变量的地址
+
+- write() 直接从这个地址读取一个字节
+
+- 不需要创建动态分配的内存
+
 #### 9.  ft_putstr_fd
 
 ```c
 void ft_putstr_fd(char *s, int fd);
 ```
+
+ft_putstr_fd 的作用与  ft_putchar_fd 类似，但它写入的是**整个字符串**.
+
+它有两个参数：
+
+- s：需要写入的字符串
+
+- fd：指定写入目标的文件描述符
+
+返回类型是 `void`，表示函数不返回任何值
+
+**如果字符串长度不是固定的，我们如何知道应该写入多少个字节？**
+
+显然，我们不能每次手动计算字符串长度, 这时就需要使用之前学过的 ft_strlen()
+
+**ft_strlen() 在 ft_putstr_fd 中的作用**
+
+它返回字符串中有效字符的数量，不包括最后的 '\0'
+
+**ft_putstr_fd() 不需要 malloc()，也不需要 free() 
+
+原因：
+
+- `s` 是调用者提供的字符串地址
+
+- `ft_strlen()` 只负责计算字符串长度
+
+- `write()` 直接从字符串所在的内存读取数据
+
+- 函数没有创建新的动态内存
+
+因此 ft_putstr_fd() 不拥有字符串 s 的内存，也不应该释放它
 
 #### 10.  ft_putendl_fd
 
@@ -190,8 +248,67 @@ void ft_putstr_fd(char *s, int fd);
 void ft_putendl_fd(char *s, int fd);
 ```
 
+ft_putendl_fd 和 ft_putstr_fd  非常相似，唯一最重要的区别是：
+
+ft_putendl_fd 在输出字符串之后，会自动追加一个换行符 '\n', 每次调用 ft_putendl_fd，都会在字符串后面自动添加一个换行符
+
+两个参数：
+
+- s：需要输出的字符串
+
+- fd：指定写入目标的文件描述符
+
+返回类型是 `void`，不返回任何值
+
+ft_putendl_fd 不需要 malloc()或 free()
+
+原因：
+
+- s 是调用者提供的字符串
+
+- ft_putstr_fd 直接读取字符串并写入目标
+
+- ft_putchar_fd 直接写入一个换行符
+
+- 整个过程没有创建动态分配的内存
+
+因此，ft_putendl_fd 不负责释放字符串 s
+
+**函数对比：
+
+|函数|功能|是否自动换行|
+|---|---|---|
+|`ft_putchar_fd`|输出一个字符|否|
+|`ft_putstr_fd`|输出一个字符串|否|
+|`ft_putendl_fd`|输出一个字符串|是|
+
+它们的底层实现都使用了 write()，另外，这三个函数都不需要动态内存分配
+
 #### 11.   ft_putnbr_fd
 
 ```c
 void ft_putnbr_fd(int n, int fd);
 ```
+
+作用是将一个整数转换成十进制字符，并写入指定的文件描述符
+
+这个函数比前面三个稍微复杂，因为需要处理：
+
+- 正整数
+
+- 负整数
+
+- 数字 `0`
+
+- INT_MIN（int 类型能够表示的最小负数）
+
+这个函数和 ft_putchar_fd、ft_putstr_fd、ft_putendl_fd 一样，都是将数据写入指定的文件描述符
+
+但它有一个不同之处：ft_putnbr_fd 接收的是整数 int ，需要将整数转换成十进制字符，然后输出
+
+两个参数：
+- n：需要输出的整数
+
+- fd：指定写入目标的文件描述符
+
+返回类型是 void，表示不返回任何值
