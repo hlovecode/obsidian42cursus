@@ -88,7 +88,7 @@ char **ft_split(char const *s, char c);
 
 作用：根据指定的分隔字符，将原始字符串分割成多个独立的字符串，并将这些字符串放进一个以 NULL 结尾的指针数组中
 
-返回值：返回的是一个字符串数组，因此它的返回类型是二级指针  `char **`
+返回值：返回的是一个字符串数组，因此它的返回类型是二级指针  char **
 
 例如：
 ```c
@@ -145,7 +145,7 @@ char *ft_strmapi(char const *s, char (*f)(unsigned int, char));
 有两个重要要求：
 
 - 原始字符串 `s` 不能被修改
-- 返回一个新的字符串，必须通过 `malloc` 分配
+- 返回一个新的字符串，必须通过 malloc 分配
 
 #### 7.  ft_striteri
 
