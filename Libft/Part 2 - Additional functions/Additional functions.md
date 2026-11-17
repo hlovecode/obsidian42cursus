@@ -150,13 +150,27 @@ char *ft_strmapi(char const *s, char (*f)(unsigned int, char));
 
 注意：ft_strmapi 本身并不规定必须转换成大写。具体怎么转换，完全由调用者传入的函数 f 决定
 
-ft_strmapi 并不知道如何处理字符，它只是负责遍历字符串，并把每个字符和索引交给调用者提供的函数 f
+ft_strmapi 并不知道如何处理字符，它只是负责遍历字符串，并把每个字符和索引交给调用者提供的函数 f，它创建一个新字符串，不修改原字符串
 
 #### 7.  ft_striteri
 
 ```c
 void ft_striteri(char *s, void (*f)(unsigned int, char *));
 ```
+
+该函数直接修改原字符串，不创建新字符串，把当前字符的地址交给回调函数，由回调函数直接修改原字符串
+
+注意：ft_striteri 不需要 malloc , 因为传递的是原字符串中字符的地址，回调函数直接修改原字符串中的字符，不需要创建新的字符串，因此：
+
+- ft_striteri 内部不需要  malloc
+
+- ft_striteri 内部不需要  free
+
+- ft_striteri 不返回新字符串
+
+- 调用者不需要因为调用 ft_striteri 而额外释放内存
+
+这也是它和 `ft_strmapi` 在内存管理方面的一个重要区别
 
 #### 8.  ft_putchar_fd
 
