@@ -1,4 +1,4 @@
-这是 `Libft` 项目真正要掌握的地方.
+这是 Libft 项目真正要掌握的地方.
 
 典型的Makefile:
 ```Makefile
