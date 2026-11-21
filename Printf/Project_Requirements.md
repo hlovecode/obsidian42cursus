@@ -25,7 +25,7 @@
 
 必须实现以下九种转换：
 
-![](./Users/lei/Obsidian Vault/obsidian42cursus/Printf/attachment/字符格式转换1.png)
+![[字符格式转换1.png]]
 
-
+![[字符格式转换2.png]]
 
