@@ -5,5 +5,5 @@
 
 因此 ft_printf 的基本工作流程就是：
 
-![基本流程](https://github.com/hlovecode/obsidian42cursus/blob/main/images/printf%E5%9F%BA%E6%9C%AC%E5%B7%A5%E4%BD%9C%E6%B5%81%E7%A8%8B.png)
+![](https://github.com/hlovecode/obsidian42cursus/blob/main/images/printf%E5%9F%BA%E6%9C%AC%E5%B7%A5%E4%BD%9C%E6%B5%81%E7%A8%8B.png)
 
