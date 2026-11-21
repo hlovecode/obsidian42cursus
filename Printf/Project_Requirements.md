@@ -25,15 +25,7 @@
 
 必须实现以下九种转换：
 
-path: /Users/lei/Obsidian Vault/obsidian42cursus/Printf/attachments/字符格式转换1.png
-
-```media
-path: /Users/lei/Obsidian Vault/obsidian42cursus/Printf/attachments/字符格式转换1.png
-type: image
-width: 500
-height: 500
-view:list 
-````
+![](./Users/lei/Obsidian Vault/obsidian42cursus/Printf/attachment/字符格式转换1.png)
 
 
 
